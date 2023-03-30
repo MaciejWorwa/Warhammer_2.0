@@ -5,68 +5,57 @@ using UnityEngine.UI;
 
 public class AttackManager : MonoBehaviour
 {
-    private float attackDistance;
+    private float attackDistance; // dystans pomiedzy walczacymi
     private bool targetDefended; // informacja o tym, czy postaci uda³o siê sparowaæ lub unikn¹æ atak
 
-    private int bonus; // sumaryczna premia do WW lub US
+    private int attackBonus; // sumaryczna premia do WW lub US przy ataku
     private int chargeBonus; //premia za szar¿ê
     private int aimingBonus; //premia za przycelowanie
 
-    //private GameObject playerAimButton;
-    //private GameObject enemyAimButton;
-
-    private GameObject[] aimButtons;
+    private GameObject[] aimButtons; // przyciski celowania zarowno bohatera gracza jak i wroga
 
     void Start()
     {
         aimButtons = GameObject.FindGameObjectsWithTag("AimButton");
     }
 
-    void Update()
-    {
-        bonus = chargeBonus + aimingBonus;
-    }
-
-    //public void FindAndSetActionsButtons(GameObject AB, int Enemy0Player1)
-    //{
-    //    if (Enemy0Player1 == 1)
-    //        playerAimButton = AB;
-    //    else if (Enemy0Player1 == 0)
-    //        enemyAimButton = AB;
-    //}
-
     public void Attack(GameObject attacker, GameObject target)
     {
         do
         {
-            //liczy dystans pomiedzy walczacymi
+            // liczy dystans pomiedzy walczacymi
             if (attacker != null && target != null)
             {
                 attackDistance = Vector3.Distance(attacker.transform.position, target.transform.position);
             }
 
+            // sprawdza czy s¹ wybrane dwie postacie, ktore ze soba walcza
             if (Enemy.trSelect != null && Player.trSelect != null)
             {
+                // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego
                 if (attackDistance <= attacker.GetComponent<Stats>().AttackRange)
                 {
                     int wynik = Random.Range(1, 101);
                     bool hit = false;
                     //aimingBonus = attacker.GetComponent<Stats>().aimingBonus;
 
+                    // sprawdza czy atak jest atakiem dystansowym
                     if (attackDistance > 1.5f)
                     {
+                        // sprawdza czy bron jest naladowana
                         if (attacker.GetComponent<Stats>().reloadLeft == 0)
                         {
-                            if (wynik <= attacker.GetComponent<Stats>().US + bonus)
+                            if (wynik <= attacker.GetComponent<Stats>().US + attackBonus)
                                 hit = true;
                             else
                                 hit = false;
 
-                            if (bonus > 0)
-                                Debug.Log("Rzut na US: " + wynik + " Premia: " + bonus);
+                            if (attackBonus > 0)
+                                Debug.Log("Rzut na US: " + wynik + " Premia: " + attackBonus);
                             else
                                 Debug.Log("Rzut na US: " + wynik);
 
+                            // resetuje naladowanie broni po wykonaniu strzalu
                             attacker.GetComponent<Stats>().reloadLeft = attacker.GetComponent<Stats>().reloadTime;
                         }
                         else
@@ -75,6 +64,7 @@ public class AttackManager : MonoBehaviour
                             break;
                         }
                     }
+                    // sprawdza czy atak jest atakiem w zwarciu
                     if (attackDistance <= 1.5f)
                     {
                         //uwzglêdnienie bonusu do WW zwiazanego z szar¿¹
@@ -83,13 +73,15 @@ public class AttackManager : MonoBehaviour
                         else
                             chargeBonus = 0;
 
-                        if (wynik <= attacker.GetComponent<Stats>().WW + bonus)
+                        attackBonus = chargeBonus + aimingBonus;
+
+                        if (wynik <= attacker.GetComponent<Stats>().WW + attackBonus)
                             hit = true;
                         else
                             hit = false;
 
-                        if (bonus > 0)
-                            Debug.Log("Rzut na WW: " + wynik + " Premia: " + bonus);
+                        if (attackBonus > 0)
+                            Debug.Log("Rzut na WW: " + wynik + " Premia: " + attackBonus);
                         else
                             Debug.Log("Rzut na WW: " + wynik);
                     }
@@ -98,10 +90,10 @@ public class AttackManager : MonoBehaviour
                     if (hit && attackDistance <= 1.5f)
                     {
                         //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
-                        if (target.GetComponent<Stats>().WW > target.GetComponent<Stats>().Zr)
+                        if (target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus > target.GetComponent<Stats>().Zr)
                         {
                             if (target.GetComponent<Stats>().canParry)
-                                ParryAttack(target);
+                                ParryAttack(attacker, target);
                             else if (target.GetComponent<Stats>().canDodge)
                                 DodgeAttack(target);
                         }
@@ -110,17 +102,13 @@ public class AttackManager : MonoBehaviour
                             if (target.GetComponent<Stats>().canDodge)
                                 DodgeAttack(target);
                             else if (target.GetComponent<Stats>().canParry)
-                                ParryAttack(target);
+                                ParryAttack(attacker, target);
                         }
                     }
 
                     // zresetowanie bonusu za celowanie, jeœli jest aktywny
                     if (aimingBonus != 0)
                         TakeAim();
-                    //if (Enemy.selectedEnemy.GetComponent<Stats>().aimingBonus != 0)
-                    //    TakeAimEnemy();
-                    //if (Player.selectedPlayer.GetComponent<Stats>().aimingBonus != 0)
-                    //    TakeAimPlayer();
 
                     if (hit == true && targetDefended != true)
                     {
@@ -128,14 +116,14 @@ public class AttackManager : MonoBehaviour
                         int damage;
                         int rollResult;
 
-                        //mechanika broni przebijajacej zbroje
-                        if (attacker.GetComponent<Stats>().PrzebijajacyZbroje == true && armor >= 1)
+                        // mechanika broni przebijajacej zbroje
+                        if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
                         {
                             armor--;
                         }
 
-                        //mechanika bronii druzgoczacej
-                        if (attacker.GetComponent<Stats>().Druzgoczacy == true)
+                        // mechanika bronii druzgoczacej
+                        if (attacker.GetComponent<Stats>().Druzgoczacy)
                         {
                             int roll1 = Random.Range(1, 11);
                             int roll2 = Random.Range(1, 11);
@@ -148,7 +136,12 @@ public class AttackManager : MonoBehaviour
                         else
                             rollResult = Random.Range(1, 11);
 
-                        //mechanika furii ulryka
+                        // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
+                        if (attacker.GetComponent<Stats>().Ciezki)
+                            attacker.GetComponent<Stats>().Druzgoczacy = false;
+
+
+                        // mechanika furii ulryka
                         if (rollResult == 10)
                         {
                             int confirmRoll = Random.Range(1, 101); //rzut na potwierdzenie furii
@@ -198,11 +191,11 @@ public class AttackManager : MonoBehaviour
                             Debug.Log(target.name + " znegowa³ " + (target.GetComponent<Stats>().Wt + armor) + " obra¿eñ.");
                             Debug.Log($"<color=red> Punkty ¿ycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>");
 
-                            if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)//to trzeba przekminic, bo na razie jest static, wiec jak umrze jakakolwiek instancja Enemy to sie uruchamia nawet gdy zadamy obrazenia innemu
+                            if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
                             {
                                 Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
                             }
-                            else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)//to trzeba przekminic, bo na razie jest static, wiec jak umrze jakakolwiek instancja Enemy to sie uruchamia nawet gdy zadamy obrazenia innemu
+                            else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
                             {
                                 Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
                             }
@@ -261,17 +254,31 @@ public class AttackManager : MonoBehaviour
         return armor;
     }
 
-    private void ParryAttack(GameObject target)
+    private void ParryAttack(GameObject attacker, GameObject target)
     {
+        // sprawdza, czy atakowany ma jakieœ bonusy do parowania
+        if (target.GetComponent<Stats>().Parujacy)
+            target.GetComponent<Stats>().parryBonus += 10;
+        if (attacker.GetComponent<Stats>().Powolny)
+            target.GetComponent<Stats>().parryBonus += 10;
+        if (attacker.GetComponent<Stats>().Szybki)
+            target.GetComponent<Stats>().parryBonus -= 10;
+
         target.GetComponent<Stats>().canParry = false;
         int wynik = Random.Range(1, 101);
 
-        Debug.Log("Rzut na parowanie: " + wynik);
+        if (target.GetComponent<Stats>().parryBonus != 0)
+            Debug.Log($"Rzut na parowanie: {wynik} Bonus do parowania: {target.GetComponent<Stats>().parryBonus}");
+        else
+            Debug.Log("Rzut na parowanie: " + wynik);
 
-        if (wynik <= target.GetComponent<Stats>().WW)
+        if (wynik <= target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus)
             targetDefended = true;
         else
-            targetDefended = false;    
+            targetDefended = false;
+
+        // zresetowanie bonusu do parowania
+        target.GetComponent<Stats>().parryBonus = 0;
     }
 
     private void DodgeAttack(GameObject target)
@@ -312,60 +319,9 @@ public class AttackManager : MonoBehaviour
                 button.GetComponent<Image>().color = Color.white;
             }
         }
+
+        attackBonus = chargeBonus + aimingBonus;
     }
-
-
-    ////przycelowanie gracza
-    //public void TakeAimPlayer()
-    //{
-    //    if (Player.selectedPlayer.GetComponent<Stats>().aimingBonus == 0)
-    //    {
-    //        Debug.Log("Przycelowanie");
-    //        Player.selectedPlayer.GetComponent<Stats>().aimingBonus = 10;
-
-    //        //zmiana koloru wszystkich przycisków AimButton, ¿eby by³o wiadomo, ¿e przycelowanie jest aktywne
-    //        foreach (GameObject button in aimButtons)
-    //        {
-    //            button.GetComponent<Image>().color = Color.green;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Player.selectedPlayer.GetComponent<Stats>().aimingBonus = 0;
-
-    //        //przywrócenie domyœlnego koloru przyciskom
-    //        foreach (GameObject button in aimButtons)
-    //        {
-    //            button.GetComponent<Image>().color = Color.white;
-    //        }
-    //    }
-    //}
-
-    ////przycelowanie wroga
-    //public void TakeAimEnemy()
-    //{
-    //    if (Enemy.selectedEnemy.GetComponent<Stats>().aimingBonus == 0)
-    //    {
-    //        Debug.Log("Przycelowanie");
-    //        Enemy.selectedEnemy.GetComponent<Stats>().aimingBonus = 10;
-
-    //        //zmiana koloru wszystkich przycisków AimButton, ¿eby by³o wiadomo, ¿e przycelowanie jest aktywne
-    //        foreach (GameObject button in aimButtons)
-    //        {
-    //            button.GetComponent<Image>().color = Color.green;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Enemy.selectedEnemy.GetComponent<Stats>().aimingBonus = 0;
-
-    //        //przywrócenie domyœlnego koloru przyciskom
-    //        foreach (GameObject button in aimButtons)
-    //        {
-    //            button.GetComponent<Image>().color = Color.white;
-    //        }
-    //    }
-    //}
 
     public void AttackPlayer()
     {

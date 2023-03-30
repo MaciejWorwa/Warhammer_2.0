@@ -30,20 +30,16 @@ public class Player : MonoBehaviour
         //nadanie temu obiektowi klasy Stats
         playerStats = this.gameObject.AddComponent<Stats>();
         this.gameObject.GetComponent<MovementManager>();
+        playerStats.Rasa = rasa.ToString();
 
         //wygenerowanie poczatkowych statystyk w zaleznosci od rasy. Metoda ta jest zawarta w klasie Stats
         playerStats.SetBaseStatsByRace(rasa);
 
+        // ustawienie aktualnych statystyk punktów ¿ycia i szybkosci zgodnie z poczatkowymi
         playerStats.tempHealth = playerStats.maxHealth;
         playerStats.tempSz = playerStats.Sz;
 
-        //nadanie wartosci punktow zbroi
-        playerStats.PZ_head = 1;
-        playerStats.PZ_arms = 2;
-        playerStats.PZ_torso = 3;
-        playerStats.PZ_legs = 4;
-
-        //zasieg broni
+        // ustawienie bazowego zasiegu broni (bron do walki w zwarciu) i sily broni (dystansowa)
         playerStats.Weapon_S = 3;
         playerStats.AttackRange = 1.5;
 
@@ -60,6 +56,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        // wyswietlanie na biezaco aktualnych punktow zycia oraz inicjatywy
         healthDisplay.text = this.gameObject.GetComponent<Stats>().tempHealth + "/" + this.gameObject.GetComponent<Stats>().maxHealth;
         initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
 

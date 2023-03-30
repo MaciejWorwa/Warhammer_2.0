@@ -11,10 +11,33 @@ public class GridManager : MonoBehaviour
 
     private Dictionary<Vector3, Tile> tiles;
 
+    private List<GameObject> tilesInRange;
+
     void Start()
     {
         GenerateGrid();
     }
+
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (Tile.canMove == true)
+    //    {
+    //        tilesInRange = new List<GameObject>();
+
+    //        //detect all objects inside the RangeSphere
+    //        if ((!tilesInRange.Contains(other.gameObject) && (other.tag == "Tile")))
+    //        {
+    //            //If is a Tile add it to the list
+    //            tilesInRange.Add(other.gameObject);
+    //            foreach (var x in tilesInRange)
+    //            {
+    //                Debug.Log("Zawartoœæ listy: " + x.ToString());
+    //            }
+    //        }
+
+    //    }
+
+    //}
 
     void GenerateGrid()
     {
@@ -40,9 +63,4 @@ public class GridManager : MonoBehaviour
 
     }
 
-    //public Tile GetTileAtPosition(Vector3 pos)
-    //{
-    //    if (tiles.TryGetValue(pos, out var tile)) return tile;
-    //    return null;
-    //}
 }

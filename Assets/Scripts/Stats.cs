@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Stats : MonoBehaviour
 {
+    [Header("Rasa")]
+    public string Rasa;
+
     [Header("Cechy pierwszorzêdowe")]//RADA MICHA£A: zrobic slownik ktorego kluczami sa nazwy cech a wartosciami wartosci tych cech
     public int WW;
     public int US;
@@ -15,6 +18,7 @@ public class Stats : MonoBehaviour
     public int Ogd;
 
     [Header("Cechy drugorzêdowe")]
+    public int A;
     public int S;
     public int Wt;
     public int Sz;
@@ -22,22 +26,28 @@ public class Stats : MonoBehaviour
     public int Mag;
     public int maxHealth;
     public int tempHealth;
+    public int PS;
 
     [Header("Inicjatywa, parowanie, uniki")]
-    public int Initiative;
+    public int Initiative; // inicjatywa
     public bool existDodge; // informacja o tym, czy postaæ posiada zdolnoœæ uniku
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac mo¿e parowaæ atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac mo¿e unikaæ ataku
-                                            //[HideInInspector] public int actionsNumber; // TO CHCIA£BYM U¯YÆ W PRZYSZ£OŒCI, NA RAZIE JEST NIEUZYWANE
-    [HideInInspector] public bool criticalCondition = false;
+    //[HideInInspector] public int actionsNumber; // TO CHCIA£BYM U¯YÆ W PRZYSZ£OŒCI, NA RAZIE JEST NIEUZYWANE
+    [HideInInspector] public bool criticalCondition = false; // sprawdza czy ¿ycie postaci jest poni¿ej 0
+    [HideInInspector] public int parryBonus; // sumaryczna premia do WW przy parowaniu
 
     [Header("Broñ")]
     public int Weapon_S;
     public double AttackRange;
     public int reloadTime;
     public int reloadLeft;
+    public bool Ciezki;
     public bool Druzgoczacy;
+    public bool Parujacy;
+    public bool Powolny;
     public bool PrzebijajacyZbroje;
+    public bool Szybki;
 
     [Header("Punkty zbroi")]
     public int PZ_head;
@@ -47,61 +57,53 @@ public class Stats : MonoBehaviour
 
     public void SetBaseStatsByRace(Player.Rasa rasa)
     {
-        if (rasa == Player.Rasa.Czlowiek)
+        WW = 20 + Random.Range(2, 21);
+        US = 20 + Random.Range(2, 21);
+        K = 20 + Random.Range(2, 21);
+        Odp = 20 + Random.Range(2, 21);
+        Zr = 20 + Random.Range(2, 21);
+        Int = 20 + Random.Range(2, 21);
+        SW = 20 + Random.Range(2, 21);
+        Ogd = 20 + Random.Range(2, 21);
+        A = 1;
+        Mag = 0;
+        Sz = 4;
+
+        int rollMaxHealth = Random.Range(1, 11);
+        if (rollMaxHealth <= 3)
+            maxHealth = 10;
+        else if (rollMaxHealth <= 6)
+            maxHealth = 11;
+        else if (rollMaxHealth <= 9)
+            maxHealth = 12;
+        else if (rollMaxHealth == 10)
+            maxHealth = 13;
+
+        if (rasa == Player.Rasa.Elf)
         {
-            WW = 20 + Random.Range(2, 21);
-            US = 20 + Random.Range(2, 21);
-            K = 20 + Random.Range(2, 21);
-            Odp = 20 + Random.Range(2, 21);
-            Zr = 20 + Random.Range(2, 21);
-            Int = 20 + Random.Range(2, 21);
-            SW = 20 + Random.Range(2, 21);
-            Ogd = 20 + Random.Range(2, 21);
-            maxHealth = Random.Range(10, 14);
-            Sz = 4;
-            Mag = 0;
-        }
-        else if (rasa == Player.Rasa.Elf)
-        {
-            WW = 20 + Random.Range(2, 21);
-            US = 30 + Random.Range(2, 21);
-            K = 20 + Random.Range(2, 21);
-            Odp = 20 + Random.Range(2, 21);
-            Zr = 30 + Random.Range(2, 21);
-            Int = 20 + Random.Range(2, 21);
-            SW = 20 + Random.Range(2, 21);
-            Ogd = 20 + Random.Range(2, 21);
-            maxHealth = Random.Range(9, 13);
+            US += 10;
+            Zr += 10;
+            maxHealth -= 1;
             Sz = 5;
-            Mag = 0;
         }
         else if (rasa == Player.Rasa.Krasnolud)
         {
-            WW = 30 + Random.Range(2, 21);
-            US = 20 + Random.Range(2, 21);
-            K = 20 + Random.Range(2, 21);
-            Odp = 30 + Random.Range(2, 21);
-            Zr = 10 + Random.Range(2, 21);
-            Int = 20 + Random.Range(2, 21);
-            SW = 20 + Random.Range(2, 21);
-            Ogd = 10 + Random.Range(2, 21);
-            maxHealth = Random.Range(11, 15);
+            WW += 10;
+            Odp += 10;
+            Zr -= 10;
+            Ogd -= 10;
+            maxHealth += 1;
             Sz = 3;
-            Mag = 0;
         }
         else if (rasa == Player.Rasa.Niziolek)
         {
-            WW = 10 + Random.Range(2, 21);
-            US = 30 + Random.Range(2, 21);
-            K = 10 + Random.Range(2, 21);
-            Odp = 10 + Random.Range(2, 21);
-            Zr = 30 + Random.Range(2, 21);
-            Int = 20 + Random.Range(2, 21);
-            SW = 20 + Random.Range(2, 21);
-            Ogd = 30 + Random.Range(2, 21);
-            maxHealth = Random.Range(8, 12);
-            Sz = 4;
-            Mag = 0;
+            WW -= 10;
+            US += 10;
+            K -= 10;
+            Odp -= 10;
+            Zr += 10;
+            Ogd += 10;
+            maxHealth -= 2;
         }
 
         Initiative = Zr + Random.Range(1, 11);

@@ -22,15 +22,15 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
-        //nadanie temu obiektowi klasy Stats
-        enemyStats = this.gameObject.AddComponent<Stats>();
-        this.gameObject.GetComponent<MovementManager>();
-
-        //nadanie rasy
+        // nadanie rasy
         rasa = (Rasa)Random.Range(0, 4);
         Debug.Log($"Stworzy³eœ {this.gameObject.name} o rasie {rasa}");
 
-        //nadanie wartosci cech pierwszorzedowych
+        // nadanie temu obiektowi klasy Stats
+        enemyStats = this.gameObject.AddComponent<Stats>();
+        this.gameObject.GetComponent<MovementManager>();
+
+        // nadanie wartosci cech pierwszorzedowych (docelowo to bedzie robione rowniez w klasie Stats, tylko chce najpierw ogarnac import Jsona ze statami roznych wrogow)
         enemyStats.WW = 20 + Random.Range(2, 21);
         enemyStats.US = 20 + Random.Range(2, 21);
         enemyStats.K = 20 + Random.Range(2, 21);
@@ -40,24 +40,19 @@ public class Enemy : MonoBehaviour
         enemyStats.SW = 20 + Random.Range(2, 21);
         enemyStats.Ogd = 20 + Random.Range(2, 21);
 
-        //nadanie wartosci cech drugorzedowych
+        // nadanie wartosci cech drugorzedowych
         enemyStats.Sz = 4;
         enemyStats.Mag = 0;
         enemyStats.maxHealth = Random.Range(10, 21);
 
+        // ustawienie aktualnych statystyk punktów ¿ycia i szybkosci zgodnie z poczatkowymi
         enemyStats.tempHealth = enemyStats.maxHealth;
         enemyStats.tempSz = enemyStats.Sz;
 
         //nadanie inicjatywy
         enemyStats.Initiative = enemyStats.Zr + Random.Range(1, 11); // docelowo to bedzie robione rowniez w klasie Stats, tylko chce najpierw ogarnac import Jsona ze statami roznych wrogow
 
-        //nadanie wartosci punktow zbroi
-        enemyStats.PZ_head = 1;
-        enemyStats.PZ_arms = 2;
-        enemyStats.PZ_torso = 3;
-        enemyStats.PZ_legs = 4;
-
-        //zasieg broni
+        // ustawienie bazowego zasiegu broni (bron do walki w zwarciu) i sily broni (dystansowa)
         enemyStats.Weapon_S = 3;
         enemyStats.AttackRange = 1.5;
 
@@ -75,6 +70,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
+        // wyswietlanie na biezaco aktualnych punktow zycia oraz inicjatywy
         healthDisplay.text = this.gameObject.GetComponent<Stats>().tempHealth + "/" + this.gameObject.GetComponent<Stats>().maxHealth;
         initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
 

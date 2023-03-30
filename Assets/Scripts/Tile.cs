@@ -9,7 +9,7 @@ public class Tile : MonoBehaviour
     [SerializeField] private GameObject highlight;
     private Color normalColor;
 
-    public static bool canMove = true;
+    public static bool canMove = true; // okresla czy postac moze wykonac ruch
 
     public void Init(bool isOffset)
     {
@@ -37,7 +37,7 @@ public class Tile : MonoBehaviour
 
         if (Player.trSelect != null && Enemy.trSelect == null && canMove)
         {
-            //zmienia predkosc w zaleznoœci, czy s¹ zaznaczone przyciski szar¿y liub biegu
+            //zmienia predkosc w zaleznoœci, czy s¹ zaznaczone przyciski szar¿y lub biegu
             if (MovementManager.Charge)
                 Player.selectedPlayer.GetComponent<Stats>().tempSz = Player.selectedPlayer.GetComponent<Stats>().Sz * 2;
             else if (MovementManager.Run)
@@ -83,7 +83,5 @@ public class Tile : MonoBehaviour
         }
         else if (Enemy.trSelect != null && Player.trSelect != null && canMove)
             Debug.Log("Nie mo¿esz poruszyæ siê dwoma postaciami jednoczeœnie.");
-    }
-        
-    
+    }        
 }

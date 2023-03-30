@@ -43,6 +43,7 @@ public class MovementManager : MonoBehaviour
         }
     }
 
+    //aktywuje mozliwosc ruchu
     public void ActiveMove()
     {
         Tile.canMove = true;
