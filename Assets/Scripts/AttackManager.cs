@@ -323,11 +323,12 @@ public class AttackManager : MonoBehaviour
         attackBonus = chargeBonus + aimingBonus;
     }
 
+    // Zaatakowanie bohatera gracza
     public void AttackPlayer()
     {
         Attack(Enemy.selectedEnemy, Player.selectedPlayer);
     }
-
+    // Zaatakowanie wroga
     public void AttackEnemy()
     {
         Attack(Player.selectedPlayer, Enemy.selectedEnemy);
@@ -351,5 +352,111 @@ public class AttackManager : MonoBehaviour
             Debug.Log("Broñ za³adowana.");
         else
             Debug.Log($"£adowanie broni. Pozosta³a/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
+    }
+
+    // Wykonanie ataku okazyjnego
+    public void OpportunityAttack(GameObject attacker, GameObject target)
+    {
+        int wynik = Random.Range(1, 101);
+        bool hit = false;
+
+        Debug.Log($"Ruch spowodowa³ atak okazyjny. Rzut na WW <color=red>{attacker.name}</color>: {wynik}");
+
+        if (wynik <= attacker.GetComponent<Stats>().WW)
+                hit = true;
+            else
+                hit = false;
+
+        if (hit == true)
+        {
+            int armor = CheckAttackLocalization(target);
+            int damage;
+            int rollResult;
+
+            // mechanika broni przebijajacej zbroje
+            if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
+            {
+                armor--;
+            }
+
+            // mechanika bronii druzgoczacej
+            if (attacker.GetComponent<Stats>().Druzgoczacy)
+            {
+                int roll1 = Random.Range(1, 11);
+                int roll2 = Random.Range(1, 11);
+                if (roll1 > roll2)
+                    rollResult = roll1;
+                else
+                    rollResult = roll2;
+                Debug.Log($"Atak druzgocz¹c¹ broni¹. Rzut 1: {roll1} Rzut 2: {roll2}");
+            }
+            else
+                rollResult = Random.Range(1, 11);
+
+            // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
+            if (attacker.GetComponent<Stats>().Ciezki)
+                attacker.GetComponent<Stats>().Druzgoczacy = false;
+
+            // mechanika furii ulryka
+            if (rollResult == 10)
+            {
+                int confirmRoll = Random.Range(1, 101); //rzut na potwierdzenie furii
+                int additionalDamage = 0; //obrazenia ktore dodajemy do wyniku rzutu
+
+                if (attackDistance <= 1.5f)
+                {
+                    if (attacker.GetComponent<Stats>().WW >= confirmRoll)
+                    {
+                        additionalDamage = Random.Range(1, 11);
+                        rollResult = rollResult + additionalDamage;
+                        Debug.Log($"<color=red> FURIA ULRYKA! </color>");
+                    }
+                    else
+                        rollResult = 10;
+                }
+                else if (attackDistance > 1.5f)
+                {
+                    if (attacker.GetComponent<Stats>().US >= confirmRoll)
+                    {
+                        additionalDamage = Random.Range(1, 11);
+                        rollResult = rollResult + additionalDamage;
+                        Debug.Log($"<color=red> FURIA ULRYKA! </color>");
+                    }
+                    else
+                        rollResult = 10;
+                }
+
+                while (additionalDamage == 10)
+                {
+                    additionalDamage = Random.Range(1, 11);
+                    rollResult = rollResult + additionalDamage;
+                    Debug.Log($"<color=red> KOLEJNA FURIA ULRYKA! </color>");
+                }
+            }
+
+            damage = rollResult + attacker.GetComponent<Stats>().S;
+
+            Debug.Log($"{attacker.name} wyrzuci³ {rollResult} i zada³ <color=green>{damage} obra¿eñ.</color>");
+
+            if (damage > (target.GetComponent<Stats>().Wt + armor))
+            {
+                target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
+                Debug.Log(target.name + " znegowa³ " + (target.GetComponent<Stats>().Wt + armor) + " obra¿eñ.");
+                Debug.Log($"<color=red> Punkty ¿ycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>");
+
+                if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
+                {
+                    Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
+                }
+                else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
+                {
+                    Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
+                }
+            }
+            else
+                Debug.Log($"Atak {attacker.name} nie przebi³ siê przez pancerz.");
+        }
+        else
+            Debug.Log($"Atak {attacker.name} chybi³.");
     }
 }

@@ -102,7 +102,7 @@ public class Enemy : MonoBehaviour
                 selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
 
                 actionsButtons.SetActive(false);
-                Tile.canMove = true;
+                MovementManager.canMove = true;
             }
             else
             {
@@ -121,7 +121,7 @@ public class Enemy : MonoBehaviour
 
                 if (GameObject.Find("ActionsButtonsPlayer") != null && Player.selectedPlayer != null)
                     GameObject.Find("ActionsButtonsPlayer").SetActive(false);
-                Tile.canMove = false;
+                MovementManager.canMove = false;
             }
         }
         else
@@ -139,7 +139,7 @@ public class Enemy : MonoBehaviour
             
             if(GameObject.Find("ActionsButtonsPlayer") != null && Player.selectedPlayer != null)
                 GameObject.Find("ActionsButtonsPlayer").SetActive(false);
-            Tile.canMove = false;
+            MovementManager.canMove = false;
         }
     }
 }

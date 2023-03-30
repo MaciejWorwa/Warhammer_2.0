@@ -22,7 +22,7 @@ public class Stats : MonoBehaviour
     public int S;
     public int Wt;
     public int Sz;
-    public int tempSz;
+    [HideInInspector] public int tempSz;
     public int Mag;
     public int maxHealth;
     public int tempHealth;
