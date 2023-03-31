@@ -79,6 +79,7 @@ public class Player : MonoBehaviour
 
     public void OnMouseDown()
     {
+
         if (trSelect != null)
         {
             if (trSelect == transform)
@@ -87,7 +88,7 @@ public class Player : MonoBehaviour
                 trSelect = null;
                 selectedPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
 
-                actionsButtons.SetActive(false);
+                actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
                 MovementManager.canMove = true;
             }
             else
@@ -102,11 +103,12 @@ public class Player : MonoBehaviour
                 Debug.Log("Wybra³eœ " + selectedPlayer.name);
                 selectedPlayer.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
 
-                actionsButtons.SetActive(true);
+                actionsButtons.transform.Find("Canvas").gameObject.SetActive(true); 
                 actionsButtons.transform.position = selectedPlayer.transform.position;
+                ShowOrHideMagicButtons();
 
                 if (GameObject.Find("ActionsButtonsEnemy") != null && Enemy.selectedEnemy != null)
-                    GameObject.Find("ActionsButtonsEnemy").SetActive(false);
+                    GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
                 MovementManager.canMove = false;
             }
         }
@@ -120,12 +122,29 @@ public class Player : MonoBehaviour
             Debug.Log("Wybra³eœ " + selectedPlayer.name);
             selectedPlayer.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
 
-            actionsButtons.SetActive(true);
+            actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
             actionsButtons.transform.position = selectedPlayer.transform.position;
-           
+            ShowOrHideMagicButtons();
+
+
             if (GameObject.Find("ActionsButtonsEnemy") != null && Enemy.selectedEnemy != null)
-                GameObject.Find("ActionsButtonsEnemy").SetActive(false);
+                GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
             MovementManager.canMove = false;
+        }
+    }
+
+    // Okreœla, czy s¹ widoczne przyciski splatania magii i rzucania zaklêæ
+    public void ShowOrHideMagicButtons()
+    {
+        if (selectedPlayer.GetComponent<Stats>().Mag > 0)
+        {
+            GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton").SetActive(true);
+            GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton").SetActive(true);
+        }
+        else
+        {
+            GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton").SetActive(false);
+            GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton").SetActive(false);
         }
     }
 }

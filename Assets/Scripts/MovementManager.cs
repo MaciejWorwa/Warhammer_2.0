@@ -50,9 +50,9 @@ public class MovementManager : MonoBehaviour
         canMove = true;
 
         //wy³¹czanie widocznosci buttonow akcji oraz odznaczanie drugiej zaznaczonej postaci, je¿eli taka istnieje
-        if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer") != null)
+        if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
         {
-            GameObject.Find("ActionsButtonsPlayer").SetActive(false);
+            GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
             if(Enemy.trSelect != null)
             {
                 Enemy.trSelect = null;
@@ -60,9 +60,9 @@ public class MovementManager : MonoBehaviour
                 Enemy.selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
             }
         }
-        if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy") != null)
+        if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
         {
-            GameObject.Find("ActionsButtonsEnemy").SetActive(false);
+            GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
             if (Player.trSelect != null)
             {
                 Player.trSelect = null;
