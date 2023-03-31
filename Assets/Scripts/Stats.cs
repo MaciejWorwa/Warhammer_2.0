@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using UnityEditor; // Potrzebne przy edytowaniu inspektora
+//using UnityEditor; // Potrzebne przy edytowaniu inspektora i szukaniu pliku .json w folderze Resources
 
 /*
 // EDYTOWANIE INSPEKTORA TAK, ABY WYSWIETLAL SLOWNIK WRAZ Z JEGO KLUCZAMI I WARTOSCIAMI I MOZNA BYLO TO ZMIENIAC (ALE OBECNIE JEST TO WADLIWE).
@@ -57,7 +57,7 @@ public class Stats : MonoBehaviour
     public int Int;
     public int SW;
     public int Ogd;
-    public Dictionary<string, int> CechyPierwszorzedowe;
+    // public Dictionary<string, int> CechyPierwszorzedowe;
 
     [Header("Cechy drugorzêdowe")]
     public int A;
@@ -96,6 +96,28 @@ public class Stats : MonoBehaviour
     public int PZ_arms;
     public int PZ_torso;
     public int PZ_legs;
+
+    // Próba wczytania bestiariusza i zaktualizowania wartoœci cech zgodnie z plikiem .json (NIEUDANA, lista potworow w inspektorze jest pusta)
+    /*
+    public TextAsset jsonBestiariusz;
+
+    [System.Serializable]
+    public class Bestiariusz
+    {
+        public Stats[] potwory;
+    }
+
+    public Bestiariusz mojBestiariusz = new Bestiariusz();
+    public Stats[] potwory;
+
+    void Start()
+    {
+        jsonBestiariusz = Resources.Load<TextAsset>("Bestiariusz");
+        mojBestiariusz = JsonUtility.FromJson<Bestiariusz>(jsonBestiariusz.text);
+
+        potwory = mojBestiariusz.potwory;
+    }
+    */
 
     public void SetBaseStatsByRace(Player.Rasa rasa)
     {
@@ -149,10 +171,6 @@ public class Stats : MonoBehaviour
         }
 
         Initiative = Zr + Random.Range(1, 11);
-    }
-
-    void Update()
-    {
         S = Mathf.RoundToInt(K / 10);
         Wt = Mathf.RoundToInt(Odp / 10);
     }

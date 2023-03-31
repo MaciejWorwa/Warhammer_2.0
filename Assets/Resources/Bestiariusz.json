@@ -1,0 +1,70 @@
+{
+  "potwory": [
+      {
+          "Rasa": "Smok",
+
+          "WW": 20,
+          "US": 20,
+          "K": 20,
+          "Odp": 20,
+          "Zr": 20,
+          "Int": 20,
+          "SW": 20,
+          "Ogd": 20,
+
+          "A": 1,
+          "Sz": 4,
+          "Mag": 0,
+          "maxHealth": 15,
+
+          "Weapon_S": 3,
+          "AttackRange": 1.5,
+          "reloadTime": 1.5,
+          "reloadLeft": 1.5,
+          "Ciezki": false,
+          "Druzgoczacy": false,
+          "Parujacy": false,
+          "Powolny": false,
+          "PrzebijajacyZbroje": false,
+          "Szybki": false,
+
+          "PZ_Head": 0,
+          "PZ_Arms": 0,
+          "PZ_Torso": 0,
+          "PZ_Legs": 0,
+      },
+      {
+          "Rasa": "Wampir",
+
+          "WW": 70,
+          "US": 70,
+          "K": 20,
+          "Odp": 20,
+          "Zr": 70,
+          "Int": 20,
+          "SW": 20,
+          "Ogd": 20,
+
+          "A": 2,
+          "Sz": 4,
+          "Mag": 0,
+          "maxHealth": 35,
+
+          "Weapon_S": 3,
+          "AttackRange": 1.5,
+          "reloadTime": 1.5,
+          "reloadLeft": 1.5,
+          "Ciezki": true,
+          "Druzgoczacy": true,
+          "Parujacy": false,
+          "Powolny": false,
+          "PrzebijajacyZbroje": false,
+          "Szybki": true,
+
+          "PZ_Head": 1,
+          "PZ_Arms": 0,
+          "PZ_Torso": 3,
+          "PZ_Legs": 0
+      }
+    ] 
+}
