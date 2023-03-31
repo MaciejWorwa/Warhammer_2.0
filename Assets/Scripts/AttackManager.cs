@@ -291,7 +291,7 @@ public class AttackManager : MonoBehaviour
             //zmiana koloru wszystkich przycisków AimButton, ¿eby by³o wiadomo, ¿e przycelowanie jest aktywne
             foreach (GameObject button in aimButtons)
             {
-                button.GetComponent<Image>().color = Color.green;
+                button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
             }
         }
         else
@@ -301,7 +301,7 @@ public class AttackManager : MonoBehaviour
             //przywrócenie domyœlnego koloru przyciskom
             foreach (GameObject button in aimButtons)
             {
-                button.GetComponent<Image>().color = Color.white;
+                button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
             }
         }
 

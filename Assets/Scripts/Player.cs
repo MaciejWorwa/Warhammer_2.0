@@ -107,7 +107,7 @@ public class Player : MonoBehaviour
                 actionsButtons.transform.position = selectedPlayer.transform.position;
                 ShowOrHideMagicButtons();
 
-                if (GameObject.Find("ActionsButtonsEnemy") != null && Enemy.selectedEnemy != null)
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas") != null && Enemy.selectedEnemy != null)
                     GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
                 MovementManager.canMove = false;
             }
@@ -127,7 +127,7 @@ public class Player : MonoBehaviour
             ShowOrHideMagicButtons();
 
 
-            if (GameObject.Find("ActionsButtonsEnemy") != null && Enemy.selectedEnemy != null)
+            if (GameObject.Find("ActionsButtonsEnemy/Canvas") != null && Enemy.selectedEnemy != null)
                 GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
             MovementManager.canMove = false;
         }
