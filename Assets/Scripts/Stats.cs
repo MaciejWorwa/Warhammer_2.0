@@ -1,11 +1,52 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+//using UnityEditor; // Potrzebne przy edytowaniu inspektora
+
+/*
+// EDYTOWANIE INSPEKTORA TAK, ABY WYSWIETLAL SLOWNIK WRAZ Z JEGO KLUCZAMI I WARTOSCIAMI I MOZNA BYLO TO ZMIENIAC (ALE OBECNIE JEST TO WADLIWE).
+[CustomEditor(typeof(Stats))]
+public class StatsEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {        
+        base.OnInspectorGUI(); // Wyœwietlenie wszystkiego z poprzedniego inspektora
+        Stats stats = (Stats)target;
+
+        EditorGUILayout.LabelField("Cechy Pierwszorzêdowe"); // Nadanie Headera s³ownikowi
+
+        // wyœwietlanie wartoœci dla ka¿dego klucza
+        foreach (string key in stats.CechyPierwszorzedowe.Keys)
+        {
+            int value = stats.CechyPierwszorzedowe[key];
+            int newValue = EditorGUILayout.IntField(key, value);
+            if (newValue != value)
+            {
+                stats.CechyPierwszorzedowe[key] = newValue;
+            }
+        }
+    }
+}
+*/
 
 public class Stats : MonoBehaviour
 {
     [Header("Rasa")]
     public string Rasa;
+
+    /*
+    // ZROBIENIE S£OWNIKA. ALE NIEZBYT WSPOLGRA TO Z WYSWIETLANIEM I ZMIENIANIEM WARTOSCI Z POZIOMU INSPEKTORA PODCZAS URUCHOMIONEJ GRY.
+    void Start()
+    {
+        CechyPierwszorzedowe = new Dictionary<string, int>();
+        string[] cechy = { "WW", "US", "K", "Odp", "Zr", "Int", "SW", "Ogd" };
+
+        foreach (string cecha in cechy)
+        {
+            CechyPierwszorzedowe.Add(cecha, 20 + Random.Range(2, 21));
+        }
+    }
+    */
 
     [Header("Cechy pierwszorzêdowe")]//RADA MICHA£A: zrobic slownik ktorego kluczami sa nazwy cech a wartosciami wartosci tych cech
     public int WW;
@@ -16,6 +57,7 @@ public class Stats : MonoBehaviour
     public int Int;
     public int SW;
     public int Ogd;
+    public Dictionary<string, int> CechyPierwszorzedowe;
 
     [Header("Cechy drugorzêdowe")]
     public int A;

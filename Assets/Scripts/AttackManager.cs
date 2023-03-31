@@ -25,9 +25,7 @@ public class AttackManager : MonoBehaviour
         {
             // liczy dystans pomiedzy walczacymi
             if (attacker != null && target != null)
-            {
                 attackDistance = Vector3.Distance(attacker.transform.position, target.transform.position);
-            }
 
             // sprawdza czy s¹ wybrane dwie postacie, ktore ze soba walcza
             if (Enemy.trSelect != null && Player.trSelect != null)
@@ -37,7 +35,6 @@ public class AttackManager : MonoBehaviour
                 {
                     int wynik = Random.Range(1, 101);
                     bool hit = false;
-                    //aimingBonus = attacker.GetComponent<Stats>().aimingBonus;
 
                     // sprawdza czy atak jest atakiem dystansowym
                     if (attackDistance > 1.5f)
@@ -45,10 +42,7 @@ public class AttackManager : MonoBehaviour
                         // sprawdza czy bron jest naladowana
                         if (attacker.GetComponent<Stats>().reloadLeft == 0)
                         {
-                            if (wynik <= attacker.GetComponent<Stats>().US + attackBonus)
-                                hit = true;
-                            else
-                                hit = false;
+                            hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                             if (attackBonus > 0)
                                 Debug.Log("Rzut na US: " + wynik + " Premia: " + attackBonus);
@@ -68,17 +62,14 @@ public class AttackManager : MonoBehaviour
                     if (attackDistance <= 1.5f)
                     {
                         //uwzglêdnienie bonusu do WW zwiazanego z szar¿¹
-                        if (MovementManager.Charge == true)
+                        if (MovementManager.Charge)
                             chargeBonus = 10;
                         else
                             chargeBonus = 0;
 
                         attackBonus = chargeBonus + aimingBonus;
 
-                        if (wynik <= attacker.GetComponent<Stats>().WW + attackBonus)
-                            hit = true;
-                        else
-                            hit = false;
+                        hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                         if (attackBonus > 0)
                             Debug.Log("Rzut na WW: " + wynik + " Premia: " + attackBonus);
@@ -110,7 +101,7 @@ public class AttackManager : MonoBehaviour
                     if (aimingBonus != 0)
                         TakeAim();
 
-                    if (hit == true && targetDefended != true)
+                    if (hit && targetDefended != true)
                     {
                         int armor = CheckAttackLocalization(target);
                         int damage;
@@ -118,19 +109,14 @@ public class AttackManager : MonoBehaviour
 
                         // mechanika broni przebijajacej zbroje
                         if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
-                        {
                             armor--;
-                        }
 
                         // mechanika bronii druzgoczacej
                         if (attacker.GetComponent<Stats>().Druzgoczacy)
                         {
                             int roll1 = Random.Range(1, 11);
                             int roll2 = Random.Range(1, 11);
-                            if (roll1 > roll2)
-                                rollResult = roll1;
-                            else
-                                rollResult = roll2;
+                            rollResult = roll1 >= roll2 ? roll1 : roll2;
                             Debug.Log($"Atak druzgocz¹c¹ broni¹. Rzut 1: {roll1} Rzut 2: {roll2}");
                         }
                         else
@@ -139,7 +125,6 @@ public class AttackManager : MonoBehaviour
                         // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
                         if (attacker.GetComponent<Stats>().Ciezki)
                             attacker.GetComponent<Stats>().Druzgoczacy = false;
-
 
                         // mechanika furii ulryka
                         if (rollResult == 10)
@@ -153,10 +138,13 @@ public class AttackManager : MonoBehaviour
                                 {
                                     additionalDamage = Random.Range(1, 11);
                                     rollResult = rollResult + additionalDamage;
-                                    Debug.Log($"<color=red> FURIA ULRYKA! </color>");
+                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
                                 }
                                 else
+                                {
                                     rollResult = 10;
+                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
+                                }
                             }
                             else if (attackDistance > 1.5f)
                             {
@@ -164,10 +152,13 @@ public class AttackManager : MonoBehaviour
                                 {
                                     additionalDamage = Random.Range(1, 11);
                                     rollResult = rollResult + additionalDamage;
-                                    Debug.Log($"<color=red> FURIA ULRYKA! </color>");
+                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
                                 }
                                 else
+                                {
                                     rollResult = 10;
+                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
+                                }
                             }
 
                             while (additionalDamage == 10)
@@ -192,19 +183,16 @@ public class AttackManager : MonoBehaviour
                             Debug.Log($"<color=red> Punkty ¿ycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>");
 
                             if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
-                            {
                                 Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
-                            }
                             else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
-                            {
                                 Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
-                            }
                         }
                         else
                             Debug.Log($"Atak {attacker.name} nie przebi³ siê przez pancerz.");
                     }
                     else
                         Debug.Log($"Atak {attacker.name} chybi³.");
+
                     targetDefended = false; // przestawienie boola na false, ¿eby przy kolejnym ataku znowu musia³ siê broniæ, a nie by³ obroniony na starcie
                 }
                 else
@@ -221,35 +209,32 @@ public class AttackManager : MonoBehaviour
         int attackLocalization = Random.Range(1, 101);
         int armor = 0;
 
-        if (attackLocalization >= 1 && attackLocalization <= 15)
+        switch (attackLocalization)
         {
-            Debug.Log("Trafienie w g³owê");
-            armor = target.GetComponent<Stats>().PZ_head;
-        }
-        if (attackLocalization >= 16 && attackLocalization <= 35)
-        {
-            Debug.Log("Trafienie w praw¹ rêkê");
-            armor = target.GetComponent<Stats>().PZ_arms;
-        }
-        if (attackLocalization >= 36 && attackLocalization <= 55)
-        {
-            Debug.Log("Trafienie w lew¹ rêkê");
-            armor = target.GetComponent<Stats>().PZ_arms;
-        }
-        if (attackLocalization >= 56 && attackLocalization <= 80)
-        {
-            Debug.Log("Trafienie w korpus");
-            armor = target.GetComponent<Stats>().PZ_torso;
-        }
-        if (attackLocalization >= 81 && attackLocalization <= 90)
-        {
-            Debug.Log("Trafienie w praw¹ nogê");
-            armor = target.GetComponent<Stats>().PZ_legs;
-        }
-        if (attackLocalization >= 91 && attackLocalization <= 100)
-        {
-            Debug.Log("Trafienie w lew¹ nogê");
-            armor = target.GetComponent<Stats>().PZ_legs;
+            case int n when (n >= 1 && n <= 15):
+                Debug.Log("Trafienie w g³owê");
+                armor = target.GetComponent<Stats>().PZ_head;
+                break;
+            case int n when (n >= 16 && n <= 35):
+                Debug.Log("Trafienie w praw¹ rêkê");
+                armor = target.GetComponent<Stats>().PZ_arms;
+                break;
+            case int n when (n >= 36 && n <= 55):
+                Debug.Log("Trafienie w lew¹ rêkê");
+                armor = target.GetComponent<Stats>().PZ_arms;
+                break;
+            case int n when (n >= 56 && n <= 80):
+                Debug.Log("Trafienie w korpus");
+                armor = target.GetComponent<Stats>().PZ_torso;
+                break;
+            case int n when (n >= 81 && n <= 90):
+                Debug.Log("Trafienie w praw¹ nogê");
+                armor = target.GetComponent<Stats>().PZ_legs;
+                break;
+            case int n when (n >= 91 && n <= 100):
+                Debug.Log("Trafienie w lew¹ nogê");
+                armor = target.GetComponent<Stats>().PZ_legs;
+                break;
         }
         return armor;
     }
@@ -362,12 +347,9 @@ public class AttackManager : MonoBehaviour
 
         Debug.Log($"Ruch spowodowa³ atak okazyjny. Rzut na WW <color=red>{attacker.name}</color>: {wynik}");
 
-        if (wynik <= attacker.GetComponent<Stats>().WW)
-                hit = true;
-            else
-                hit = false;
+        hit = wynik <= attacker.GetComponent<Stats>().WW;  // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
-        if (hit == true)
+        if (hit)
         {
             int armor = CheckAttackLocalization(target);
             int damage;
@@ -375,19 +357,14 @@ public class AttackManager : MonoBehaviour
 
             // mechanika broni przebijajacej zbroje
             if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
-            {
                 armor--;
-            }
 
             // mechanika bronii druzgoczacej
             if (attacker.GetComponent<Stats>().Druzgoczacy)
             {
                 int roll1 = Random.Range(1, 11);
                 int roll2 = Random.Range(1, 11);
-                if (roll1 > roll2)
-                    rollResult = roll1;
-                else
-                    rollResult = roll2;
+                rollResult = roll1 >= roll2 ? roll1 : roll2;
                 Debug.Log($"Atak druzgocz¹c¹ broni¹. Rzut 1: {roll1} Rzut 2: {roll2}");
             }
             else
@@ -409,10 +386,13 @@ public class AttackManager : MonoBehaviour
                     {
                         additionalDamage = Random.Range(1, 11);
                         rollResult = rollResult + additionalDamage;
-                        Debug.Log($"<color=red> FURIA ULRYKA! </color>");
+                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
                     }
                     else
+                    {
                         rollResult = 10;
+                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
+                    }
                 }
                 else if (attackDistance > 1.5f)
                 {
@@ -420,10 +400,13 @@ public class AttackManager : MonoBehaviour
                     {
                         additionalDamage = Random.Range(1, 11);
                         rollResult = rollResult + additionalDamage;
-                        Debug.Log($"<color=red> FURIA ULRYKA! </color>");
+                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
                     }
                     else
+                    {
                         rollResult = 10;
+                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
+                    }
                 }
 
                 while (additionalDamage == 10)
@@ -445,13 +428,9 @@ public class AttackManager : MonoBehaviour
                 Debug.Log($"<color=red> Punkty ¿ycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>");
 
                 if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
-                {
                     Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
-                }
                 else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
-                {
                     Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
-                }
             }
             else
                 Debug.Log($"Atak {attacker.name} nie przebi³ siê przez pancerz.");
