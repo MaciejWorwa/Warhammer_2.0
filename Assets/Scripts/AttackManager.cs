@@ -28,7 +28,7 @@ public class AttackManager : MonoBehaviour
                 attackDistance = Vector3.Distance(attacker.transform.position, target.transform.position);
 
             // sprawdza czy s¹ wybrane dwie postacie, ktore ze soba walcza
-            if (Enemy.trSelect != null && Player.trSelect != null)
+            if ((Enemy.trSelect != null && Player.trSelect != null) || AutoCombat.AutoCombatOn)
             {
                 // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego
                 if (attackDistance <= attacker.GetComponent<Stats>().AttackRange)
@@ -182,6 +182,7 @@ public class AttackManager : MonoBehaviour
                             Debug.Log(target.name + " znegowa³ " + (target.GetComponent<Stats>().Wt + armor) + " obra¿eñ.");
                             Debug.Log($"<color=red> Punkty ¿ycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>");
 
+                            //TO PONI¯EJ DZIA£A ALE MUSIA£EM WY£¥CZYÆ TYMCZASOWO ¯EBY AUTOMATYCZNY COMBAT NIE WYWALA£ B£ÊDÓW, BO W NIM NIE MA ¯ADNYCH SELECTEDENEMY ANI SELECTEDPLAYER
                             if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
                                 Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
                             else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)

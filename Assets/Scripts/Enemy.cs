@@ -18,7 +18,7 @@ public class Enemy : MonoBehaviour
 
     private float attackDistance;
 
-    private AttackManager attackManager;
+    [HideInInspector] public AttackManager attackManager;
 
     void Start()
     {

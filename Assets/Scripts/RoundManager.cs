@@ -6,6 +6,7 @@ using TMPro;
 public class RoundManager : MonoBehaviour
 {
     private int roundNumber;
+    public AutoCombat autoCombat;
 
     [SerializeField] private TMP_Text roundNumberDisplay;
 
@@ -13,10 +14,15 @@ public class RoundManager : MonoBehaviour
     {
         roundNumber = 1;
         roundNumberDisplay.text = "Runda: " + roundNumber;
+
+        autoCombat = autoCombat.gameObject.GetComponent<AutoCombat>();
     }
 
     public void NextRound()
     {
+        if(AutoCombat.AutoCombatOn)
+            autoCombat.AutomaticActions();
+
         roundNumber++;
         roundNumberDisplay.text = "Runda: " + roundNumber;
 

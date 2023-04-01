@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
 
     private float attackDistance;
 
-    private AttackManager attackManager;
+    [HideInInspector] public AttackManager attackManager;
 
     void Start()
     {

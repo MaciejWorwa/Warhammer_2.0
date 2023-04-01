@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using UnityEditor; // Potrzebne przy edytowaniu inspektora i szukaniu pliku .json w folderze Resources
+using UnityEditor; // Potrzebne przy edytowaniu inspektora i szukaniu pliku .json w folderze Resources
 
 /*
 // EDYTOWANIE INSPEKTORA TAK, ABY WYSWIETLAL SLOWNIK WRAZ Z JEGO KLUCZAMI I WARTOSCIAMI I MOZNA BYLO TO ZMIENIAC (ALE OBECNIE JEST TO WADLIWE).
@@ -101,7 +101,7 @@ public class Stats : MonoBehaviour
     /*
     public TextAsset jsonBestiariusz;
 
-    [System.Serializable]
+    //[System.Serializable]
     public class Bestiariusz
     {
         public Stats[] potwory;
@@ -113,11 +113,13 @@ public class Stats : MonoBehaviour
     void Start()
     {
         jsonBestiariusz = Resources.Load<TextAsset>("Bestiariusz");
-        mojBestiariusz = JsonUtility.FromJson<Bestiariusz>(jsonBestiariusz.text);
+        //mojBestiariusz = JsonUtility.FromJson<Bestiariusz>(jsonBestiariusz.text);
+        potwory = JsonUtility.FromJson<Stats[]>(jsonBestiariusz.text);
 
-        potwory = mojBestiariusz.potwory;
+        //potwory = mojBestiariusz.potwory;
     }
     */
+
 
     public void SetBaseStatsByRace(Player.Rasa rasa)
     {
