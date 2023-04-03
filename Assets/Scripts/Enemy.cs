@@ -45,12 +45,17 @@ public class Enemy : MonoBehaviour
         enemyStats.Mag = 0;
         enemyStats.maxHealth = Random.Range(10, 21);
 
+
         // ustawienie aktualnych statystyk punktów ¿ycia i szybkosci zgodnie z poczatkowymi
         enemyStats.tempHealth = enemyStats.maxHealth;
         enemyStats.tempSz = enemyStats.Sz;
 
-        //nadanie inicjatywy
-        enemyStats.Initiative = enemyStats.Zr + Random.Range(1, 11); // docelowo to bedzie robione rowniez w klasie Stats, tylko chce najpierw ogarnac import Jsona ze statami roznych wrogow
+        //UWAGA!!!!!!!!!!!!!  nadanie inicjatywy, atakow, Si³y i Wt docelowo to bedzie robione rowniez w klasie Stats, tylko chce najpierw ogarnac import Jsona ze statami roznych wrogow 
+        enemyStats.Initiative = enemyStats.Zr + Random.Range(1, 11);
+        enemyStats.A = 1;
+        enemyStats.S = Mathf.RoundToInt(enemyStats.K / 10);
+        enemyStats.Wt = Mathf.RoundToInt(enemyStats.Odp / 10);
+
 
         // ustawienie bazowego zasiegu broni (bron do walki w zwarciu) i sily broni (dystansowa)
         enemyStats.Weapon_S = 3;

@@ -45,9 +45,9 @@ public class AttackManager : MonoBehaviour
                             hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                             if (attackBonus > 0)
-                                Debug.Log("Rzut na US: " + wynik + " Premia: " + attackBonus);
+                                Debug.Log($"{attacker.name} Rzut na US: {wynik}  Premia: {attackBonus}");
                             else
-                                Debug.Log("Rzut na US: " + wynik);
+                                Debug.Log($"{attacker.name} Rzut na US: {wynik}");
 
                             // resetuje naladowanie broni po wykonaniu strzalu
                             attacker.GetComponent<Stats>().reloadLeft = attacker.GetComponent<Stats>().reloadTime;
@@ -72,9 +72,9 @@ public class AttackManager : MonoBehaviour
                         hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                         if (attackBonus > 0)
-                            Debug.Log("Rzut na WW: " + wynik + " Premia: " + attackBonus);
+                            Debug.Log($"{attacker.name} Rzut na WW: {wynik}  Premia: {attackBonus}");
                         else
-                            Debug.Log("Rzut na WW: " + wynik);
+                            Debug.Log($"{attacker.name} Rzut na WW: {wynik}");
                     }
 
                     //wywo³anie funkcji parowania lub uniku jeœli postaæ jeszcze mo¿e to robiæ w tej rundzie
@@ -185,7 +185,7 @@ public class AttackManager : MonoBehaviour
                             //TO PONI¯EJ DZIA£A ALE MUSIA£EM WY£¥CZYÆ TYMCZASOWO ¯EBY AUTOMATYCZNY COMBAT NIE WYWALA£ B£ÊDÓW, BO W NIM NIE MA ¯ADNYCH SELECTEDENEMY ANI SELECTEDPLAYER
                             if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
                                 Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
-                            else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
+                            else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
                                 Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
                         }
                         else
@@ -254,9 +254,9 @@ public class AttackManager : MonoBehaviour
         int wynik = Random.Range(1, 101);
 
         if (target.GetComponent<Stats>().parryBonus != 0)
-            Debug.Log($"Rzut na parowanie: {wynik} Bonus do parowania: {target.GetComponent<Stats>().parryBonus}");
+            Debug.Log($"{target.name} Rzut na parowanie: {wynik} Bonus do parowania: {target.GetComponent<Stats>().parryBonus}");
         else
-            Debug.Log("Rzut na parowanie: " + wynik);
+            Debug.Log($"{target.name} Rzut na parowanie: {wynik}");
 
         if (wynik <= target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus)
             targetDefended = true;
@@ -272,7 +272,7 @@ public class AttackManager : MonoBehaviour
         target.GetComponent<Stats>().canDodge = false;
         int wynik = Random.Range(1, 101);
 
-        Debug.Log("Rzut na unik: " + wynik);
+        Debug.Log($"{target.name} Rzut na unik: {wynik}");
 
         if (wynik <= target.GetComponent<Stats>().Zr)
             targetDefended = true;
@@ -430,7 +430,7 @@ public class AttackManager : MonoBehaviour
 
                 if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
                     Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
-                else if (Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
+                else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
                     Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
             }
             else

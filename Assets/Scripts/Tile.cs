@@ -9,12 +9,23 @@ public class Tile : MonoBehaviour
     [SerializeField] private GameObject highlight;
     private Color normalColor;
 
+    public bool isOccupied;
+    private LayerMask layer;
+
     //public static bool canMove = true; // okresla czy postac moze wykonac ruch
 
     public void Init(bool isOffset)
     {
         _renderer.material.color = isOffset ? offsetColor : baseColor;
         normalColor = _renderer.material.color;
+        layer = LayerMask.GetMask("Character");
+    }
+
+    void Update()
+    {
+        // Sprawdza czy na polu stoi jakas postac
+        Collider2D collider = Physics2D.OverlapCircle(transform.position, 0.1f, layer);
+        isOccupied = (collider != null) ? true : false;
     }
 
     void OnMouseEnter()
