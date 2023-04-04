@@ -13,7 +13,7 @@ public class AutoCombat : MonoBehaviour
 
     public MovementManager movementManager;
 
-    public static bool AutoCombatOn = true;
+    public static bool AutoCombatOn = false;
 
     void Start()
     {

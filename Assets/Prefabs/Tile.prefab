@@ -127,5 +127,8 @@ MonoBehaviour:
   baseColor: {r: 0.53442764, g: 0.7735849, b: 0.4557177, a: 1}
   offsetColor: {r: 0.681498, g: 0.8113208, b: 0.4702939, a: 1}
   highlightColor: {r: 0.9006242, g: 1, b: 0.6079664, a: 1}
+  rangeColor: {r: 0, g: 0, b: 0, a: 0}
   _renderer: {fileID: 1718136763751826049}
-  highlight: {fileID: 0}
+  normalColor: {r: 0, g: 0, b: 0, a: 0}
+  copyMaterial: {fileID: 0}
+  isOccupied: 0

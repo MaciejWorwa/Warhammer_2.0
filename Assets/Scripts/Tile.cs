@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    [SerializeField] private Color baseColor, offsetColor, highlightColor;
-    [SerializeField] protected Renderer _renderer;
-    [SerializeField] private GameObject highlight;
-    private Color normalColor;
+    public Color baseColor, offsetColor, highlightColor, rangeColor, rangeHighlightColor;
+    [HideInInspector] public Renderer _renderer;
+    [HideInInspector] public Color normalColor;
+
 
     public bool isOccupied;
     private LayerMask layer;
@@ -19,6 +19,12 @@ public class Tile : MonoBehaviour
         _renderer.material.color = isOffset ? offsetColor : baseColor;
         normalColor = _renderer.material.color;
         layer = LayerMask.GetMask("Character");
+
+        // Ustala kolor podswietlonych pol na taki sam jak normalny ale z opacity na poziomie 80%
+        rangeColor = _renderer.material.color;
+        rangeColor.a = 0.8f;
+        rangeHighlightColor = highlightColor;
+        rangeHighlightColor.a = 0.8f;
     }
 
     void Update()
@@ -32,21 +38,29 @@ public class Tile : MonoBehaviour
     {
         //podswietlenie pola
         if (MovementManager.canMove == true)
-            _renderer.material.color = highlightColor;
+        {
+            // Jezli alpha pola jest rowne 1 (czyli nie jest to pole w zasiegu ruchu) to ustala standardowy kolor podswietlenia, w przeciwnym razie ustala rangeHighlightColor
+            if(_renderer.material.color.a == 1f)
+                _renderer.material.color = highlightColor;
+            else
+                _renderer.material.color = rangeHighlightColor;
+        }
     }
 
     void OnMouseExit()
     {
-        //przywrocenie normalnego koloru
-        if (MovementManager.canMove == true)
+        // PrzywrÃ³cenie normalnego koloru, ale tylko jeÅ›li obecny kolor nie jest rÃ³wny rangeHighlightColor
+        if (_renderer.material.color != rangeHighlightColor && _renderer.material.color == highlightColor)
             _renderer.material.color = normalColor;
+        else if (MovementManager.canMove == true)
+            _renderer.material.color = rangeColor;
     }
 
     void OnMouseDown()
     {
         MovementManager movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
 
-        // wywo³uje akcje ruchu wewn¹trz klasy MovementManager
+        // wywoï¿½uje akcje ruchu wewnï¿½trz klasy MovementManager
         movementManager.MoveSelectedCharacter(this.gameObject);    
     }
 }
