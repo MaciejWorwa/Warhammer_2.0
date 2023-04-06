@@ -22,7 +22,7 @@ public class AutoCombat : MonoBehaviour
 
     public void SetAutoCombat()
     {
-        if(AutoCombatOn)
+        if (AutoCombatOn)
         {
             AutoCombatOn = false;
             Debug.Log($"<color=green>Walka automatyczna zosta³a wy³¹czona.</color>");
@@ -35,14 +35,14 @@ public class AutoCombat : MonoBehaviour
 
     }
 
-    // Wykonuje automatyczne akcje za ka¿d¹ postaæ
+    // Wykonuje automatyczne akcje za kazda postac
     public void AutomaticActions()
     {
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
         players = GameObject.FindGameObjectsWithTag("Player");
 
         // Polaczenie tablicy enemies z tablica players. Zbior wszystkich postaci.
-        // Potem sortuje tablice wg inicjatywy. Domyœlnie jest rosnaco, dlatego pozniej jeszcze obracamy kolejnosc przy pomocy Reverse()
+        // Potem sortuje tablice wg inicjatywy. Domyslnie jest rosnaco, dlatego pozniej jeszcze obracamy kolejnosc przy pomocy Reverse()
         characters = enemies.Concat(players).ToArray();
         Array.Sort(characters, delegate (GameObject x, GameObject y) { return x.GetComponent<Stats>().Initiative.CompareTo(y.GetComponent<Stats>().Initiative); });
         Array.Reverse(characters);
@@ -64,157 +64,72 @@ public class AutoCombat : MonoBehaviour
 
             float distance = Vector3.Distance(closestOpponent.transform.position, character.transform.position);
 
+            // Jeœli rywal jest w zasiegu ataku to wykonuje atak
             if (character.GetComponent<Stats>().AttackRange >= distance)
             {
-                if(character.tag == "Enemy")
-                    character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
+                if (character.tag == "Enemy")
+                {
+                    // Wykonuje tyle ataków ile wynosi cecha Ataki postaci
+                    for (int i = 0; i < character.GetComponent<Stats>().A; i++)
+                    {
+                        // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
+                        if (character.GetComponent<Stats>().reloadLeft == 0)
+                            character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
+                        else
+                            character.GetComponent<Enemy>().attackManager.ReloadEnemy();
+                    }
+
+                }
                 else
-                    character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
+                {
+                    // Wykonuje tyle ataków ile wynosi cecha Ataki postaci
+                    for (int i = 0; i < character.GetComponent<Stats>().A; i++)
+                    {
+                        // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
+                        if (character.GetComponent<Stats>().reloadLeft == 0)
+                            character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
+                        else
+                            character.GetComponent<Player>().attackManager.ReloadPlayer();
+                    }
+                }
+
             }
             else
             {
-                Debug.Log("Tutaj bedzie mechanika ruchu w kierunku postaci :)"); // TUTAJ MUSZE COS ROZKMINIC. PONIZEJ SA ZAKOMENTOWANE POPRZEDNIE PROBY
+                // Postac wykonuje ruch w kierunku najblizszego rywala tyle razy ile wynosi jej aktualna szybkosc
+                for (int i = 0; i < character.GetComponent<Stats>().tempSz; i++)
+                {
+                    int XorY = UnityEngine.Random.Range(0, 2);
+
+                    // Ustala losowa kolejnosc sprawdzania roznicy dystansu (raz najpierw sprawdza w osi x, raz w osi y).
+                    // Zapobiega to blokowaniu sie postaci w jednej osi, gdy pomiedzy atakujacym a celem stoi sojusznik atakujacego
+                    if(XorY == 0 || closestOpponent.transform.position.y == character.transform.position.y)
+                    {
+                        // Sprawdza w ktorym kierunku powinien wykonac ruch.
+                        // Jezeli wejdzie na pole zajete przez inna postac, szuka wolnego pola tu¿ obok.
+                        if (closestOpponent.transform.position.x > character.transform.position.x)
+                            character.transform.position = ChangeCharacterPosition(character, Vector3.right);
+                        else if (closestOpponent.transform.position.x < character.transform.position.x)
+                            character.transform.position = ChangeCharacterPosition(character, Vector3.left);
+                    }
+                    else if (XorY != 0 || closestOpponent.transform.position.x == character.transform.position.x)
+                    {
+                        // Sprawdza w ktorym kierunku powinien wykonac ruch.
+                        // Jezeli wejdzie na pole zajete przez inna postac, szuka wolnego pola tu¿ obok.
+                        if (closestOpponent.transform.position.y > character.transform.position.y)
+                            character.transform.position = ChangeCharacterPosition(character, Vector3.up);
+                        else if (closestOpponent.transform.position.y < character.transform.position.y)
+                            character.transform.position = ChangeCharacterPosition(character, Vector3.down);
+                    }
+                }
             }
 
             // Usuwa z pola bitwy postacie, ktorych zywotnosc spadla ponizej 0
             if (closestOpponent.GetComponent<Stats>().tempHealth < 0)
                 Destroy(closestOpponent);
         }
-
-
-
-        /*
-        foreach (GameObject enemy in enemies)
-        {
-            Enemy.selectedEnemy = enemy;
-            GameObject closestPlayer = GetClosestOpponent(players, enemy.transform);
-
-            Debug.Log($"Inicjatywa {enemy} to {enemy.GetComponent<Stats>().Initiative}");
-
-            float distance = Vector3.Distance(closestPlayer.transform.position, enemy.transform.position);
-
-            if (enemy.GetComponent<Stats>().AttackRange >= distance)
-                enemy.GetComponent<Enemy>().attackManager.Attack(enemy, closestPlayer);
-            else
-            {
-                /*
-                //TO PONIZEJ NIE DZIALA POPRAWNIE. TRZEBA NAD TYM POKMINIC. WROGOWIE CZASAMI STAJA NA INNE POLE ZAJETE PRZEZ INNEGO WROGA, A CZASAMI ZATRZYMUJA SIE I NIE IDA DALEJ
-                
-
-                enemy.layer = 0; // zresetowanie warstwy aktualnego Enemy na 'Default' po to, ¿eby sam siebie nie wykrywa³ jako collidera
-
-                // Porusza wroga w stronê bohatera gracza w jednym z czterech kierunkow. Wykonuje pojedynczy ruch tyle razy ile wynosi aktualna szybkosc wroga.
-                for (int i = 0; i < enemy.GetComponent<Stats>().tempSz; i++)
-                {
-                    Collider2D collider;
-                    LayerMask layer = LayerMask.GetMask("Character"); // wartwa wspolna dla wrogow i bohaterow graczy
-
-                    // kazdy ponizszy 'if' odpowiada za ruch w innym kierunku (prawo, lewo, gora, dol). Sa zdeterminowane pozycja atakujacego enemy i najbliszego celu (playera)
-                    if (closestPlayer.transform.position.x > enemy.transform.position.x && distance > 1.5f)
-                    {
-                        collider = Physics2D.OverlapCircle(enemy.transform.position, 1f, layer);
-
-                        if (collider == null || collider.transform.position.x < enemy.transform.position.x || collider.transform.position.y != enemy.transform.position.y)
-                        {
-                            enemy.transform.position += Vector3.right;                           
-                        }
-                        else
-                        {
-                            Debug.Log("ktos stoi na drodze");
-                        }
-                        // TE ZAKOMENTOWANE PONIZEJ TO NIEUDANE PROBY OMIJANIA POSTACI STOJACYCH NA DRODZE. POLEGAJA NA ZMIANIE RUCHU Z POZIOMEGO NA PIONOWY LUB ODWROTNIE, ZAWSZE W KIERUNKU CELU
-                        //else
-                        //{
-                        //    if(enemy.transform.position.y < closestPlayer.transform.position.y)
-                        //        enemy.transform.position += Vector3.up;
-                        //    if (enemy.transform.position.y > closestPlayer.transform.position.y)
-                        //        enemy.transform.position += Vector3.down;
-                        //}
-
-                        distance = Vector3.Distance(closestPlayer.transform.position, enemy.transform.position);
-                    }
-                    else if (closestPlayer.transform.position.x < enemy.transform.position.x && distance > 1.5f)
-                    {
-                        collider = Physics2D.OverlapCircle(enemy.transform.position, 1f, layer);
-
-                        if (collider == null || collider.transform.position.x > enemy.transform.position.x || collider.transform.position.y != enemy.transform.position.y)
-                        {
-                            enemy.transform.position += Vector3.left;
-                        }
-                        else
-                        {
-                            Debug.Log("ktos stoi na drodze");
-                        }
-                        //else
-                        //{
-                        //    if (enemy.transform.position.y < closestPlayer.transform.position.y)
-                        //        enemy.transform.position += Vector3.up;
-                        //    if (enemy.transform.position.y > closestPlayer.transform.position.y)
-                        //        enemy.transform.position += Vector3.down;
-                        //}
-
-                        distance = Vector3.Distance(closestPlayer.transform.position, enemy.transform.position);
-                    }
-                    else if (closestPlayer.transform.position.y > enemy.transform.position.y && distance > 1.5f)
-                    {
-                        collider = Physics2D.OverlapCircle(enemy.transform.position, 1f, layer);
-
-                        if (collider == null || collider.transform.position.y < enemy.transform.position.y || collider.transform.position.x != enemy.transform.position.x)
-                        {
-                            enemy.transform.position += Vector3.up;
-                        }
-                        else
-                        {
-                            Debug.Log("ktos stoi na drodze");
-                        }
-                        //else
-                        //{
-                        //    if (enemy.transform.position.x < closestPlayer.transform.position.x)
-                        //        enemy.transform.position += Vector3.right;
-                        //    if (enemy.transform.position.x > closestPlayer.transform.position.x)
-                        //        enemy.transform.position += Vector3.left;
-                        //}
-
-                        distance = Vector3.Distance(closestPlayer.transform.position, enemy.transform.position);
-                    }
-                    else if (closestPlayer.transform.position.y < enemy.transform.position.y && distance > 1.5f)
-                    {
-                        collider = Physics2D.OverlapCircle(enemy.transform.position, 1f, layer);
-
-                        if (collider == null || collider.transform.position.y > enemy.transform.position.y || collider.transform.position.x != enemy.transform.position.x)
-                        {
-                            enemy.transform.position += Vector3.down;
-                        }
-                        else
-                        {
-                            Debug.Log("ktos stoi na drodze");
-                        }
-                        //else
-                        //{
-                        //    if (enemy.transform.position.x < closestPlayer.transform.position.x)
-                        //        enemy.transform.position += Vector3.right;
-                        //    if (enemy.transform.position.x > closestPlayer.transform.position.x)
-                        //        enemy.transform.position += Vector3.left;
-                        //}
-
-                        distance = Vector3.Distance(closestPlayer.transform.position, enemy.transform.position);                       
-                    }
-                }
-
-                enemy.layer = 6;
-                
-            }
-        }
-        foreach (GameObject player in players)
-        {
-            Player.selectedPlayer = player;
-            GameObject closestEnemy = GetClosestOpponent(enemies, player.transform);
-
-            player.GetComponent<Player>().attackManager.Attack(player, closestEnemy);
-        }
-        */
     }
-        
+
 
     GameObject GetClosestOpponent(GameObject[] characters, Transform currentCharacter)
     {
@@ -232,44 +147,77 @@ public class AutoCombat : MonoBehaviour
         }
         return closestCharacter;
     }
-}
 
-// KOD OD CHATU-GPT DO PRZEROBIENIA.
-/*
-// Oblicz kierunek do gracza
-Vector2 direction = player.transform.position - transform.position;
-
-// Jeœli dystans do gracza jest wiêkszy ni¿ szybkoœæ, to znajdŸ nowe pole z tagiem "Tile"
-if (direction.magnitude > speed)
-{
-    // Normalizuj kierunek i przemnó¿ go przez szybkoœæ, aby uzyskaæ docelowe po³o¿enie
-    direction.Normalize();
-    Vector2 targetPosition = transform.position + direction * speed;
-
-    // SprawdŸ, czy na docelowym polu znajduje siê ju¿ inny obiekt
-    Collider2D[] colliders = Physics2D.OverlapBoxAll(targetPosition, Vector2.one * 0.9f, 0, tileLayer);
-    Collider2D targetCollider = null;
-    float minDistance = Mathf.Infinity;
-
-    foreach (Collider2D collider in colliders)
+    Vector3 FindFreeAdjacentPosition(Vector3 currentPosition, List<Vector3> otherPositions)
     {
-        // SprawdŸ, czy to pole jest ju¿ zajête przez inny obiekt
-        if (collider.gameObject != gameObject && collider.gameObject != player)
+        // Usuniecie pozycji atakujacego z listy zawierajacej pozycje wszystkich postaci
+        otherPositions.Remove(currentPosition);
+
+        // Zbiera wszystkie przylegle do postaci pola na ktore teoretycznie moglaby sie poruszyc
+        Vector3[] adjacentPositions =
         {
-            // Oblicz odleg³oœæ od pola do przeciwnika
-            float distance = Vector2.Distance(transform.position, collider.transform.position);
-            if (distance < minDistance)
+        currentPosition + Vector3.right,
+        currentPosition + Vector3.left,
+        currentPosition + Vector3.up,
+        currentPosition + Vector3.down
+        };
+
+        // Sortowanie elementow tablicy w losowy sposob, aby nie bylo tak, ze zawsze najpierw postac chce pojsc w prawo, potem w lewo itd.
+        Vector3 tempVector3;
+        for (int i = 0; i < adjacentPositions.Length; i++)
+        {
+            int rnd = UnityEngine.Random.Range(0, adjacentPositions.Length);
+            tempVector3 = adjacentPositions[rnd];
+            adjacentPositions[rnd] = adjacentPositions[i];
+            adjacentPositions[i] = tempVector3;
+        }
+
+        // Sprawdza czy pozycje przylegle do postaci sa zajete
+        foreach (Vector3 position in adjacentPositions)
+        {
+            bool isFree = true;
+            foreach (Vector3 otherPosition in otherPositions)
             {
-                targetCollider = collider;
-                minDistance = distance;
+                if (position == otherPosition)
+                {
+                    isFree = false;
+                    break;
+                }
+            }
+            if (isFree && position.x >= -8 && position.x <= 8 && position.y >= -4 && position.y <= 3) // w przyszlosci zamienic te stale wartosci na odniesienie do szerokosci i wysokosci grida
+            {
+                Debug.Log($"Zwracam nowa przylegla pozycje dla {currentPosition}: {position}");
+                // Zwraca informacje o pierwszej wolnej przyleglej do postaci pozycji jesli jest wolna i znajduje sie w obrebie pola gry
+                return position;
             }
         }
+        // Jesli kazda pozycja przylegla do postaci jest zajeta to zwraca wektor zerowy
+        return Vector3.zero;
     }
 
-    // Jeœli znaleziono docelowe pole, to przemieœæ przeciwnika na nie
-    if (targetCollider != null)
+    Vector3 ChangeCharacterPosition(GameObject character, Vector3 direction)
     {
-        transform.position = targetCollider.transform.position;
+        Vector3 newPosition = character.transform.position + direction;
+        bool canMove = true;
+
+        foreach (GameObject ch in characters)
+        {
+            if (newPosition == ch.transform.position && ch != character)
+            {
+                canMove = false;
+                break;
+            }
+        }
+
+        if (!canMove)
+        {
+            newPosition = FindFreeAdjacentPosition(character.transform.position, characters.Select(ch => ch.transform.position).ToList());
+
+            // PROBA WPROWADZENIA TUTAJ ATAKU OKAZYJNEGO, ALE FUNKCJA CHECKFOROPPORTUNITYATTACK NIESTETY TYLKO UWZGLEDNIA SELECTEDENEMY I SELECTEDPLAYER A NIE WSZYSTKICH
+            //MovementManager moveMan = GameObject.Find("MovementManager").GetComponent<MovementManager>();
+            //moveMan.CheckForOpportunityAttack(character, newPosition);
+        }
+
+        return newPosition;
     }
 }
-*/

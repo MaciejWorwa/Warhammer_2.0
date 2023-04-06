@@ -45,9 +45,9 @@ public class AttackManager : MonoBehaviour
                             hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                             if (attackBonus > 0)
-                                Debug.Log($"{attacker.name} Rzut na US: {wynik}  Premia: {attackBonus}");
+                                Debug.Log($"<color=green>{attacker.name}</color> Rzut na US: {wynik}  Premia: {attackBonus}");
                             else
-                                Debug.Log($"{attacker.name} Rzut na US: {wynik}");
+                                Debug.Log($"<color=green>{attacker.name}</color> Rzut na US: {wynik}");
 
                             // resetuje naladowanie broni po wykonaniu strzalu
                             attacker.GetComponent<Stats>().reloadLeft = attacker.GetComponent<Stats>().reloadTime;
@@ -72,9 +72,9 @@ public class AttackManager : MonoBehaviour
                         hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                         if (attackBonus > 0)
-                            Debug.Log($"{attacker.name} Rzut na WW: {wynik}  Premia: {attackBonus}");
+                            Debug.Log($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}  Premia: {attackBonus}");
                         else
-                            Debug.Log($"{attacker.name} Rzut na WW: {wynik}");
+                            Debug.Log($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}");
                     }
 
                     //wywo³anie funkcji parowania lub uniku jeœli postaæ jeszcze mo¿e to robiæ w tej rundzie
@@ -174,7 +174,7 @@ public class AttackManager : MonoBehaviour
                         else
                             damage = rollResult + attacker.GetComponent<Stats>().Weapon_S;
 
-                        Debug.Log($"{attacker.name} wyrzuci³ {rollResult} i zada³ <color=green>{damage} obra¿eñ.</color>");
+                        Debug.Log($"<color=green>{attacker.name}</color> wyrzuci³ {rollResult} i zada³ <color=green>{damage} obra¿eñ.</color>");
 
                         if (damage > (target.GetComponent<Stats>().Wt + armor))
                         {
@@ -189,10 +189,10 @@ public class AttackManager : MonoBehaviour
                                 Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
                         }
                         else
-                            Debug.Log($"Atak {attacker.name} nie przebi³ siê przez pancerz.");
+                            Debug.Log($"Atak <color=red>{attacker.name}</color> nie przebi³ siê przez pancerz.");
                     }
                     else
-                        Debug.Log($"Atak {attacker.name} chybi³.");
+                        Debug.Log($"Atak <color=red>{attacker.name}</color> chybi³.");
 
                     targetDefended = false; // przestawienie boola na false, ¿eby przy kolejnym ataku znowu musia³ siê broniæ, a nie by³ obroniony na starcie
                 }
@@ -325,9 +325,9 @@ public class AttackManager : MonoBehaviour
         if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft > 0)
             Player.selectedPlayer.GetComponent<Stats>().reloadLeft--;
         if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft == 0)
-            Debug.Log("Broñ za³adowana.");
+            Debug.Log($"Broñ <color=green>{Player.selectedPlayer.name}</color> za³adowana.");
         else
-            Debug.Log($"£adowanie broni. Pozosta³a/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
+            Debug.Log($"£adowanie broni <color=green>{Player.selectedPlayer.name}</color>. Pozosta³a/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
 
     }
     public void ReloadEnemy()
@@ -335,9 +335,9 @@ public class AttackManager : MonoBehaviour
         if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft > 0)
             Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft--;
         if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft == 0)
-            Debug.Log("Broñ za³adowana.");
+            Debug.Log($"Broñ <color=red>{Enemy.selectedEnemy.name}</color> za³adowana.");
         else
-            Debug.Log($"£adowanie broni. Pozosta³a/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
+            Debug.Log($"£adowanie broni <color=red>{Enemy.selectedEnemy.name}</color>. Pozosta³a/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
     }
 
     // Wykonanie ataku okazyjnego
@@ -420,7 +420,7 @@ public class AttackManager : MonoBehaviour
 
             damage = rollResult + attacker.GetComponent<Stats>().S;
 
-            Debug.Log($"{attacker.name} wyrzuci³ {rollResult} i zada³ <color=green>{damage} obra¿eñ.</color>");
+            Debug.Log($"<color=green>{attacker.name}</color> wyrzuci³ {rollResult} i zada³ <color=green>{damage} obra¿eñ.</color>");
 
             if (damage > (target.GetComponent<Stats>().Wt + armor))
             {
@@ -434,9 +434,9 @@ public class AttackManager : MonoBehaviour
                     Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
             }
             else
-                Debug.Log($"Atak {attacker.name} nie przebi³ siê przez pancerz.");
+                Debug.Log($"Atak <color=red>{attacker.name}</color> nie przebi³ siê przez pancerz.");
         }
         else
-            Debug.Log($"Atak {attacker.name} chybi³.");
+            Debug.Log($"Atak <color=red>{attacker.name}</color> chybi³.");
     }
 }

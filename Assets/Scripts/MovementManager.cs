@@ -14,18 +14,18 @@ public class MovementManager : MonoBehaviour
 
     public void SetCharge()
     {
-        if(Charge != true)
+        if (Charge != true)
         {
             Charge = true;
             chargeButton.GetComponent<Image>().color = Color.white;
             Run = false;
             runButton.GetComponent<Image>().color = Color.gray;
-        } 
+        }
         else
         {
             Charge = false;
             chargeButton.GetComponent<Image>().color = Color.gray;
-        } 
+        }
     }
 
     public void SetRun()
@@ -53,7 +53,7 @@ public class MovementManager : MonoBehaviour
         if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
         {
             GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
-            if(Enemy.trSelect != null)
+            if (Enemy.trSelect != null)
             {
                 Enemy.trSelect = null;
                 Enemy.selectedEnemy.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -78,9 +78,9 @@ public class MovementManager : MonoBehaviour
                 Player.trSelect = null;
                 Player.selectedPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
                 Player.selectedPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
-            }  
+            }
 
-             //zmienia predkosc w zaleznosci, czy sa zaznaczone przyciski szarzy liub biegu
+            //zmienia predkosc w zaleznosci, czy sa zaznaczone przyciski szarzy liub biegu
             if (Charge)
                 Enemy.selectedEnemy.GetComponent<Stats>().tempSz = Enemy.selectedEnemy.GetComponent<Stats>().Sz * 2;
             else if (Run)
@@ -95,7 +95,7 @@ public class MovementManager : MonoBehaviour
     public void MoveSelectedCharacter(GameObject selectedTile)
     {
         //RUCH POSTACI. Na przyszlosc: rozkminic jak zrobic, zeby wyliczac zasieg ruchu uwzgledniajac inne postacie, ktore ma na linii ruchu i powinien je ominac
-        if(selectedTile.GetComponent<Tile>().isOccupied)
+        if (selectedTile.GetComponent<Tile>().isOccupied)
             Debug.Log("To pole jest zajęte.");
         else
         {
@@ -111,7 +111,7 @@ public class MovementManager : MonoBehaviour
                 //sprawdza dystans do przebycia
                 if ((Mathf.Abs(charPos.x - tilePos.x)) + (Mathf.Abs(charPos.y - tilePos.y)) <= movementRange)
                 {
-                    CheckForOpportunityAttack(Player.selectedPlayer, selectedTile);
+                    CheckForOpportunityAttack(Player.selectedPlayer, selectedTile.transform.position);
                     Player.selectedPlayer.transform.position = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
                 }
                 else
@@ -129,7 +129,7 @@ public class MovementManager : MonoBehaviour
                 //sprawdza dystans do przebycia
                 if ((Mathf.Abs(charPos.x - tilePos.x)) + (Mathf.Abs(charPos.y - tilePos.y)) <= movementRange)
                 {
-                    CheckForOpportunityAttack(Enemy.selectedEnemy, selectedTile);
+                    CheckForOpportunityAttack(Enemy.selectedEnemy, selectedTile.transform.position);
                     Enemy.selectedEnemy.transform.position = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
                 }
                 else
@@ -138,16 +138,16 @@ public class MovementManager : MonoBehaviour
 
             // resetuje podswietlenie pol siatki w zasiegu ruchu postaci
             GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
-            foreach(var tile in tiles)
+            foreach (var tile in tiles)
             {
                 tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
             }
-        }    
+        }
     }
 
 
     // Sprawdza czy ruch powoduje atak okazyjny
-    void CheckForOpportunityAttack(GameObject movingCharacter, GameObject selectedTile)
+    public void CheckForOpportunityAttack(GameObject movingCharacter, Vector3 selectedTilePosition)
     {
         if (movingCharacter == Player.selectedPlayer)
         {
@@ -160,7 +160,7 @@ public class MovementManager : MonoBehaviour
             {
                 // Sprawdzenie ilu wrogow jest w zwarciu z bohaterem gracza i czy ruch bohatera gracza powoduje oddalenie sie od nich (czyli atak okazyjny)
                 float distanceFromOpponent = Vector3.Distance(Player.selectedPlayer.transform.position, enemy.transform.position);
-                float distanceFromOpponentAfterMove = Vector3.Distance(selectedTile.transform.position, enemy.transform.position);
+                float distanceFromOpponentAfterMove = Vector3.Distance(selectedTilePosition, enemy.transform.position);
 
                 if (distanceFromOpponent <= 1.8f && distanceFromOpponentAfterMove > 1.8f)
                 {
@@ -181,7 +181,7 @@ public class MovementManager : MonoBehaviour
             {
                 // Sprawdzenie ilu bohaterow gracza jest w zwarciu z wrogiem i czy ruch wroga powoduje oddalenie sie od nich (czyli atak okazyjny)
                 float distanceFromOpponent = Vector3.Distance(Enemy.selectedEnemy.transform.position, player.transform.position);
-                float distanceFromOpponentAfterMove = Vector3.Distance(selectedTile.transform.position, player.transform.position);
+                float distanceFromOpponentAfterMove = Vector3.Distance(selectedTilePosition, player.transform.position);
 
                 if (distanceFromOpponent <= 1.8f && distanceFromOpponentAfterMove > 1.8f)
                 {
@@ -200,7 +200,7 @@ public class MovementManager : MonoBehaviour
         // Znajduje wszystkie pola na planszy
         GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
 
-        foreach(var tile in tiles)
+        foreach (var tile in tiles)
         {
             // Sprawdza czy pole jest w zasiegu ruchu postaci
             if ((Mathf.Abs(character.transform.position.x - tile.transform.position.x)) + (Mathf.Abs(character.transform.position.y - tile.transform.position.y)) <= character.GetComponent<Stats>().tempSz)
@@ -208,14 +208,10 @@ public class MovementManager : MonoBehaviour
                 // Zmienia kolor pola na highlightColor. Jesli pole juz jest podswietlone to przywraca domyslny kolor
                 if (tile.GetComponent<Tile>()._renderer.material.color != tile.GetComponent<Tile>().rangeColor)
                     tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().rangeColor;
-                else 
+                else
                     tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
             }
         }
     }
 
 }
-
-
-
-
