@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
+using System;
 
 public class MovementManager : MonoBehaviour
 {
@@ -92,8 +94,76 @@ public class MovementManager : MonoBehaviour
         }
     }
 
-    public void MoveSelectedCharacter(GameObject selectedTile)
+    public void MoveSelectedCharacter(GameObject selectedTile, GameObject character)
     {
+        // Sprawdza, czy akcja wykonywania ruchu jest aktywna
+        if(canMove)
+        {
+            // Sprawdza zasieg ruchu postaci
+            int movementRange = character.GetComponent<Stats>().tempSz;
+
+            Vector3 charPos = character.transform.position;
+            Vector3 selectedTilePos = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
+
+            float distanceFromCharacterToSelectedTile = (Mathf.Abs(charPos.x - selectedTilePos.x)) + (Mathf.Abs(charPos.y - selectedTilePos.y));
+
+            // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci
+            if (distanceFromCharacterToSelectedTile <= movementRange)
+            {
+                // wektor w prawo, lewo, góra, dół
+                Vector3[] directions = { Vector3.right, Vector3.left, Vector3.up, Vector3.down };
+
+                // lista pol przylegajacych do postaci
+                List<GameObject> adjacentTiles = new List<GameObject>();
+
+                // Wykonuje pojedynczy ruch tyle razy ile wynosi zasieg ruchu postaci
+                for (int i = 0; i < movementRange; i++)
+                {
+                    // Aktualizuje zmienne po kazdym pojedynczym ruchu
+                    charPos = character.transform.position;
+                    distanceFromCharacterToSelectedTile = (Mathf.Abs(charPos.x - selectedTilePos.x)) + (Mathf.Abs(charPos.y - selectedTilePos.y));
+
+                    // Wykonuje ponizsze akcje tylko jezeli jeszcze nie osiagnal pola docelowego
+                    if (distanceFromCharacterToSelectedTile < 1) break;
+                    adjacentTiles.Clear();
+
+                    // Szuka pol w każdym kierunku
+                    foreach (Vector3 direction in directions)
+                    {
+                        // pozycja przylegajaca do postaci
+                        Vector3 targetPos = character.transform.position + direction;
+
+                        // znajdź kolider z tagiem "Tile" przylegajacy do postaci na ktorym nie stoi inna postac (gdy stoi to collider wykryje najpierw obiekt postaci i nie wykryje 'tile')
+                        Collider2D collider = Physics2D.OverlapCircle(targetPos, 0.1f);
+                        if (collider != null && collider.gameObject.tag == "Tile")
+                            adjacentTiles.Add(collider.gameObject);
+                    }
+                    // Zamienia liste na tablice, zeby pozniej mozna bylo ja posortowac
+                    GameObject[] adjacentTilesArray = adjacentTiles.ToArray();
+
+                    // Sortuje przylegajace do postaci pola wg odleglosci od pola docelowego. Te ktore sa najblizej znajduja sie na poczatku tablicy
+                    Array.Sort(adjacentTilesArray, (x, y) => Vector3.Distance(x.transform.position, selectedTilePos).CompareTo(Vector3.Distance(y.transform.position, selectedTilePos)));
+
+                    // Ustawienie zmiennej tilePos na pozycje pierwszego elementu tablicy (czyli tego znajdujacego sie najblizej pola docelowego
+                    Vector3 tilePos = adjacentTilesArray[0].transform.position;
+
+                    // Pojedynczy ruch gracza na przylegajace do niego pole, ktore zbliza go w kierunku docelowym
+                    character.transform.position = new Vector3(tilePos.x, tilePos.y, 0);
+                }                
+            }
+            else
+                Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
+
+            // resetuje podswietlenie pol siatki w zasiegu ruchu postaci
+            GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
+            foreach (var tile in tiles)
+            {
+                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+            }
+        }
+       
+
+        /*
         //RUCH POSTACI. Na przyszlosc: rozkminic jak zrobic, zeby wyliczac zasieg ruchu uwzgledniajac inne postacie, ktore ma na linii ruchu i powinien je ominac
         if (selectedTile.GetComponent<Tile>().isOccupied)
             Debug.Log("To pole jest zajęte.");
@@ -143,6 +213,7 @@ public class MovementManager : MonoBehaviour
                 tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
             }
         }
+        */
     }
 
 

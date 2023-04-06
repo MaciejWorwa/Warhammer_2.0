@@ -60,7 +60,16 @@ public class Tile : MonoBehaviour
     {
         MovementManager movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
 
-        // wywo�uje akcje ruchu wewn�trz klasy MovementManager
-        movementManager.MoveSelectedCharacter(this.gameObject);    
+        GameObject character = null;
+
+        // Ustala jaka postac ma sie ruszyc
+        if (Player.trSelect != null && Enemy.trSelect == null)
+            character = Player.selectedPlayer;
+        else if (Enemy.trSelect != null && Player.trSelect == null)
+            character = Enemy.selectedEnemy;
+
+        // wywoluje akcje ruchu wewnatrz klasy MovementManager
+        if(character != null)
+            movementManager.MoveSelectedCharacter(this.gameObject, character);    
     }
 }
