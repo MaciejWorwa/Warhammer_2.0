@@ -100,24 +100,52 @@ public class Enemy : MonoBehaviour
     {
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
-        if (trSelect != null)
+        // Gdy otwarty jest edytor statystyk to uniemozliwia wybieranie postaci
+        if (!StatsEditor.EditorIsOpen)
         {
-            if (trSelect == transform)
+            if (trSelect != null)
             {
-                transform.localScale = new Vector3(1f, 1f, 1f);
-                trSelect = null;
-                selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+                if (trSelect == transform)
+                {
+                    transform.localScale = new Vector3(1f, 1f, 1f);
+                    trSelect = null;
+                    selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
 
-                actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
-                MovementManager.canMove = true;
+                    actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
+                    MovementManager.canMove = true;
 
-                // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-                grid.ResetTileColors();
+                    // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+                    grid.ResetTileColors();
+                }
+                else
+                {
+                    trSelect.localScale = new Vector3(1f, 1f, 1f);
+                    selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+                    trSelect = transform;
+                    transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+
+                    selectedEnemy = this.gameObject;
+
+                    Debug.Log("Wybra³eœ " + selectedEnemy.name);
+                    selectedEnemy.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
+
+                    actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
+                    actionsButtons.transform.position = selectedEnemy.transform.position;
+                    ShowOrHideMagicButtons();
+
+                    if (GameObject.Find("ActionsButtonsPlayer/Canvas") != null && Player.selectedPlayer != null)
+                        GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
+                    MovementManager.canMove = false;
+
+                    //Zresetowanie szarzy i biegu
+                    GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
+                    // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+                    grid.ResetTileColors();
+                }
             }
             else
             {
-                trSelect.localScale = new Vector3(1f, 1f, 1f);
-                selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
                 trSelect = transform;
                 transform.localScale = new Vector3(1.2f, 1.2f, 1f);
 
@@ -126,7 +154,7 @@ public class Enemy : MonoBehaviour
                 Debug.Log("Wybra³eœ " + selectedEnemy.name);
                 selectedEnemy.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
 
-                actionsButtons.transform.Find("Canvas").gameObject.SetActive(true); 
+                actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
                 actionsButtons.transform.position = selectedEnemy.transform.position;
                 ShowOrHideMagicButtons();
 
@@ -140,31 +168,7 @@ public class Enemy : MonoBehaviour
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
                 grid.ResetTileColors();
             }
-        }
-        else
-        {
-            trSelect = transform;
-            transform.localScale = new Vector3(1.2f, 1.2f, 1f);
-
-            selectedEnemy = this.gameObject;
-
-            Debug.Log("Wybra³eœ " + selectedEnemy.name);
-            selectedEnemy.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
-
-            actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
-            actionsButtons.transform.position = selectedEnemy.transform.position;
-            ShowOrHideMagicButtons();
-
-            if (GameObject.Find("ActionsButtonsPlayer/Canvas") != null && Player.selectedPlayer != null)
-                GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
-            MovementManager.canMove = false;
-
-            //Zresetowanie szarzy i biegu
-            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
-
-            // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-            grid.ResetTileColors();
-        }
+        }    
     }
 
     // Okreœla, czy s¹ widoczne przyciski splatania magii i rzucania zaklêæ
