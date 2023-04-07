@@ -51,6 +51,9 @@ public class AttackManager : MonoBehaviour
 
                             // resetuje naladowanie broni po wykonaniu strzalu
                             attacker.GetComponent<Stats>().reloadLeft = attacker.GetComponent<Stats>().reloadTime;
+                            // uwzglednia zdolnosc blyskawicznego przeladowania
+                            if (attacker.GetComponent<Stats>().instantReload == true)
+                                attacker.GetComponent<Stats>().reloadLeft--;
                         }
                         else
                         {

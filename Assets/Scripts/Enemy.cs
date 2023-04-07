@@ -98,7 +98,7 @@ public class Enemy : MonoBehaviour
 
     public void OnMouseDown()
     {
-        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
+        GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         if (trSelect != null)
         {
@@ -112,8 +112,7 @@ public class Enemy : MonoBehaviour
                 MovementManager.canMove = true;
 
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-                foreach (var tile in tiles)
-                    tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+                grid.ResetTileColors();
             }
             else
             {
@@ -135,9 +134,11 @@ public class Enemy : MonoBehaviour
                     GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
                 MovementManager.canMove = false;
 
+                //Zresetowanie szarzy i biegu
+                GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-                foreach (var tile in tiles)
-                    tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+                grid.ResetTileColors();
             }
         }
         else
@@ -158,9 +159,11 @@ public class Enemy : MonoBehaviour
                 GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
             MovementManager.canMove = false;
 
+            //Zresetowanie szarzy i biegu
+            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
             // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-            foreach (var tile in tiles)
-                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+            grid.ResetTileColors();
         }
     }
 

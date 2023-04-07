@@ -18,27 +18,6 @@ public class GridManager : MonoBehaviour
         GenerateGrid();
     }
 
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (Tile.canMove == true)
-    //    {
-    //        tilesInRange = new List<GameObject>();
-
-    //        //detect all objects inside the RangeSphere
-    //        if ((!tilesInRange.Contains(other.gameObject) && (other.tag == "Tile")))
-    //        {
-    //            //If is a Tile add it to the list
-    //            tilesInRange.Add(other.gameObject);
-    //            foreach (var x in tilesInRange)
-    //            {
-    //                Debug.Log("Zawartoœæ listy: " + x.ToString());
-    //            }
-    //        }
-
-    //    }
-
-    //}
-
     void GenerateGrid()
     {
         tiles = new Dictionary<Vector3, Tile>();
@@ -60,7 +39,12 @@ public class GridManager : MonoBehaviour
 
         //przesuwa obiekt grid, ktory jest rodzicem wszystkich tile w taka pozycje, aby siatka bitewna byla na srodku ekranu
         this.transform.position = new Vector3(-(width/2), -(height/2), 1);
-
     }
 
+    public void ResetTileColors()
+    {
+        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
+        foreach (var tile in tiles)
+            tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+    }
 }

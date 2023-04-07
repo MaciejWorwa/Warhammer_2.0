@@ -12,22 +12,43 @@ public class MovementManager : MonoBehaviour
     public static bool Run; //bieg
 
     // Lista wszystkich pol w zasiegu ruchu postaci
-    public List<GameObject> tilesInMovementRange = new List<GameObject>();
+    private List<GameObject> tilesInMovementRange = new List<GameObject>();
+
+    private GridManager grid;
 
     [SerializeField] private GameObject chargeButton;
     [SerializeField] private GameObject runButton;
 
+    void Start()
+    {
+        grid = GameObject.Find("Grid").GetComponent<GridManager>();
+    }
+
+    public void ResetChargeAndRun()
+    {
+        Charge = false;
+        Run = false;
+        chargeButton.GetComponent<Image>().color = Color.gray;
+        runButton.GetComponent<Image>().color = Color.gray;
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+        GameObject[] characters = enemies.Concat(players).ToArray();
+
+        foreach(var character in characters) character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz;
+    }
+
     public void SetCharge()
     {
+        if(Charge || Run)
+            ResetChargeAndRun();
+
         // Ustalenie ktora postac jest wybrana
-        GameObject character = null;
+        GameObject character = CharacterManager.GetSelectedCharacter();
+        if(character == null) return;
 
-        if (Player.trSelect != null && Enemy.trSelect == null)
-            character = Player.selectedPlayer;
-        else if (Enemy.trSelect != null && Player.trSelect == null)
-            character = Enemy.selectedEnemy;
-
-        if (Charge != true)
+        if (!Charge)
         {
             Charge = true;
             character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2; // zmiana aktualnej predkosci
@@ -35,17 +56,9 @@ public class MovementManager : MonoBehaviour
             Run = false;
             runButton.GetComponent<Image>().color = Color.gray;
         }
-        else
-        {
-            Charge = false;
-            character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz; // zmiana aktualnej predkosci
-            chargeButton.GetComponent<Image>().color = Color.gray;
-        }
 
         // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
-        foreach (var tile in tiles)
-            tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+        grid.ResetTileColors();
 
         // Aktualizacja podswietlonego zasiegu ruchu postaci
         HighlightTilesInMovementRange(character);
@@ -53,15 +66,14 @@ public class MovementManager : MonoBehaviour
 
     public void SetRun()
     {
+        if (Charge || Run)
+            ResetChargeAndRun();
+
         // Ustalenie ktora postac jest wybrana
-        GameObject character = null;
+        GameObject character = CharacterManager.GetSelectedCharacter();
+        if (character == null) return;
 
-        if (Player.trSelect != null && Enemy.trSelect == null)
-            character = Player.selectedPlayer;
-        else if (Enemy.trSelect != null && Player.trSelect == null)
-            character = Enemy.selectedEnemy;
-
-        if (Run != true)
+        if (!Run)
         {
             Run = true;
             character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 3; // zmiana aktualnej predkosci
@@ -69,17 +81,9 @@ public class MovementManager : MonoBehaviour
             Charge = false;
             chargeButton.GetComponent<Image>().color = Color.gray;
         }
-        else
-        {
-            Run = false;
-            character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz; // zmiana aktualnej predkosci
-            runButton.GetComponent<Image>().color = Color.gray;
-        }
 
         // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
-        foreach (var tile in tiles)
-            tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+        grid.ResetTileColors();
 
         // Aktualizacja podswietlonego zasiegu ruchu postaci
         HighlightTilesInMovementRange(character);
@@ -160,11 +164,8 @@ public class MovementManager : MonoBehaviour
                     // Szuka pol w każdym kierunku
                     foreach (Vector3 direction in directions)
                     {
-                        // pozycja przylegajaca do postaci
-                        Vector3 targetPos = character.transform.position + direction;
-
                         // znajdź kolider z tagiem "Tile" przylegajacy do postaci na ktorym nie stoi inna postac (gdy stoi to collider wykryje najpierw obiekt postaci i nie wykryje 'tile')
-                        Collider2D collider = Physics2D.OverlapCircle(targetPos, 0.1f);
+                        Collider2D collider = Physics2D.OverlapCircle(character.transform.position + direction, 0.1f);
                         if (collider != null && collider.gameObject.tag == "Tile")
                             adjacentTiles.Add(collider.gameObject);
                     }
@@ -175,11 +176,8 @@ public class MovementManager : MonoBehaviour
                     // Sortuje przylegajace do postaci pola wg odleglosci od pola docelowego. Te ktore sa najblizej znajduja sie na poczatku tablicy
                     Array.Sort(adjacentTilesArray, (x, y) => Vector3.Distance(x.transform.position, selectedTilePos).CompareTo(Vector3.Distance(y.transform.position, selectedTilePos)));
 
-                    // Ustawienie zmiennej tilePos na pozycje pierwszego elementu tablicy (czyli tego znajdujacego sie najblizej pola docelowego
-                    Vector3 tilePos = adjacentTilesArray[0].transform.position;
-
-                    // Pojedynczy ruch gracza na przylegajace do niego pole, ktore zbliza go w kierunku docelowym
-                    character.transform.position = new Vector3(tilePos.x, tilePos.y, 0);
+                    // Pojedynczy ruch gracza na przylegajace do niego pole, ktore znajduje sie najblizej pola docelego
+                    character.transform.position = new Vector3(adjacentTilesArray[0].transform.position.x, adjacentTilesArray[0].transform.position.y, 0);
                 }  
                 
                 // Jezeli postaci nie uda sie dotrzec na wybrane miejsce docelowe to jego pozycja jest resetowana do tej sprzed rozpoczenia ruchu
@@ -255,9 +253,6 @@ public class MovementManager : MonoBehaviour
         // Sprawdza zasieg ruchu postaci
         int movementRange = character.GetComponent<Stats>().tempSz;
 
-        // Pozycja postaci przed zaczeciem wykonywania ruchu
-        Vector3 startCharPos = character.transform.position;
-
         // Wrzucajac do listy postac, dodajemy punkt poczatkowy, ktory jest potrzebny do pozniejszej petli wyszukujacej dostepne pozycje
         tilesInMovementRange.Add(character);
 
@@ -275,11 +270,8 @@ public class MovementManager : MonoBehaviour
                 // Szuka pol w każdym kierunku
                 foreach (Vector3 direction in directions)
                 {
-                    // pozycja przylegajaca do postaci lub pola na ktorym postac stanie
-                    Vector3 targetPos = tile.transform.position + direction;
-
                     // znajdź kolider z tagiem "Tile" przylegajacy do postaci na ktorym nie stoi inna postac (gdy stoi to collider wykryje najpierw obiekt postaci i nie wykryje 'tile')
-                    Collider2D collider = Physics2D.OverlapCircle(targetPos, 0.1f);
+                    Collider2D collider = Physics2D.OverlapCircle(tile.transform.position + direction, 0.1f);
 
                     // Jezeli collider to 'Tile' to dodajemy go do listy
                     if (collider != null && collider.gameObject.tag == "Tile")
@@ -304,8 +296,6 @@ public class MovementManager : MonoBehaviour
             // Zmienia kolor pola na highlightColor. Jesli pole juz jest podswietlone to przywraca domyslny kolor
             if (tile.GetComponent<Tile>()._renderer.material.color != tile.GetComponent<Tile>().rangeColor)
                 tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().rangeColor;
-            //else
-               // tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
         }
 
         tilesInMovementRange.Clear();

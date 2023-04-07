@@ -73,6 +73,7 @@ public class Stats : MonoBehaviour
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
     public bool existDodge; // informacja o tym, czy postaæ posiada zdolnoœæ uniku
+    public bool instantReload; // informacja o tym, czy postaæ posiada zdolnoœæ blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac mo¿e parowaæ atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac mo¿e unikaæ ataku
     //[HideInInspector] public int actionsNumber; // TO CHCIA£BYM U¯YÆ W PRZYSZ£OŒCI, NA RAZIE JEST NIEUZYWANE
