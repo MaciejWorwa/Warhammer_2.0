@@ -98,6 +98,8 @@ public class Enemy : MonoBehaviour
 
     public void OnMouseDown()
     {
+        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
+
         if (trSelect != null)
         {
             if (trSelect == transform)
@@ -108,6 +110,10 @@ public class Enemy : MonoBehaviour
 
                 actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
                 MovementManager.canMove = true;
+
+                // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+                foreach (var tile in tiles)
+                    tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
             }
             else
             {
@@ -128,6 +134,10 @@ public class Enemy : MonoBehaviour
                 if (GameObject.Find("ActionsButtonsPlayer/Canvas") != null && Player.selectedPlayer != null)
                     GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
                 MovementManager.canMove = false;
+
+                // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+                foreach (var tile in tiles)
+                    tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
             }
         }
         else
@@ -147,6 +157,10 @@ public class Enemy : MonoBehaviour
             if (GameObject.Find("ActionsButtonsPlayer/Canvas") != null && Player.selectedPlayer != null)
                 GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
             MovementManager.canMove = false;
+
+            // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+            foreach (var tile in tiles)
+                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
         }
     }
 

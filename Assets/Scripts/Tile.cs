@@ -39,8 +39,8 @@ public class Tile : MonoBehaviour
         //podswietlenie pola
         if (MovementManager.canMove == true)
         {
-            // Jezli alpha pola jest rowne 1 (czyli nie jest to pole w zasiegu ruchu) to ustala standardowy kolor podswietlenia, w przeciwnym razie ustala rangeHighlightColor
-            if(_renderer.material.color.a == 1f)
+            // Jezeli alpha pola jest rowne 1 (czyli nie jest to pole w zasiegu ruchu) to ustala standardowy kolor podswietlenia, w przeciwnym razie ustala rangeHighlightColor
+            if (_renderer.material.color.a == 1f)
                 _renderer.material.color = highlightColor;
             else
                 _renderer.material.color = rangeHighlightColor;

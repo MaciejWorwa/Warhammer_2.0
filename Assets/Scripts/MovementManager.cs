@@ -11,14 +11,26 @@ public class MovementManager : MonoBehaviour
     public static bool Charge; // szarza
     public static bool Run; //bieg
 
+    // Lista wszystkich pol w zasiegu ruchu postaci
+    public List<GameObject> tilesInMovementRange = new List<GameObject>();
+
     [SerializeField] private GameObject chargeButton;
     [SerializeField] private GameObject runButton;
 
     public void SetCharge()
     {
+        // Ustalenie ktora postac jest wybrana
+        GameObject character = null;
+
+        if (Player.trSelect != null && Enemy.trSelect == null)
+            character = Player.selectedPlayer;
+        else if (Enemy.trSelect != null && Player.trSelect == null)
+            character = Enemy.selectedEnemy;
+
         if (Charge != true)
         {
             Charge = true;
+            character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2; // zmiana aktualnej predkosci
             chargeButton.GetComponent<Image>().color = Color.white;
             Run = false;
             runButton.GetComponent<Image>().color = Color.gray;
@@ -26,15 +38,33 @@ public class MovementManager : MonoBehaviour
         else
         {
             Charge = false;
+            character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz; // zmiana aktualnej predkosci
             chargeButton.GetComponent<Image>().color = Color.gray;
         }
+
+        // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
+        foreach (var tile in tiles)
+            tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+
+        // Aktualizacja podswietlonego zasiegu ruchu postaci
+        HighlightTilesInMovementRange(character);
     }
 
     public void SetRun()
     {
+        // Ustalenie ktora postac jest wybrana
+        GameObject character = null;
+
+        if (Player.trSelect != null && Enemy.trSelect == null)
+            character = Player.selectedPlayer;
+        else if (Enemy.trSelect != null && Player.trSelect == null)
+            character = Enemy.selectedEnemy;
+
         if (Run != true)
         {
             Run = true;
+            character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 3; // zmiana aktualnej predkosci
             runButton.GetComponent<Image>().color = Color.white;
             Charge = false;
             chargeButton.GetComponent<Image>().color = Color.gray;
@@ -42,8 +72,17 @@ public class MovementManager : MonoBehaviour
         else
         {
             Run = false;
+            character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz; // zmiana aktualnej predkosci
             runButton.GetComponent<Image>().color = Color.gray;
         }
+
+        // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
+        foreach (var tile in tiles)
+            tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+
+        // Aktualizacja podswietlonego zasiegu ruchu postaci
+        HighlightTilesInMovementRange(character);
     }
 
     //aktywuje mozliwosc ruchu
@@ -62,14 +101,6 @@ public class MovementManager : MonoBehaviour
                 Enemy.selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
             }
 
-            //zmienia predkosc w zaleznosci, czy sa zaznaczone przyciski szarzy lub biegu
-            if (Charge)
-                Player.selectedPlayer.GetComponent<Stats>().tempSz = Player.selectedPlayer.GetComponent<Stats>().Sz * 2;
-            else if (Run)
-                Player.selectedPlayer.GetComponent<Stats>().tempSz = Player.selectedPlayer.GetComponent<Stats>().Sz * 3;
-            else
-                Player.selectedPlayer.GetComponent<Stats>().tempSz = Player.selectedPlayer.GetComponent<Stats>().Sz;
-
             HighlightTilesInMovementRange(Player.selectedPlayer);
         }
         if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
@@ -81,14 +112,6 @@ public class MovementManager : MonoBehaviour
                 Player.selectedPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
                 Player.selectedPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
             }
-
-            //zmienia predkosc w zaleznosci, czy sa zaznaczone przyciski szarzy liub biegu
-            if (Charge)
-                Enemy.selectedEnemy.GetComponent<Stats>().tempSz = Enemy.selectedEnemy.GetComponent<Stats>().Sz * 2;
-            else if (Run)
-                Enemy.selectedEnemy.GetComponent<Stats>().tempSz = Enemy.selectedEnemy.GetComponent<Stats>().Sz * 3;
-            else
-                Enemy.selectedEnemy.GetComponent<Stats>().tempSz = Enemy.selectedEnemy.GetComponent<Stats>().Sz;
 
             HighlightTilesInMovementRange(Enemy.selectedEnemy);
         }
@@ -102,14 +125,21 @@ public class MovementManager : MonoBehaviour
             // Sprawdza zasieg ruchu postaci
             int movementRange = character.GetComponent<Stats>().tempSz;
 
-            Vector3 charPos = character.transform.position;
+            // Pozycja postaci przed zaczeciem wykonywania ruchu
+            Vector3 startCharPos = character.transform.position;
+
+            // Pozycja pola wybranego jako cel ruchu
             Vector3 selectedTilePos = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
 
-            float distanceFromCharacterToSelectedTile = (Mathf.Abs(charPos.x - selectedTilePos.x)) + (Mathf.Abs(charPos.y - selectedTilePos.y));
+            // Odleglosc od postaci do wybranego pola
+            float distanceFromCharacterToSelectedTile = (Mathf.Abs(startCharPos.x - selectedTilePos.x)) + (Mathf.Abs(startCharPos.y - selectedTilePos.y));
 
             // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci
             if (distanceFromCharacterToSelectedTile <= movementRange)
             {
+                // Obecna pozycja postaci, aktualizowana po przejsciu kazdego pola. Poczatkowo przyjmuje wartosc pozycji startowej.
+                Vector3 tempCharPos = startCharPos;
+
                 // wektor w prawo, lewo, góra, dół
                 Vector3[] directions = { Vector3.right, Vector3.left, Vector3.up, Vector3.down };
 
@@ -120,8 +150,8 @@ public class MovementManager : MonoBehaviour
                 for (int i = 0; i < movementRange; i++)
                 {
                     // Aktualizuje zmienne po kazdym pojedynczym ruchu
-                    charPos = character.transform.position;
-                    distanceFromCharacterToSelectedTile = (Mathf.Abs(charPos.x - selectedTilePos.x)) + (Mathf.Abs(charPos.y - selectedTilePos.y));
+                    tempCharPos = character.transform.position;
+                    distanceFromCharacterToSelectedTile = (Mathf.Abs(tempCharPos.x - selectedTilePos.x)) + (Mathf.Abs(tempCharPos.y - selectedTilePos.y));
 
                     // Wykonuje ponizsze akcje tylko jezeli jeszcze nie osiagnal pola docelowego
                     if (distanceFromCharacterToSelectedTile < 1) break;
@@ -138,6 +168,7 @@ public class MovementManager : MonoBehaviour
                         if (collider != null && collider.gameObject.tag == "Tile")
                             adjacentTiles.Add(collider.gameObject);
                     }
+
                     // Zamienia liste na tablice, zeby pozniej mozna bylo ja posortowac
                     GameObject[] adjacentTilesArray = adjacentTiles.ToArray();
 
@@ -149,7 +180,14 @@ public class MovementManager : MonoBehaviour
 
                     // Pojedynczy ruch gracza na przylegajace do niego pole, ktore zbliza go w kierunku docelowym
                     character.transform.position = new Vector3(tilePos.x, tilePos.y, 0);
-                }                
+                }  
+                
+                // Jezeli postaci nie uda sie dotrzec na wybrane miejsce docelowe to jego pozycja jest resetowana do tej sprzed rozpoczenia ruchu
+                if(character.transform.position != selectedTilePos)
+                {
+                    character.transform.position = startCharPos;
+                    Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
+                }
             }
             else
                 Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
@@ -161,59 +199,6 @@ public class MovementManager : MonoBehaviour
                 tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
             }
         }
-       
-
-        /*
-        //RUCH POSTACI. Na przyszlosc: rozkminic jak zrobic, zeby wyliczac zasieg ruchu uwzgledniajac inne postacie, ktore ma na linii ruchu i powinien je ominac
-        if (selectedTile.GetComponent<Tile>().isOccupied)
-            Debug.Log("To pole jest zajęte.");
-        else
-        {
-            if (Player.trSelect != null && Enemy.trSelect == null && canMove)
-            {
-                //ustala aktualna szybkosc
-                int movementRange = Player.selectedPlayer.GetComponent<Stats>().tempSz;
-
-                //zbiera informacje o pozycji wybranej postaci oraz kliknietego pola (tile)
-                Vector3 charPos = Player.selectedPlayer.transform.position;
-                Vector3 tilePos = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
-
-                //sprawdza dystans do przebycia
-                if ((Mathf.Abs(charPos.x - tilePos.x)) + (Mathf.Abs(charPos.y - tilePos.y)) <= movementRange)
-                {
-                    CheckForOpportunityAttack(Player.selectedPlayer, selectedTile.transform.position);
-                    Player.selectedPlayer.transform.position = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
-                }
-                else
-                    Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
-            }
-            else if (Enemy.trSelect != null && Player.trSelect == null && canMove)
-            {
-                //ustala aktualna szybkosc
-                int movementRange = Enemy.selectedEnemy.GetComponent<Stats>().tempSz;
-
-                //zbiera informacje o pozycji wybranej postaci oraz kliknietego pola (tile)
-                Vector3 charPos = Enemy.selectedEnemy.transform.position;
-                Vector3 tilePos = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
-
-                //sprawdza dystans do przebycia
-                if ((Mathf.Abs(charPos.x - tilePos.x)) + (Mathf.Abs(charPos.y - tilePos.y)) <= movementRange)
-                {
-                    CheckForOpportunityAttack(Enemy.selectedEnemy, selectedTile.transform.position);
-                    Enemy.selectedEnemy.transform.position = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
-                }
-                else
-                    Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
-            }
-
-            // resetuje podswietlenie pol siatki w zasiegu ruchu postaci
-            GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
-            foreach (var tile in tiles)
-            {
-                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
-            }
-        }
-        */
     }
 
 
@@ -235,7 +220,7 @@ public class MovementManager : MonoBehaviour
 
                 if (distanceFromOpponent <= 1.8f && distanceFromOpponentAfterMove > 1.8f)
                 {
-                    // Wywo�anie ataku okazyjnego w klasie AttackManager
+                    // Wywolanie ataku okazyjnego w klasie AttackManager
                     AttackManager attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
                     attackManager.OpportunityAttack(enemy, Player.selectedPlayer);
                 }
@@ -256,7 +241,7 @@ public class MovementManager : MonoBehaviour
 
                 if (distanceFromOpponent <= 1.8f && distanceFromOpponentAfterMove > 1.8f)
                 {
-                    // Wywo�anie ataku okazyjnego w klasie AttackManager
+                    // Wywolanie ataku okazyjnego w klasie AttackManager
                     AttackManager attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
                     attackManager.OpportunityAttack(player, Enemy.selectedEnemy);
                 }
@@ -267,22 +252,62 @@ public class MovementManager : MonoBehaviour
     // Zmienia kolor wszystkich pol w zasiegu ruchu postaci
     public void HighlightTilesInMovementRange(GameObject character)
     {
+        // Sprawdza zasieg ruchu postaci
+        int movementRange = character.GetComponent<Stats>().tempSz;
 
-        // Znajduje wszystkie pola na planszy
-        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
+        // Pozycja postaci przed zaczeciem wykonywania ruchu
+        Vector3 startCharPos = character.transform.position;
 
-        foreach (var tile in tiles)
+        // Wrzucajac do listy postac, dodajemy punkt poczatkowy, ktory jest potrzebny do pozniejszej petli wyszukujacej dostepne pozycje
+        tilesInMovementRange.Add(character);
+
+        // wektor w prawo, lewo, góra, dół
+        Vector3[] directions = { Vector3.right, Vector3.left, Vector3.up, Vector3.down };
+
+        // Wykonuje pojedynczy ruch tyle razy ile wynosi zasieg ruchu postaci
+        for (int i = 0; i < movementRange; i++)
         {
-            // Sprawdza czy pole jest w zasiegu ruchu postaci
-            if ((Mathf.Abs(character.transform.position.x - tile.transform.position.x)) + (Mathf.Abs(character.transform.position.y - tile.transform.position.y)) <= character.GetComponent<Stats>().tempSz)
-            {
-                // Zmienia kolor pola na highlightColor. Jesli pole juz jest podswietlone to przywraca domyslny kolor
-                if (tile.GetComponent<Tile>()._renderer.material.color != tile.GetComponent<Tile>().rangeColor)
-                    tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().rangeColor;
-                else
-                    tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
-            }
-        }
-    }
+            // Lista pol, ktore bedziemy dodawac do listy wszystkich pol w zasiegu ruchu
+            List<GameObject> tilesToAdd = new List<GameObject>();
 
+            foreach (var tile in tilesInMovementRange)
+            {
+                // Szuka pol w każdym kierunku
+                foreach (Vector3 direction in directions)
+                {
+                    // pozycja przylegajaca do postaci lub pola na ktorym postac stanie
+                    Vector3 targetPos = tile.transform.position + direction;
+
+                    // znajdź kolider z tagiem "Tile" przylegajacy do postaci na ktorym nie stoi inna postac (gdy stoi to collider wykryje najpierw obiekt postaci i nie wykryje 'tile')
+                    Collider2D collider = Physics2D.OverlapCircle(targetPos, 0.1f);
+
+                    // Jezeli collider to 'Tile' to dodajemy go do listy
+                    if (collider != null && collider.gameObject.tag == "Tile")
+                    {
+                        tilesToAdd.Add(collider.gameObject);
+                    }
+                }
+            }
+            // Dodajemy do listy wszystkie pola, ktorych tam jeszcze nie ma
+            foreach (var tile in tilesToAdd)
+            {
+                if(!tilesInMovementRange.Contains(tile))
+                    tilesInMovementRange.Add(tile);
+            }
+
+            // Usuwamy postac z listy, bo nie jest ona 'Tile' :)
+            tilesInMovementRange.Remove(character);
+        }
+
+        foreach (var tile in tilesInMovementRange)
+        {
+            // Zmienia kolor pola na highlightColor. Jesli pole juz jest podswietlone to przywraca domyslny kolor
+            if (tile.GetComponent<Tile>()._renderer.material.color != tile.GetComponent<Tile>().rangeColor)
+                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().rangeColor;
+            //else
+               // tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+        }
+
+        tilesInMovementRange.Clear();
+    }
 }
