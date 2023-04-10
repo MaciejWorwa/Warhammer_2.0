@@ -7,6 +7,8 @@ TagManager:
   - Enemy
   - Tile
   - AimButton
+  - StatsButton
+  - Panel
   layers:
   - Default
   - TransparentFX

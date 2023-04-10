@@ -6,30 +6,79 @@ using System.Reflection;
 
 public class StatsEditor : MonoBehaviour
 {
-    [SerializeField] private GameObject statsPanel;
+    [SerializeField] GameObject generalPanel; // Panel w ktorym wybieramy, jaki typ cech bedziemy chcieli zmieniac
 
     public static bool EditorIsOpen = false;
 
-    public void PanelVisibility()
+    public void PanelVisibility(GameObject panel)
     {
-        if (statsPanel.activeSelf)
+        panel.SetActive(true);
+        generalPanel.SetActive(false);
+    }
+
+    public void ShowGeneralPanel()
+    {
+        // Znajduje wszystkie panele poza g³ownym
+        GameObject[] otherPanels = GameObject.FindGameObjectsWithTag("Panel");
+
+        // Zamyka wszystkie inne panele poza glownym
+        foreach (var otherPanel in otherPanels)
         {
-            statsPanel.SetActive(false);
-            EditorIsOpen = false;
+            otherPanel.SetActive(false);
+        }
+
+        // Otwiera lub zamyka glowny panel
+        if(!generalPanel.activeSelf)
+        {
+            EditorIsOpen = true;
+            generalPanel.SetActive(true);
         }
         else
         {
-            statsPanel.SetActive(true);
-            EditorIsOpen = true;
+            generalPanel.SetActive(false);
+            EditorIsOpen= false;
         }
+    }
+
+    public void LoadAttributes()
+    {
+
+        GameObject character = CharacterManager.GetSelectedCharacter();
+
+        // Wyszukuje wszystkie pola tekstowe i przyciski do ustalania statystyk postaci wewnatrz gry
+        GameObject[] inputFields = GameObject.FindGameObjectsWithTag("StatsButton");
+
+        foreach (var inputField in inputFields)
+        {
+            // Pobiera pole ze statystyk postaci o nazwie takiej jak nazwa textInputa
+            FieldInfo field = character.GetComponent<Stats>().GetType().GetField(inputField.name);
+
+            // Jeœli znajdzie takie pole w to zmienia wartoœæ wyswietlanego tekstu na wartosc cechy
+            if (field != null && field.FieldType == typeof(int)) // to dziala dla cech opisywanych wartosciami int
+            {
+                int value = (int)field.GetValue(character.GetComponent<Stats>());
+                inputField.GetComponent<TMPro.TMP_InputField>().text = value.ToString();
+            }
+            else if (field != null && field.FieldType == typeof(bool)) // to dziala dla cech opisywanych wartosciami bool
+            {
+                bool value = (bool)field.GetValue(character.GetComponent<Stats>());
+                inputField.GetComponent<Toggle>().isOn = value;
+            }
+            else if (field != null && field.FieldType == typeof(double)) // to dziala dla cech opisywanych wartosciami float
+            {
+                double value = (double)field.GetValue(character.GetComponent<Stats>());
+                if(value > 1.5f)
+                    inputField.GetComponent<TMPro.TMP_InputField>().text = (value*2).ToString(); // przemnaza x2 zeby podac zasieg w metrach a nie polach
+                else
+                    inputField.GetComponent<TMPro.TMP_InputField>().text = "1"; // gdy jest to bron do walki w zwarciu to wyswietla zasieg rowny 1
+            }
+        }
+ 
     }
 
     public void EditAttribute(GameObject textInput)
     {
         GameObject character = CharacterManager.GetSelectedCharacter();
-
-        // Zamienia wprowadzony text na wartoœæ int
-        int.TryParse(textInput.GetComponent<TMPro.TMP_InputField>().text, out int value);
 
         // Pobiera pole o nazwie takiej jak nazwa textInputa
         FieldInfo field = character.GetComponent<Stats>().GetType().GetField(textInput.name);
@@ -37,13 +86,27 @@ public class StatsEditor : MonoBehaviour
         // Jezeli znajdzie to zmienia wartosc cechy
         if (field != null && field.FieldType == typeof(int))
         {
+            int.TryParse(textInput.GetComponent<TMPro.TMP_InputField>().text, out int value); // Zamienia wprowadzony text na wartoœæ int
             field.SetValue(character.GetComponent<Stats>(), value);
             Debug.Log($"Atrybut {field.Name} zmieniony na {value}");
         }
+        else if (field != null && field.FieldType == typeof(bool)) 
+        {
+            bool boolValue = textInput.GetComponent<Toggle>().isOn; // Jezeli znajdzie to zmienia wartosc cechy na true lub false w zale¿noœci od wartoœci Toggle
+            field.SetValue(character.GetComponent<Stats>(), boolValue);
+            Debug.Log($"Atrybut {field.Name} zmieniony na {boolValue}");
+        }
+        else if (field != null && field.FieldType == typeof(double)) // to dziala dla cech opisywanych wartosciami float
+        {
+            double.TryParse(textInput.GetComponent<TMPro.TMP_InputField>().text, out double value); // Zamienia wprowadzony text na wartoœæ float
+            if(value > 3)
+                field.SetValue(character.GetComponent<Stats>(), value/2); // dzieli wartosc na 2, zeby ustawic zasieg w polach a nie metrach
+            else
+                field.SetValue(character.GetComponent<Stats>(), 1.5f); // gdy ktos poda zasieg mniejszy niz 3 metry to ustawia domyslna wartosc zasiegu do walki wrecz
+
+            Debug.Log($"Atrybut {field.Name} zmieniony na {value}");
+        }
         else
-            Debug.Log($"{field.Name} {value}");
-
-
-        //To powyzej dziala tylko dla Int. Pomyslec jak dorobic jeszcze zeby przyjmowalo bool albo string, nie powinno to byc trudne
+            Debug.Log($"Nie uda³o siê zmieniæ wartoœci cechy.");
     }
 }

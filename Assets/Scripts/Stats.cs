@@ -68,7 +68,7 @@ public class Stats : MonoBehaviour
     public int Mag;
     public int maxHealth;
     public int tempHealth;
-    public int PS;
+    public int PP;
 
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
