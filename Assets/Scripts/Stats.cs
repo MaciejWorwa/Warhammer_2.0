@@ -31,6 +31,9 @@ public class StatsEditor : Editor
 
 public class Stats : MonoBehaviour
 {
+    [Header("Imiê")]
+    public string Name;
+
     [Header("Rasa")]
     public string Rasa;
 

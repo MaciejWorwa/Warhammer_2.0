@@ -9,6 +9,7 @@ public class Enemy : MonoBehaviour
     private enum Rasa { Ork, Goblin, Troll, Wilk } // rozkminiæ gdzie przechowywaæ informacje o statystykach poczatkowych danej rasy, zeby nie bylo miliona linii kodu w Enemy
     [SerializeField] private Rasa rasa;
 
+    private TMP_Text nameDisplay;
     private TMP_Text healthDisplay;
     private TMP_Text initiativeDisplay;
 
@@ -29,6 +30,9 @@ public class Enemy : MonoBehaviour
         // nadanie temu obiektowi klasy Stats
         enemyStats = this.gameObject.AddComponent<Stats>();
         this.gameObject.GetComponent<MovementManager>();
+
+        // nadanie poczatkowego imienia takiego jak nazwa obiektu gry, np. Enemy 1
+        enemyStats.Name = this.gameObject.name;
 
         // nadanie wartosci cech pierwszorzedowych (docelowo to bedzie robione rowniez w klasie Stats, tylko chce najpierw ogarnac import Jsona ze statami roznych wrogow)
         enemyStats.WW = 20 + Random.Range(2, 21);
@@ -71,18 +75,22 @@ public class Enemy : MonoBehaviour
         initiativeDisplay = this.transform.Find("initiativeEnemy").gameObject.GetComponent<TMP_Text>();
         initiativeDisplay.transform.position = new Vector3(this.gameObject.transform.position.x + 0.5f, this.gameObject.transform.position.y + 0.5f, this.gameObject.transform.position.z);
 
+        nameDisplay = this.transform.Find("nameEnemy").gameObject.GetComponent<TMP_Text>();
+        nameDisplay.transform.position = new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y - 0.6f, this.gameObject.transform.position.z);
+
     }
 
     void Update()
     {
-        // wyswietlanie na biezaco aktualnych punktow zycia oraz inicjatywy
+        // wyswietlanie na biezaco aktualnych punktow zycia, imienia oraz inicjatywy
         healthDisplay.text = this.gameObject.GetComponent<Stats>().tempHealth + "/" + this.gameObject.GetComponent<Stats>().maxHealth;
         initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
+        nameDisplay.text = this.gameObject.GetComponent<Stats>().Name.ToString();
 
-        if (Input.GetKeyDown(KeyCode.E) && selectedEnemy.name == this.gameObject.name)
+        if (Input.GetKeyDown(KeyCode.E) && selectedEnemy.name == this.gameObject.name && StatsEditor.EditorIsOpen == false)
         {
             attackManager.Attack(selectedEnemy, Player.selectedPlayer);
-            actionsButtons.SetActive(false);
+            actionsButtons.transform.Find("Canvas").gameObject.SetActive(false);
         }
 
         if (enemyStats.tempHealth < 0 && enemyStats.criticalCondition == false)

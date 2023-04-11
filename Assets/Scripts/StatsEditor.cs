@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Reflection;
+using TMPro;
 
 public class StatsEditor : MonoBehaviour
 {
     [SerializeField] GameObject generalPanel; // Panel w ktorym wybieramy, jaki typ cech bedziemy chcieli zmieniac
+
+    [SerializeField] TMP_InputField charNameText; // Napis przedstawiajacy na panelu imie postaci
 
     public static bool EditorIsOpen = false;
 
@@ -20,6 +23,10 @@ public class StatsEditor : MonoBehaviour
     {
         // Znajduje wszystkie panele poza g³ownym
         GameObject[] otherPanels = GameObject.FindGameObjectsWithTag("Panel");
+
+        // Zmiana wysietlanego w panelu imienia na imie wybranej postaci
+        GameObject character = CharacterManager.GetSelectedCharacter();
+        charNameText.text = character.GetComponent<Stats>().Name;
 
         // Zamyka wszystkie inne panele poza glownym
         foreach (var otherPanel in otherPanels)
@@ -105,6 +112,12 @@ public class StatsEditor : MonoBehaviour
                 field.SetValue(character.GetComponent<Stats>(), 1.5f); // gdy ktos poda zasieg mniejszy niz 3 metry to ustawia domyslna wartosc zasiegu do walki wrecz
 
             Debug.Log($"Atrybut {field.Name} zmieniony na {value}");
+        }
+        else if (field != null && field.FieldType == typeof(string)) // to dziala dla cech opisywanych wartosciami string
+        {
+            string stringValue = textInput.GetComponent<TMPro.TMP_InputField>().text;
+            field.SetValue(character.GetComponent<Stats>(), stringValue);
+            Debug.Log($"Atrybut {field.Name} zmieniony na {stringValue}");
         }
         else
             Debug.Log($"Nie uda³o siê zmieniæ wartoœci cechy.");

@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     public enum Rasa { Czlowiek, Elf, Krasnolud, Niziolek }
     [SerializeField] private Rasa rasa;
 
+    private TMP_Text nameDisplay;
     private TMP_Text healthDisplay;
     private TMP_Text initiativeDisplay;
 
@@ -32,6 +33,9 @@ public class Player : MonoBehaviour
         this.gameObject.GetComponent<MovementManager>();
         playerStats.Rasa = rasa.ToString();
 
+        // nadanie poczatkowego imienia takiego jak nazwa obiektu gry, np. Player 1
+        playerStats.Name = this.gameObject.name;
+
         //wygenerowanie poczatkowych statystyk w zaleznosci od rasy. Metoda ta jest zawarta w klasie Stats
         playerStats.SetBaseStatsByRace(rasa);
 
@@ -52,18 +56,22 @@ public class Player : MonoBehaviour
 
         initiativeDisplay = this.transform.Find("initiativePlayer").gameObject.GetComponent<TMP_Text>();
         initiativeDisplay.transform.position = new Vector3(this.gameObject.transform.position.x + 0.5f, this.gameObject.transform.position.y + 0.5f, this.gameObject.transform.position.z);
+
+        nameDisplay = this.transform.Find("namePlayer").gameObject.GetComponent<TMP_Text>();
+        nameDisplay.transform.position = new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y - 0.6f, this.gameObject.transform.position.z);
     }
 
     void Update()
     {
-        // wyswietlanie na biezaco aktualnych punktow zycia oraz inicjatywy
+        // wyswietlanie na biezaco aktualnych punktow zycia, imienia oraz inicjatywy
         healthDisplay.text = this.gameObject.GetComponent<Stats>().tempHealth + "/" + this.gameObject.GetComponent<Stats>().maxHealth;
         initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
+        nameDisplay.text = this.gameObject.GetComponent<Stats>().Name.ToString();
 
-        if (Input.GetKeyDown(KeyCode.P) && selectedPlayer.name == this.gameObject.name)
+        if (Input.GetKeyDown(KeyCode.P) && selectedPlayer.name == this.gameObject.name && StatsEditor.EditorIsOpen == false)
         {
             attackManager.Attack(selectedPlayer, Enemy.selectedEnemy);
-            actionsButtons.SetActive(false);
+            actionsButtons.transform.Find("Canvas").gameObject.SetActive(false);
         }
  
         if (playerStats.tempHealth < 0 && playerStats.criticalCondition == false)

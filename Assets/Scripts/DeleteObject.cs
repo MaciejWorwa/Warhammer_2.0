@@ -6,23 +6,25 @@ public class DeleteObject : MonoBehaviour
 {
     public void DestroySelectedObjects()
     {
-        if (Player.trSelect != null)
+        if (Player.trSelect != null && Enemy.trSelect == null)
         {
             Destroy(Player.selectedPlayer);
-            //actionsButtons = GameObject.Find("ActionsButtonsPlayer");
 
-            //// Wylacza przyciski akcji usuwanej postaci, jesli sa wlaczone
-            //if (actionsButtons.activeSelf && actionsButtons != null)
-            //    actionsButtons.SetActive(false);
+            // Wylacza przyciski akcji usuwanej postaci, jesli sa wlaczone
+            if (GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
+                GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
         }
-        if (Enemy.trSelect != null)
+        else if (Enemy.trSelect != null && Player.trSelect == null)
         {
             Destroy(Enemy.selectedEnemy);
-            //actionsButtons = GameObject.Find("ActionsButtonsEnemy");
 
-            //// Wylacza przyciski akcji usuwanej postaci, jesli sa wlaczone
-            //if (actionsButtons.activeSelf && actionsButtons != null)
-            //    actionsButtons.SetActive(false);
+            // Wylacza przyciski akcji usuwanej postaci, jesli sa wlaczone
+            if (GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
+                GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
         }
+        else if (Enemy.trSelect != null && Player.trSelect != null)
+            Debug.Log("Nie mo¿esz usun¹æ dwóch postaci jednoczeœnie. Zaznacz jedn¹ postaæ.");
+        else
+            Debug.Log("Musisz zaznaczyæ postaæ, któr¹ chcesz usun¹æ");
     }
 }
