@@ -302,3 +302,4 @@ public class MovementManager : MonoBehaviour
         tilesInMovementRange.Clear();
     }
 }
+
