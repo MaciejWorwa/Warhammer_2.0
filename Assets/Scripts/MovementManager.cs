@@ -159,6 +159,7 @@ public class MovementManager : MonoBehaviour
 
                     // Wykonuje ponizsze akcje tylko jezeli jeszcze nie osiagnal pola docelowego
                     if (distanceFromCharacterToSelectedTile < 1) break;
+
                     adjacentTiles.Clear();
 
                     // Szuka pol w każdym kierunku

@@ -32,7 +32,7 @@ public class RoundManager : MonoBehaviour
         foreach (Stats obj in allObjectsWithStats)
         {
             obj.GetComponent<Stats>().ResetParryAndDodge();
-            //obj.GetComponent<Stats>().ResetActionsNumber();
+            obj.GetComponent<Stats>().ResetActionsNumber();
         }
 
     }

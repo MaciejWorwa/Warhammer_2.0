@@ -19,6 +19,38 @@ public class AttackManager : MonoBehaviour
         aimButtons = GameObject.FindGameObjectsWithTag("AimButton");
     }
 
+    // Zaatakowanie bohatera gracza
+    public void AttackPlayer()
+    {
+        Attack(Enemy.selectedEnemy, Player.selectedPlayer);
+    }
+    // Zaatakowanie wroga
+    public void AttackEnemy()
+    {
+        Attack(Player.selectedPlayer, Enemy.selectedEnemy);
+    }
+
+    public void ReloadPlayer()
+    {
+        if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft > 0)
+            Player.selectedPlayer.GetComponent<Stats>().reloadLeft--;
+        if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft == 0)
+            Debug.Log($"Broñ <color=green>{Player.selectedPlayer.name}</color> za³adowana.");
+        else
+            Debug.Log($"£adowanie broni <color=green>{Player.selectedPlayer.name}</color>. Pozosta³a/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
+
+    }
+    public void ReloadEnemy()
+    {
+        if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft > 0)
+            Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft--;
+        if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft == 0)
+            Debug.Log($"Broñ <color=red>{Enemy.selectedEnemy.name}</color> za³adowana.");
+        else
+            Debug.Log($"£adowanie broni <color=red>{Enemy.selectedEnemy.name}</color>. Pozosta³a/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
+    }
+
+    #region Attack function
     public void Attack(GameObject attacker, GameObject target)
     {
         do
@@ -207,7 +239,9 @@ public class AttackManager : MonoBehaviour
         }
         while (false);
     }
+    #endregion
 
+    #region Check for attack localization function
     int CheckAttackLocalization(GameObject target)
     {
         int attackLocalization = Random.Range(1, 101);
@@ -242,7 +276,9 @@ public class AttackManager : MonoBehaviour
         }
         return armor;
     }
+    #endregion
 
+    #region Parry and dodge
     private void ParryAttack(GameObject attacker, GameObject target)
     {
         // sprawdza, czy atakowany ma jakieœ bonusy do parowania
@@ -282,9 +318,9 @@ public class AttackManager : MonoBehaviour
         else
             targetDefended = false;
     }
+    #endregion
 
-    //TO PONI¯EJ DZIA£A DOBRZE, ALE KA¯DE PRZYCELOWANIE WROGA DODAJE ROWNIEZ BONUS GRACZOWI I ODWROTNIE.TRZEBA WTEDY WYKONYWAC ATAKI W ODPOWIEDNIEJ KOLEJNOSCI
-    //przycelowanie
+    #region Take aim
     public void TakeAim()
     {
         if (aimingBonus == 0)
@@ -311,38 +347,9 @@ public class AttackManager : MonoBehaviour
 
         attackBonus = chargeBonus + aimingBonus;
     }
+    #endregion
 
-    // Zaatakowanie bohatera gracza
-    public void AttackPlayer()
-    {
-        Attack(Enemy.selectedEnemy, Player.selectedPlayer);
-    }
-    // Zaatakowanie wroga
-    public void AttackEnemy()
-    {
-        Attack(Player.selectedPlayer, Enemy.selectedEnemy);
-    }
-
-    public void ReloadPlayer()
-    {
-        if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft > 0)
-            Player.selectedPlayer.GetComponent<Stats>().reloadLeft--;
-        if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft == 0)
-            Debug.Log($"Broñ <color=green>{Player.selectedPlayer.name}</color> za³adowana.");
-        else
-            Debug.Log($"£adowanie broni <color=green>{Player.selectedPlayer.name}</color>. Pozosta³a/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
-
-    }
-    public void ReloadEnemy()
-    {
-        if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft > 0)
-            Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft--;
-        if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft == 0)
-            Debug.Log($"Broñ <color=red>{Enemy.selectedEnemy.name}</color> za³adowana.");
-        else
-            Debug.Log($"£adowanie broni <color=red>{Enemy.selectedEnemy.name}</color>. Pozosta³a/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzeliæ.");
-    }
-
+    #region Opportunity attack function
     // Wykonanie ataku okazyjnego
     public void OpportunityAttack(GameObject attacker, GameObject target)
     {
@@ -442,4 +449,5 @@ public class AttackManager : MonoBehaviour
         else
             Debug.Log($"Atak <color=red>{attacker.name}</color> chybi³.");
     }
+    #endregion
 }

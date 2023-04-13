@@ -79,7 +79,7 @@ public class Stats : MonoBehaviour
     public bool instantReload; // informacja o tym, czy postaæ posiada zdolnoœæ blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac mo¿e parowaæ atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac mo¿e unikaæ ataku
-    //[HideInInspector] public int actionsNumber; // TO CHCIA£BYM U¯YÆ W PRZYSZ£OŒCI, NA RAZIE JEST NIEUZYWANE
+    [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy ¿ycie postaci jest poni¿ej 0
     [HideInInspector] public int parryBonus; // sumaryczna premia do WW przy parowaniu
 
@@ -124,7 +124,7 @@ public class Stats : MonoBehaviour
     }
     */
 
-
+    #region Set base stats for players by race function
     public void SetBaseStatsByRace(Player.Rasa rasa)
     {
         WW = 20 + Random.Range(2, 21);
@@ -180,37 +180,44 @@ public class Stats : MonoBehaviour
         S = Mathf.RoundToInt(K / 10);
         Wt = Mathf.RoundToInt(Odp / 10);
     }
+    #endregion
 
+    #region Reset parry and dodge function
     public void ResetParryAndDodge()
     {
         canParry = true;
         if (existDodge) //sprawdzenie czy postac posiada zdolnosc Unik
             canDodge = true;
     }
+    #endregion
 
+    #region Get critical hit function
     public void GetCriticalHit()
     {
         int criticalValue = Random.Range(1, 101);
         Debug.Log("¯ywotnoœæ spad³a poni¿ej 0. Wynik rzutu na obra¿enia krytyczne: " + criticalValue);
         criticalCondition = true;
     }
+    #endregion
 
-    /* TO NA PRZYSZ£OŒÆ MO¯E SIÊ PRZYDAÆ, NA RAZIE SPOKO DZIA£A NAWET BEZ TEGO
+    #region Zarzadzanie akcjami postaci
     public void ResetActionsNumber()
     {
-        actionsNumber = 0;
+        actionsLeft = 2;
+        //Debug.Log($"Nowa runda. {this.gameObject.name} pozosta³y {actionsLeft} akcje.");
     }
-
 
     public void TakeAction() // wykonanie akcji
     {
-        actionsNumber++;
+        actionsLeft--;
+        Debug.Log($"{this.gameObject.name} wykona³ akcjê pojedyncz¹. Pozosta³a {actionsLeft} akcja w tej rundzie.");
     }
 
     public void TakeDoubleAction() // wykonanie akcji podwójnej
     {
-        actionsNumber += 2;
+        actionsLeft -= 2;
+        Debug.Log($"{this.gameObject.name} wykona³ akcjê podwójn¹. Pozosta³o {actionsLeft} akcji w tej rundzie.");
     }
-    */
+    #endregion
 }
 

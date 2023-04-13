@@ -85,6 +85,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    #region Select or deselect player method
     public void OnMouseDown()
     {
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
@@ -160,7 +161,9 @@ public class Player : MonoBehaviour
             }
         }
     }
+    #endregion
 
+    #region Show or hide magic-related buttons function
     // Okreœla, czy s¹ widoczne przyciski splatania magii i rzucania zaklêæ
     public void ShowOrHideMagicButtons()
     {
@@ -175,9 +178,10 @@ public class Player : MonoBehaviour
             GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton").SetActive(false);
         }
     }
+    #endregion
 }
 
 
 
-    
+
 

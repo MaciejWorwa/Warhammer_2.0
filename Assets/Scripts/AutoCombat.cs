@@ -67,66 +67,133 @@ public class AutoCombat : MonoBehaviour
             // Jeœli rywal jest w zasiegu ataku to wykonuje atak
             if (character.GetComponent<Stats>().AttackRange >= distance)
             {
-                if (character.tag == "Enemy")
-                {
-                    // Wykonuje tyle ataków ile wynosi cecha Ataki postaci
-                    for (int i = 0; i < character.GetComponent<Stats>().A; i++)
-                    {
-                        // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
-                        if (character.GetComponent<Stats>().reloadLeft == 0)
-                            character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
-                        else
-                            character.GetComponent<Enemy>().attackManager.ReloadEnemy();
-                    }
-
-                }
-                else
-                {
-                    // Wykonuje tyle ataków ile wynosi cecha Ataki postaci
-                    for (int i = 0; i < character.GetComponent<Stats>().A; i++)
-                    {
-                        // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
-                        if (character.GetComponent<Stats>().reloadLeft == 0)
-                            character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
-                        else
-                            character.GetComponent<Player>().attackManager.ReloadPlayer();
-                    }
-                }
-
+                // Przekazuje informacje o atakujacym i ilosci atakow, ktore moze wykonac w jednej rundzie
+                AutomaticAttack(character, closestOpponent, character.GetComponent<Stats>().A);
             }
             else
             {
-                // Postac wykonuje ruch w kierunku najblizszego rywala tyle razy ile wynosi jej aktualna szybkosc
-                for (int i = 0; i < character.GetComponent<Stats>().tempSz; i++)
-                {
-                    int XorY = UnityEngine.Random.Range(0, 2);
+                // wektor we wszystkie osiem kierunkow dookola pola z postacia bedaca celem ataku
+                Vector3[] directions = { Vector3.right, Vector3.left, Vector3.up, Vector3.down, new Vector3(1,1,0), new Vector3(-1,-1,0), new Vector3(-1, 1, 0), new Vector3(1, -1, 0) };
 
-                    // Ustala losowa kolejnosc sprawdzania roznicy dystansu (raz najpierw sprawdza w osi x, raz w osi y).
-                    // Zapobiega to blokowaniu sie postaci w jednej osi, gdy pomiedzy atakujacym a celem stoi sojusznik atakujacego
-                    if(XorY == 0 || closestOpponent.transform.position.y == character.transform.position.y)
+                // lista pol przylegajacych do postaci
+                List<GameObject> adjacentTiles = new List<GameObject>();
+
+                // Szuka pol w ka¿dym kierunku
+                foreach (Vector3 direction in directions)
+                {
+                    // znajdŸ kolider z tagiem "Tile" przylegajacy do postaci bedacej celem ataku, na ktorym nie stoi inna postac (gdy stoi to collider wykryje najpierw obiekt postaci i nie wykryje 'tile')
+                    Collider2D collider = Physics2D.OverlapCircle(closestOpponent.transform.position + direction, 0.1f);
+                    if (collider != null && collider.gameObject.tag == "Tile")
+                        adjacentTiles.Add(collider.gameObject);
+
+
+                    //TRZEBA ZROBIC TAK, ZEBY KOLEJNA ITERACJA TEJ PETLI WYKONYWALA SIE DOPIERO, GDY CHARACTER ZMIENI SWOJA POZYCJE (WIERSZE 105-131), BO INACZEJ POSTACIE WCHODZA NA SIEBIE NAWZAJEM
+
+                    // TU DOWOD, ZE WYKRYWA ZLE:
+                    if (collider != null)
+                        Debug.Log(collider.gameObject.name);
+                }
+
+                // Zamienia liste na tablice, zeby pozniej mozna bylo ja posortowac
+                GameObject[] adjacentTilesArray = adjacentTiles.ToArray();
+
+                // Sortuje przylegajace do postaci pola wg odleglosci od atakujacego. Te ktore sa najblizej znajduja sie na poczatku tablicy
+                Array.Sort(adjacentTilesArray, (x, y) => Vector3.Distance(x.transform.position, character.transform.position).CompareTo(Vector3.Distance(y.transform.position, character.transform.position)));
+
+                // Sprawdza dystans do pola docelowego
+                float distanceBetweenOpponents = (Mathf.Abs(character.transform.position.x - adjacentTilesArray[0].transform.position.x)) + (Mathf.Abs(character.transform.position.y - adjacentTilesArray[0].transform.position.y));
+
+                if (distanceBetweenOpponents > character.GetComponent<Stats>().tempSz * 2) // Jesli jest poza zasiegiem szarzy
+                {
+                    Debug.Log("jest za daleko.");
+                }
+                else if (distanceBetweenOpponents >= 3 && distanceBetweenOpponents <= character.GetComponent<Stats>().tempSz *2) // Jesli jest w zasiegu szarzy
+                {
+                    //Wykonanie szarzy
+                    if (adjacentTilesArray != null)
                     {
-                        // Sprawdza w ktorym kierunku powinien wykonac ruch.
-                        // Jezeli wejdzie na pole zajete przez inna postac, szuka wolnego pola tu¿ obok.
-                        if (closestOpponent.transform.position.x > character.transform.position.x)
-                            character.transform.position = ChangeCharacterPosition(character, Vector3.right);
-                        else if (closestOpponent.transform.position.x < character.transform.position.x)
-                            character.transform.position = ChangeCharacterPosition(character, Vector3.left);
-                    }
-                    else if (XorY != 0 || closestOpponent.transform.position.x == character.transform.position.x)
-                    {
-                        // Sprawdza w ktorym kierunku powinien wykonac ruch.
-                        // Jezeli wejdzie na pole zajete przez inna postac, szuka wolnego pola tu¿ obok.
-                        if (closestOpponent.transform.position.y > character.transform.position.y)
-                            character.transform.position = ChangeCharacterPosition(character, Vector3.up);
-                        else if (closestOpponent.transform.position.y < character.transform.position.y)
-                            character.transform.position = ChangeCharacterPosition(character, Vector3.down);
+                        character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2;
+                        GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
+
+                        MovementManager.Charge = true;
+                        AutomaticAttack(character, closestOpponent, 1); // Wykonywany jest jeden atak z bonusem +10, bo to szarza
+
+                        // Zresetowanie szarzy
+                        character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz;
+                        MovementManager.Charge = false;
                     }
                 }
+                else if (distanceBetweenOpponents < 3) // Jesli jest zbyt blisko na szarze
+                {
+                    if (adjacentTilesArray != null)
+                    {
+                        GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
+                        AutomaticAttack(character, closestOpponent, 1); // Wykonywany jest jeden atak, bo wczesniej zostal wykonany ruch
+                    }
+                }
+
+                Debug.Log("adjacentTilesArray[0]: " + adjacentTilesArray[0].name);
+
+
+                //// Postac wykonuje ruch w kierunku najblizszego rywala tyle razy ile wynosi jej aktualna szybkosc
+                //for (int i = 0; i < character.GetComponent<Stats>().tempSz; i++)
+                //{
+                //    int XorY = UnityEngine.Random.Range(0, 2);
+
+                //    // Ustala losowa kolejnosc sprawdzania roznicy dystansu (raz najpierw sprawdza w osi x, raz w osi y).
+                //    // Zapobiega to blokowaniu sie postaci w jednej osi, gdy pomiedzy atakujacym a celem stoi sojusznik atakujacego
+                //    if(XorY == 0 || closestOpponent.transform.position.y == character.transform.position.y)
+                //    {
+                //        // Sprawdza w ktorym kierunku powinien wykonac ruch.
+                //        // Jezeli wejdzie na pole zajete przez inna postac, szuka wolnego pola tu¿ obok.
+                //        if (closestOpponent.transform.position.x > character.transform.position.x)
+                //            character.transform.position = ChangeCharacterPosition(character, Vector3.right);
+                //        else if (closestOpponent.transform.position.x < character.transform.position.x)
+                //            character.transform.position = ChangeCharacterPosition(character, Vector3.left);
+                //    }
+                //    else if (XorY != 0 || closestOpponent.transform.position.x == character.transform.position.x)
+                //    {
+                //        // Sprawdza w ktorym kierunku powinien wykonac ruch.
+                //        // Jezeli wejdzie na pole zajete przez inna postac, szuka wolnego pola tu¿ obok.
+                //        if (closestOpponent.transform.position.y > character.transform.position.y)
+                //            character.transform.position = ChangeCharacterPosition(character, Vector3.up);
+                //        else if (closestOpponent.transform.position.y < character.transform.position.y)
+                //            character.transform.position = ChangeCharacterPosition(character, Vector3.down);
+                //    }
+                //}
             }
 
             // Usuwa z pola bitwy postacie, ktorych zywotnosc spadla ponizej 0
             if (closestOpponent.GetComponent<Stats>().tempHealth < 0)
                 Destroy(closestOpponent);
+        }
+    }
+
+    void AutomaticAttack(GameObject character, GameObject closestOpponent, int attacksAmount)
+    {
+        if (character.tag == "Enemy")
+        {
+            // Wykonuje tyle ataków ile wynosi cecha Ataki postaci
+            for (int i = 0; i < attacksAmount; i++)
+            {
+                // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
+                if (character.GetComponent<Stats>().reloadLeft == 0)
+                    character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
+                else
+                    character.GetComponent<Enemy>().attackManager.ReloadEnemy();
+            }
+        }
+        else
+        {
+            // Wykonuje tyle ataków ile wynosi cecha Ataki postaci
+            for (int i = 0; i < attacksAmount; i++)
+            {
+                // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
+                if (character.GetComponent<Stats>().reloadLeft == 0)
+                    character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
+                else
+                    character.GetComponent<Player>().attackManager.ReloadPlayer();
+            }
         }
     }
 

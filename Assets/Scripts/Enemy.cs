@@ -47,7 +47,7 @@ public class Enemy : MonoBehaviour
         // nadanie wartosci cech drugorzedowych
         enemyStats.Sz = 4;
         enemyStats.Mag = 0;
-        enemyStats.maxHealth = Random.Range(10, 21);
+        enemyStats.maxHealth = Random.Range(8, 15);
 
 
         // ustawienie aktualnych statystyk punktów ¿ycia i szybkosci zgodnie z poczatkowymi
@@ -104,6 +104,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    #region Select or deselect enemy method
     public void OnMouseDown()
     {
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
@@ -178,7 +179,9 @@ public class Enemy : MonoBehaviour
             }
         }    
     }
+    #endregion
 
+    #region Show or hide magic-related buttons function
     // Okreœla, czy s¹ widoczne przyciski splatania magii i rzucania zaklêæ
     public void ShowOrHideMagicButtons()
     {
@@ -193,4 +196,5 @@ public class Enemy : MonoBehaviour
             GameObject.Find("ActionsButtonsEnemy/Canvas/SpellButton").SetActive(false);
         }
     }
+    #endregion
 }
