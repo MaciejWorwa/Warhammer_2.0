@@ -21,8 +21,13 @@ public class Enemy : MonoBehaviour
 
     [HideInInspector] public AttackManager attackManager;
 
+    private MessageManager messageManager;
+
     void Start()
     {
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+
         // nadanie rasy
         rasa = (Rasa)Random.Range(0, 4);
         Debug.Log($"Stworzy³eœ {this.gameObject.name} o rasie {rasa}");
@@ -109,51 +114,22 @@ public class Enemy : MonoBehaviour
     {
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
-        // Gdy otwarty jest edytor statystyk to uniemozliwia wybieranie postaci
-        if (!StatsEditor.EditorIsOpen)
+        // Umozliwia zaznaczenie/odznaczenie postaci, tylko gdy inne postacie nie sa wybrane i panel edycji statystyk jest zamkniety
+        if (!StatsEditor.EditorIsOpen && trSelect == null && Player.trSelect == null || !StatsEditor.EditorIsOpen && trSelect == transform && Player.trSelect == null)
         {
-            if (trSelect != null)
+            if (trSelect == transform) // klikniecie na postac, ktora juz jest wybrana
             {
-                if (trSelect == transform)
-                {
-                    transform.localScale = new Vector3(1f, 1f, 1f);
-                    trSelect = null;
-                    selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+                transform.localScale = new Vector3(1f, 1f, 1f);
+                trSelect = null;
+                selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
 
-                    actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
-                    MovementManager.canMove = true;
+                actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
+                MovementManager.canMove = true;
 
-                    // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-                    grid.ResetTileColors();
-                }
-                else
-                {
-                    trSelect.localScale = new Vector3(1f, 1f, 1f);
-                    selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
-                    trSelect = transform;
-                    transform.localScale = new Vector3(1.2f, 1.2f, 1f);
-
-                    selectedEnemy = this.gameObject;
-
-                    Debug.Log("Wybra³eœ " + selectedEnemy.name);
-                    selectedEnemy.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
-
-                    actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
-                    actionsButtons.transform.position = selectedEnemy.transform.position;
-                    ShowOrHideMagicButtons();
-
-                    if (GameObject.Find("ActionsButtonsPlayer/Canvas") != null && Player.selectedPlayer != null)
-                        GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
-                    MovementManager.canMove = false;
-
-                    //Zresetowanie szarzy i biegu
-                    GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
-
-                    // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-                    grid.ResetTileColors();
-                }
+                // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+                grid.ResetTileColors();
             }
-            else
+            else // klikniecie na postac, gdy zadna postac nie jest wybrana
             {
                 trSelect = transform;
                 transform.localScale = new Vector3(1.2f, 1.2f, 1f);
@@ -167,8 +143,6 @@ public class Enemy : MonoBehaviour
                 actionsButtons.transform.position = selectedEnemy.transform.position;
                 ShowOrHideMagicButtons();
 
-                if (GameObject.Find("ActionsButtonsPlayer/Canvas") != null && Player.selectedPlayer != null)
-                    GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
                 MovementManager.canMove = false;
 
                 //Zresetowanie szarzy i biegu
@@ -177,7 +151,26 @@ public class Enemy : MonoBehaviour
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
                 grid.ResetTileColors();
             }
-        }    
+        }
+
+        // Jezeli jest aktywny tryb wybierania celu ataku, przekazuje informacje o kliknietym Enemy i wywoluje funkcje Attack traktujac wybranego Playera jako atakujacego i Enemy jako atakowanego.
+        if (AttackManager.targetSelecting == true)
+        {
+            // Sprawdza, czy atakujacym nie jest inny Enemy
+            if (trSelect != null)
+            {
+                Debug.Log("Nie mo¿esz atakowaæ swoich sojuszników.");
+                return;
+            }
+            selectedEnemy = this.gameObject;
+            attackManager.Attack(Player.selectedPlayer, selectedEnemy);
+
+            // Resetuje tryb wyboru celu ataku
+            AttackManager.targetSelecting = false;
+
+            // Przywraca widocznosc przyciskow akcji atakujacej postaci
+            Player.selectedPlayer.GetComponent<Player>().actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
+        }
     }
     #endregion
 

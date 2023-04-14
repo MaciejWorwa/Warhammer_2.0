@@ -19,9 +19,14 @@ public class MovementManager : MonoBehaviour
     [SerializeField] private GameObject chargeButton;
     [SerializeField] private GameObject runButton;
 
+    private MessageManager messageManager;
+
     void Start()
     {
         grid = GameObject.Find("Grid").GetComponent<GridManager>();
+
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
     }
 
     public void ResetChargeAndRun()

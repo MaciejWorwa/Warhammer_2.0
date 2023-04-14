@@ -7,6 +7,14 @@ public class MagicManager : MonoBehaviour
     private int powerLevel;
     private GameObject wizard;
 
+    private MessageManager messageManager;
+
+    void Start()
+    {
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+    }
+
     // Splatanie magii
     public void ChannelingMagic()
     {

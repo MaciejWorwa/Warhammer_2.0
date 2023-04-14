@@ -15,9 +15,14 @@ public class AutoCombat : MonoBehaviour
 
     public static bool AutoCombatOn = false;
 
+    private MessageManager messageManager;
+
     void Start()
     {
         movementManager = movementManager.gameObject.GetComponent<MovementManager>();
+
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
     }
 
     public void SetAutoCombat()

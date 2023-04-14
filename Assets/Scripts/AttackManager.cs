@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class AttackManager : MonoBehaviour
 {
+    public static bool targetSelecting; // tryb wyboru celu ataku. Jego wartosc mowi o tym, czy w danym momencie trwa wybieranie celu ataku
+
     private float attackDistance; // dystans pomiedzy walczacymi
     private bool targetDefended; // informacja o tym, czy postaci uda³o siê sparowaæ lub unikn¹æ atak
 
@@ -14,21 +16,34 @@ public class AttackManager : MonoBehaviour
 
     private GameObject[] aimButtons; // przyciski celowania zarowno bohatera gracza jak i wroga
 
+    private MessageManager messageManager;
+
     void Start()
     {
         aimButtons = GameObject.FindGameObjectsWithTag("AimButton");
+
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
     }
 
-    // Zaatakowanie bohatera gracza
-    public void AttackPlayer()
+    // Wybor celu ataku
+    public void SelectTarget()
     {
-        Attack(Enemy.selectedEnemy, Player.selectedPlayer);
+        targetSelecting = true;
+        Debug.Log("Wybierz cel ataku, klikaj¹c na niego.");
+
+        // Wylacza widocznosc przyciskow akcji postaci
+        if(Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
+            GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
+        if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
+            GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
     }
-    // Zaatakowanie wroga
-    public void AttackEnemy()
-    {
-        Attack(Player.selectedPlayer, Enemy.selectedEnemy);
-    }
+    //// Zaatakowanie wroga
+    //public void AttackEnemy()
+    //{
+    //    targetSelecting = true;
+    //    Attack(Player.selectedPlayer, Enemy.selectedEnemy);
+    //}
 
     public void ReloadPlayer()
     {
@@ -59,183 +74,177 @@ public class AttackManager : MonoBehaviour
             if (attacker != null && target != null)
                 attackDistance = Vector3.Distance(attacker.transform.position, target.transform.position);
 
-            // sprawdza czy s¹ wybrane dwie postacie, ktore ze soba walcza
-            if ((Enemy.trSelect != null && Player.trSelect != null) || AutoCombat.AutoCombatOn)
+            // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego
+            if (attackDistance <= attacker.GetComponent<Stats>().AttackRange)
             {
-                // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego
-                if (attackDistance <= attacker.GetComponent<Stats>().AttackRange)
+                int wynik = Random.Range(1, 101);
+                bool hit = false;
+
+                // sprawdza czy atak jest atakiem dystansowym
+                if (attackDistance > 1.5f)
                 {
-                    int wynik = Random.Range(1, 101);
-                    bool hit = false;
-
-                    // sprawdza czy atak jest atakiem dystansowym
-                    if (attackDistance > 1.5f)
+                    // sprawdza czy bron jest naladowana
+                    if (attacker.GetComponent<Stats>().reloadLeft == 0)
                     {
-                        // sprawdza czy bron jest naladowana
-                        if (attacker.GetComponent<Stats>().reloadLeft == 0)
-                        {
-                            hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
-
-                            if (attackBonus > 0)
-                                Debug.Log($"<color=green>{attacker.name}</color> Rzut na US: {wynik}  Premia: {attackBonus}");
-                            else
-                                Debug.Log($"<color=green>{attacker.name}</color> Rzut na US: {wynik}");
-
-                            // resetuje naladowanie broni po wykonaniu strzalu
-                            attacker.GetComponent<Stats>().reloadLeft = attacker.GetComponent<Stats>().reloadTime;
-                            // uwzglednia zdolnosc blyskawicznego przeladowania
-                            if (attacker.GetComponent<Stats>().instantReload == true)
-                                attacker.GetComponent<Stats>().reloadLeft--;
-                        }
-                        else
-                        {
-                            Debug.Log("Broñ wymaga na³adowania.");
-                            break;
-                        }
-                    }
-                    // sprawdza czy atak jest atakiem w zwarciu
-                    if (attackDistance <= 1.5f)
-                    {
-                        //uwzglêdnienie bonusu do WW zwiazanego z szar¿¹
-                        if (MovementManager.Charge)
-                            chargeBonus = 10;
-                        else
-                            chargeBonus = 0;
-
-                        attackBonus = chargeBonus + aimingBonus;
-
-                        hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
+                        hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                         if (attackBonus > 0)
-                            Debug.Log($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}  Premia: {attackBonus}");
+                            Debug.Log($"<color=green>{attacker.name}</color> Rzut na US: {wynik}  Premia: {attackBonus}");
                         else
-                            Debug.Log($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}");
+                            Debug.Log($"<color=green>{attacker.name}</color> Rzut na US: {wynik}");
+
+                        // resetuje naladowanie broni po wykonaniu strzalu
+                        attacker.GetComponent<Stats>().reloadLeft = attacker.GetComponent<Stats>().reloadTime;
+                        // uwzglednia zdolnosc blyskawicznego przeladowania
+                        if (attacker.GetComponent<Stats>().instantReload == true)
+                            attacker.GetComponent<Stats>().reloadLeft--;
                     }
-
-                    //wywo³anie funkcji parowania lub uniku jeœli postaæ jeszcze mo¿e to robiæ w tej rundzie
-                    if (hit && attackDistance <= 1.5f)
+                    else
                     {
-                        //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
-                        if (target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus > target.GetComponent<Stats>().Zr)
-                        {
-                            if (target.GetComponent<Stats>().canParry)
-                                ParryAttack(attacker, target);
-                            else if (target.GetComponent<Stats>().canDodge)
-                                DodgeAttack(target);
-                        }
-                        else
-                        {
-                            if (target.GetComponent<Stats>().canDodge)
-                                DodgeAttack(target);
-                            else if (target.GetComponent<Stats>().canParry)
-                                ParryAttack(attacker, target);
-                        }
+                        Debug.Log("Broñ wymaga na³adowania.");
+                        break;
                     }
+                }
+                // sprawdza czy atak jest atakiem w zwarciu
+                if (attackDistance <= 1.5f)
+                {
+                    //uwzglêdnienie bonusu do WW zwiazanego z szar¿¹
+                    if (MovementManager.Charge)
+                        chargeBonus = 10;
+                    else
+                        chargeBonus = 0;
 
-                    // zresetowanie bonusu za celowanie, jeœli jest aktywny
-                    if (aimingBonus != 0)
-                        TakeAim();
+                    attackBonus = chargeBonus + aimingBonus;
 
-                    if (hit && targetDefended != true)
+                    hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
+
+                    if (attackBonus > 0)
+                        Debug.Log($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}  Premia: {attackBonus}");
+                    else
+                        Debug.Log($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}");
+                }
+
+                //wywo³anie funkcji parowania lub uniku jeœli postaæ jeszcze mo¿e to robiæ w tej rundzie
+                if (hit && attackDistance <= 1.5f)
+                {
+                    //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
+                    if (target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus > target.GetComponent<Stats>().Zr)
                     {
-                        int armor = CheckAttackLocalization(target);
-                        int damage;
-                        int rollResult;
+                        if (target.GetComponent<Stats>().canParry)
+                            ParryAttack(attacker, target);
+                        else if (target.GetComponent<Stats>().canDodge)
+                            DodgeAttack(target);
+                    }
+                    else
+                    {
+                        if (target.GetComponent<Stats>().canDodge)
+                            DodgeAttack(target);
+                        else if (target.GetComponent<Stats>().canParry)
+                            ParryAttack(attacker, target);
+                    }
+                }
 
-                        // mechanika broni przebijajacej zbroje
-                        if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
-                            armor--;
+                // zresetowanie bonusu za celowanie, jeœli jest aktywny
+                if (aimingBonus != 0)
+                    TakeAim();
 
-                        // mechanika bronii druzgoczacej
-                        if (attacker.GetComponent<Stats>().Druzgoczacy)
+                if (hit && targetDefended != true)
+                {
+                    int armor = CheckAttackLocalization(target);
+                    int damage;
+                    int rollResult;
+
+                    // mechanika broni przebijajacej zbroje
+                    if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
+                        armor--;
+
+                    // mechanika bronii druzgoczacej
+                    if (attacker.GetComponent<Stats>().Druzgoczacy)
+                    {
+                        int roll1 = Random.Range(1, 11);
+                        int roll2 = Random.Range(1, 11);
+                        rollResult = roll1 >= roll2 ? roll1 : roll2;
+                        Debug.Log($"Atak druzgocz¹c¹ broni¹. Rzut 1: {roll1} Rzut 2: {roll2}");
+                    }
+                    else
+                        rollResult = Random.Range(1, 11);
+
+                    // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
+                    if (attacker.GetComponent<Stats>().Ciezki)
+                        attacker.GetComponent<Stats>().Druzgoczacy = false;
+
+                    // mechanika furii ulryka
+                    if (rollResult == 10)
+                    {
+                        int confirmRoll = Random.Range(1, 101); //rzut na potwierdzenie furii
+                        int additionalDamage = 0; //obrazenia ktore dodajemy do wyniku rzutu
+
+                        if (attackDistance <= 1.5f)
                         {
-                            int roll1 = Random.Range(1, 11);
-                            int roll2 = Random.Range(1, 11);
-                            rollResult = roll1 >= roll2 ? roll1 : roll2;
-                            Debug.Log($"Atak druzgocz¹c¹ broni¹. Rzut 1: {roll1} Rzut 2: {roll2}");
-                        }
-                        else
-                            rollResult = Random.Range(1, 11);
-
-                        // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
-                        if (attacker.GetComponent<Stats>().Ciezki)
-                            attacker.GetComponent<Stats>().Druzgoczacy = false;
-
-                        // mechanika furii ulryka
-                        if (rollResult == 10)
-                        {
-                            int confirmRoll = Random.Range(1, 101); //rzut na potwierdzenie furii
-                            int additionalDamage = 0; //obrazenia ktore dodajemy do wyniku rzutu
-
-                            if (attackDistance <= 1.5f)
-                            {
-                                if (attacker.GetComponent<Stats>().WW >= confirmRoll)
-                                {
-                                    additionalDamage = Random.Range(1, 11);
-                                    rollResult = rollResult + additionalDamage;
-                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
-                                }
-                                else
-                                {
-                                    rollResult = 10;
-                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
-                                }
-                            }
-                            else if (attackDistance > 1.5f)
-                            {
-                                if (attacker.GetComponent<Stats>().US >= confirmRoll)
-                                {
-                                    additionalDamage = Random.Range(1, 11);
-                                    rollResult = rollResult + additionalDamage;
-                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
-                                }
-                                else
-                                {
-                                    rollResult = 10;
-                                    Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
-                                }
-                            }
-
-                            while (additionalDamage == 10)
+                            if (attacker.GetComponent<Stats>().WW >= confirmRoll)
                             {
                                 additionalDamage = Random.Range(1, 11);
                                 rollResult = rollResult + additionalDamage;
-                                Debug.Log($"<color=red> KOLEJNA FURIA ULRYKA! </color>");
+                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
+                            }
+                            else
+                            {
+                                rollResult = 10;
+                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
+                            }
+                        }
+                        else if (attackDistance > 1.5f)
+                        {
+                            if (attacker.GetComponent<Stats>().US >= confirmRoll)
+                            {
+                                additionalDamage = Random.Range(1, 11);
+                                rollResult = rollResult + additionalDamage;
+                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}.<color=red> FURIA ULRYKA! </color>");
+                            }
+                            else
+                            {
+                                rollResult = 10;
+                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda³o siê potwierdziæ Furii Ulryka.");
                             }
                         }
 
-                        if (attackDistance <= 1.5f)
-                            damage = rollResult + attacker.GetComponent<Stats>().S;
-                        else
-                            damage = rollResult + attacker.GetComponent<Stats>().Weapon_S;
-
-                        Debug.Log($"<color=green>{attacker.name}</color> wyrzuci³ {rollResult} i zada³ <color=green>{damage} obra¿eñ.</color>");
-
-                        if (damage > (target.GetComponent<Stats>().Wt + armor))
+                        while (additionalDamage == 10)
                         {
-                            target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
-                            Debug.Log(target.name + " znegowa³ " + (target.GetComponent<Stats>().Wt + armor) + " obra¿eñ.");
-                            Debug.Log($"<color=red> Punkty ¿ycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>");
-
-                            //TO PONI¯EJ DZIA£A ALE MUSIA£EM WY£¥CZYÆ TYMCZASOWO ¯EBY AUTOMATYCZNY COMBAT NIE WYWALA£ B£ÊDÓW, BO W NIM NIE MA ¯ADNYCH SELECTEDENEMY ANI SELECTEDPLAYER
-                            if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
-                                Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
-                            else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
-                                Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
+                            additionalDamage = Random.Range(1, 11);
+                            rollResult = rollResult + additionalDamage;
+                            Debug.Log($"<color=red> KOLEJNA FURIA ULRYKA! </color>");
                         }
-                        else
-                            Debug.Log($"Atak <color=red>{attacker.name}</color> nie przebi³ siê przez pancerz.");
+                    }
+
+                    if (attackDistance <= 1.5f)
+                        damage = rollResult + attacker.GetComponent<Stats>().S;
+                    else
+                        damage = rollResult + attacker.GetComponent<Stats>().Weapon_S;
+
+                    Debug.Log($"<color=green>{attacker.name}</color> wyrzuci³ {rollResult} i zada³ <color=green>{damage} obra¿eñ.</color>");
+
+                    if (damage > (target.GetComponent<Stats>().Wt + armor))
+                    {
+                        target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
+                        Debug.Log(target.name + " znegowa³ " + (target.GetComponent<Stats>().Wt + armor) + " obra¿eñ.");
+                        Debug.Log($"<color=red> Punkty ¿ycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>");
+
+                        //TO PONI¯EJ DZIA£A ALE MUSIA£EM WY£¥CZYÆ TYMCZASOWO ¯EBY AUTOMATYCZNY COMBAT NIE WYWALA£ B£ÊDÓW, BO W NIM NIE MA ¯ADNYCH SELECTEDENEMY ANI SELECTEDPLAYER
+                        if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
+                            Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
+                        else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
+                            Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
                     }
                     else
-                        Debug.Log($"Atak <color=red>{attacker.name}</color> chybi³.");
-
-                    targetDefended = false; // przestawienie boola na false, ¿eby przy kolejnym ataku znowu musia³ siê broniæ, a nie by³ obroniony na starcie
+                        Debug.Log($"Atak <color=red>{attacker.name}</color> nie przebi³ siê przez pancerz.");
                 }
                 else
-                    Debug.Log("Cel ataku stoi poza zasiêgiem.");
+                    Debug.Log($"Atak <color=red>{attacker.name}</color> chybi³.");
+
+                targetDefended = false; // przestawienie boola na false, ¿eby przy kolejnym ataku znowu musia³ siê broniæ, a nie by³ obroniony na starcie
             }
             else
-                Debug.Log("Musisz wybraæ atakuj¹cego oraz cel ataku.");
+                Debug.Log("Cel ataku stoi poza zasiêgiem.");
         }
         while (false);
     }

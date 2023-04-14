@@ -5,6 +5,7 @@ using UnityEngine;
 public class CharacterManager : MonoBehaviour
 {
     [SerializeField] private GameObject setStatsButton;
+    [SerializeField] private GameObject destroyButton;
 
     public static GameObject GetSelectedCharacter()
     {
@@ -18,10 +19,17 @@ public class CharacterManager : MonoBehaviour
 
     void Update()
     {
-        // Wylacza widocznosc przycisku zmiany statystyk, jesli sa wybrane dwie postacie, albo nie jest wybrana zadna
-        if (Player.trSelect != null && Enemy.trSelect != null || Player.trSelect == null && Enemy.trSelect == null)
+        // Wylacza widocznosc przycisku zmiany statystyk i usuwania postaci, jesli postac nie jest wybrana
+        if (Player.trSelect == null && Enemy.trSelect == null)
+        {
+            destroyButton.SetActive(false);
             setStatsButton.SetActive(false);
+        }
         else
+        {
+            destroyButton.SetActive(true);
             setStatsButton.SetActive(true);
+        }
+
     }
 }

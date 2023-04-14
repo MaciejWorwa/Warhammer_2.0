@@ -22,9 +22,5 @@ public class DeleteObject : MonoBehaviour
             if (GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
                 GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
         }
-        else if (Enemy.trSelect != null && Player.trSelect != null)
-            Debug.Log("Nie mo¿esz usun¹æ dwóch postaci jednoczeœnie. Zaznacz jedn¹ postaæ.");
-        else
-            Debug.Log("Musisz zaznaczyæ postaæ, któr¹ chcesz usun¹æ");
     }
 }
