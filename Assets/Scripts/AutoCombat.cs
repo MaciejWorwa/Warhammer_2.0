@@ -30,12 +30,14 @@ public class AutoCombat : MonoBehaviour
         if (AutoCombatOn)
         {
             AutoCombatOn = false;
-            Debug.Log($"<color=green>Walka automatyczna została wyłączona.</color>");
+            messageManager.ShowMessage($"<color=green>Walka automatyczna została wyłączona.</color>", 3f);
+            Debug.Log($"Walka automatyczna została wyłączona.");
         }
         else
         {
             AutoCombatOn = true;
-            Debug.Log($"<color=green>Walka automatyczna została aktywowana.</color>");
+            messageManager.ShowMessage($"<color=green>Walka automatyczna została aktywowana.</color>", 3f);
+            Debug.Log($"Walka automatyczna została aktywowana.");
         }
 
     }
@@ -45,6 +47,10 @@ public class AutoCombat : MonoBehaviour
     {
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
         players = GameObject.FindGameObjectsWithTag("Player");
+
+        // Gdy na polu bitwy wystepuja tylko postacie Enemy albo tylko postacie Player to automatyczna akcja nie jest wykonywana
+        if (enemies.Length == 0 || players.Length == 0)
+            return;
 
         // Polaczenie tablicy enemies z tablica players. Zbior wszystkich postaci.
         // Potem sortuje tablice wg inicjatywy. Domyslnie jest rosnaco, dlatego pozniej jeszcze obracamy kolejnosc przy pomocy Reverse()
@@ -106,18 +112,20 @@ public class AutoCombat : MonoBehaviour
 
                 if (distanceBetweenOpponents > character.GetComponent<Stats>().tempSz * 2) // Jesli jest poza zasiegiem szarzy
                 {
-                    Debug.Log("jest za daleko."); // TUTAJ DO ZROBIENIA ZEBY PO PROSTU SIE PRZEMIESCIL W KIERUNKU PRZECIWNIKA
+                    GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
+                    Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)
                 }
                 else if (distanceBetweenOpponents >= 3 && distanceBetweenOpponents <= character.GetComponent<Stats>().tempSz * 2) // Jesli jest w zasiegu szarzy
                 {
                     //Wykonanie szarzy
                     if (adjacentTilesArray != null)
                     {
-                        character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2;
-                        GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
-                        Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D w wierszu 86 nie wykrywa zmian pozycji postaci)
-
                         MovementManager.Charge = true;
+                        character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2;
+
+                        GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
+                        Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)
+
                         AutomaticAttack(character, closestOpponent, 1); // Wykonywany jest jeden atak z bonusem +10, bo to szarza
 
                         // Zresetowanie szarzy
@@ -130,7 +138,7 @@ public class AutoCombat : MonoBehaviour
                     if (adjacentTilesArray != null)
                     {
                         GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
-                        Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D w wierszu 86 nie wykrywa zmian pozycji postaci)
+                        Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)
 
                         AutomaticAttack(character, closestOpponent, 1); // Wykonywany jest jeden atak, bo wczesniej zostal wykonany ruch
                     }
@@ -147,26 +155,46 @@ public class AutoCombat : MonoBehaviour
     {
         if (character.tag == "Enemy")
         {
-            // Wykonuje tyle atak�w ile wynosi cecha Ataki postaci
+            // Wykonuje tyle atakow ile wynosi cecha Ataki postaci
             for (int i = 0; i < attacksAmount; i++)
             {
                 // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
                 if (character.GetComponent<Stats>().reloadLeft == 0)
                     character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
-                else
+                else if (character.GetComponent<Stats>().reloadLeft == 1)
+                {
                     character.GetComponent<Enemy>().attackManager.ReloadEnemy();
+                    character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
+                    return;
+                }
+                else if (character.GetComponent<Stats>().reloadLeft > 1)
+                {
+                    character.GetComponent<Enemy>().attackManager.ReloadEnemy();
+                    character.GetComponent<Enemy>().attackManager.ReloadEnemy();
+                    return;
+                }
             }
         }
         else
         {
-            // Wykonuje tyle atak�w ile wynosi cecha Ataki postaci
+            // Wykonuje tyle atakow ile wynosi cecha Ataki postaci
             for (int i = 0; i < attacksAmount; i++)
             {
                 // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
                 if (character.GetComponent<Stats>().reloadLeft == 0)
                     character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
-                else
+                else if (character.GetComponent<Stats>().reloadLeft == 1)
+                {
                     character.GetComponent<Player>().attackManager.ReloadPlayer();
+                    character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
+                    return;
+                }
+                else if (character.GetComponent<Stats>().reloadLeft > 1)
+                {
+                    character.GetComponent<Player>().attackManager.ReloadPlayer();
+                    character.GetComponent<Player>().attackManager.ReloadPlayer();
+                    return;
+                }
             }
         }
     }

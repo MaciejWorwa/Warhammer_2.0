@@ -15,7 +15,8 @@ public class Player : MonoBehaviour
 
     public static GameObject selectedPlayer;
     public static Transform trSelect = null;
-    public GameObject actionsButtons;
+
+    private ButtonManager buttonManager;
 
     private float attackDistance;
 
@@ -28,8 +29,14 @@ public class Player : MonoBehaviour
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
         messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
 
+        // Odniesienie do Managera Przyciskow
+        buttonManager = GameObject.Find("ButtonManager").GetComponent<ButtonManager>();
+
+        //Odniesienie do Managera Ataku
+        attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
         //nadanie rasy
         rasa = (Rasa)Random.Range(0, 4);
+        messageManager.ShowMessage($"Stworzy³eœ {this.gameObject.name} o rasie {rasa}", 3f);
         Debug.Log($"Stworzy³eœ {this.gameObject.name} o rasie {rasa}");
 
         //nadanie temu obiektowi klasy Stats
@@ -51,10 +58,6 @@ public class Player : MonoBehaviour
         playerStats.Weapon_S = 3;
         playerStats.AttackRange = 1.5;
 
-        actionsButtons = GameObject.Find("ActionsButtonsPlayer");
-
-        attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
-
         healthDisplay = this.transform.Find("healthPointsPlayer").gameObject.GetComponent<TMP_Text>();
         healthDisplay.transform.position = this.gameObject.transform.position;
 
@@ -75,7 +78,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P) && selectedPlayer.name == this.gameObject.name && StatsEditor.EditorIsOpen == false)
         {
             attackManager.Attack(selectedPlayer, Enemy.selectedEnemy);
-            actionsButtons.transform.Find("Canvas").gameObject.SetActive(false);
+            buttonManager.ShowOrHideActionsButtons(selectedPlayer, false);
         }
  
         if (playerStats.tempHealth < 0 && playerStats.criticalCondition == false)
@@ -95,16 +98,15 @@ public class Player : MonoBehaviour
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // Umozliwia zaznaczenie/odznaczenie postaci, tylko gdy inne postacie nie sa wybrane i panel edycji statystyk jest zamkniety
-        if (!StatsEditor.EditorIsOpen && trSelect == null && Enemy.trSelect == null || !StatsEditor.EditorIsOpen && trSelect == transform && Enemy.trSelect == null)
+        if (!StatsEditor.EditorIsOpen && trSelect == null && Enemy.trSelect == null && AttackManager.targetSelecting != true || !StatsEditor.EditorIsOpen && trSelect == transform && Enemy.trSelect == null && AttackManager.targetSelecting != true)
         {
-
             if (trSelect == transform) // klikniecie na postac, ktora juz jest wybrana
             {
                 transform.localScale = new Vector3(1f, 1f, 1f);
                 trSelect = null;
                 selectedPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
 
-                actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
+                buttonManager.ShowOrHideActionsButtons(selectedPlayer, false);
                 MovementManager.canMove = true;
 
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
@@ -117,13 +119,12 @@ public class Player : MonoBehaviour
 
                 selectedPlayer = this.gameObject;
 
+                messageManager.ShowMessage($"Wybra³eœ {selectedPlayer.GetComponent<Stats>().Name}", 3f);
                 Debug.Log("Wybra³eœ " + selectedPlayer.name);
 
                 selectedPlayer.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
 
-                actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
-                actionsButtons.transform.position = selectedPlayer.transform.position;
-                ShowOrHideMagicButtons();
+                buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);
 
                 MovementManager.canMove = false;
 
@@ -139,36 +140,30 @@ public class Player : MonoBehaviour
         if(AttackManager.targetSelecting == true)
         {
             // Sprawdza, czy atakujacym nie jest inny Player
-            if(trSelect != null)
+            if (trSelect != null)
             {
+                messageManager.ShowMessage($"<color=red>Nie mo¿esz atakowaæ swoich sojuszników.</color>", 3f);
                 Debug.Log("Nie mo¿esz atakowaæ swoich sojuszników.");
+
+                // Przywraca widocznosc przyciskow akcji
+                buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);
+                // Resetuje szarze jesli jest aktywna
+                if (MovementManager.Charge)
+                    GameObject.Find("MovementManager").GetComponent<MovementManager>().SetCharge();
                 return;
             }
             selectedPlayer = this.gameObject;
-            attackManager.Attack(Enemy.selectedEnemy, selectedPlayer);
+
+            if (!MovementManager.Charge)
+                attackManager.Attack(Enemy.selectedEnemy, selectedPlayer);
+            else
+                attackManager.ChargeAttack(Enemy.selectedEnemy, selectedPlayer);
 
             // Resetuje tryb wyboru celu ataku
             AttackManager.targetSelecting = false;
 
             // Przywraca widocznosc przyciskow akcji atakujacej postaci
-            Enemy.selectedEnemy.GetComponent<Enemy>().actionsButtons.transform.Find("Canvas").gameObject.SetActive(true);
-        }
-    }
-    #endregion
-
-    #region Show or hide magic-related buttons function
-    // Okreœla, czy s¹ widoczne przyciski splatania magii i rzucania zaklêæ
-    public void ShowOrHideMagicButtons()
-    {
-        if (selectedPlayer.GetComponent<Stats>().Mag > 0)
-        {
-            GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton").SetActive(true);
-            GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton").SetActive(true);
-        }
-        else
-        {
-            GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton").SetActive(false);
-            GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton").SetActive(false);
+            buttonManager.ShowOrHideActionsButtons(Enemy.selectedEnemy, true);
         }
     }
     #endregion

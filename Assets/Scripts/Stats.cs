@@ -195,6 +195,8 @@ public class Stats : MonoBehaviour
     public void GetCriticalHit()
     {
         int criticalValue = Random.Range(1, 101);
+
+        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>¯ywotnoœæ spad³a poni¿ej 0.</color> Wynik rzutu na obra¿enia krytyczne: <color=red>{criticalValue}</color>", 6f);
         Debug.Log("¯ywotnoœæ spad³a poni¿ej 0. Wynik rzutu na obra¿enia krytyczne: " + criticalValue);
         criticalCondition = true;
     }

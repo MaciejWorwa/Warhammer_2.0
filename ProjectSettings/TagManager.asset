@@ -9,6 +9,7 @@ TagManager:
   - AimButton
   - StatsButton
   - Panel
+  - MainCanvas
   layers:
   - Default
   - TransparentFX

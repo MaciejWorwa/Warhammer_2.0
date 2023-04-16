@@ -5,18 +5,40 @@ using TMPro;
 
 public class MessageManager : MonoBehaviour
 {
-    public TMP_Text Message;
+    [SerializeField] private TMP_Text messagePrefab;
+    List<TMP_Text> allMessages = new List<TMP_Text>();
 
-    public void ShowMessage(string messageText, Color messageColor, float messageDuration)
+    public void ShowMessage(string messageText, float messageDuration)
     {
-        Message.text = messageText;
-        Message.color = messageColor;
-        Message.gameObject.SetActive(true); // w³¹czenie obiektu
+        // Zmienia pozycje poprzednich wiadomosci, zeby nie pojawialy sie jedna na drugiej
+        if (allMessages.Count > 0)
+            foreach (var m in allMessages)
+                m.gameObject.transform.Translate(new Vector3(0, 18, 0));
 
-        StartCoroutine(HideMessage(messageDuration)); // uruchomienie korutyny
+        // Gdy ilosc wyswietlanych wiadomosci przekroczy okreslona ilosc to usuwa najwczesniejsza z nich
+        if (allMessages.Count > 12)
+        {
+            Destroy(allMessages[0]);
+            allMessages.RemoveAt(0);
+        }
+
+        // Tworzy nowa wiadomosc i dodaje ja do listy wszystkich wiadomosci
+        TMP_Text message = Instantiate(messagePrefab, messagePrefab.transform.position, Quaternion.identity);
+        allMessages.Add(message);
+
+        // Ustala pozycje nowo powstalej wiadomosci i przypisuje ja do glownego Canvasa
+        message.gameObject.transform.SetParent(GameObject.FindGameObjectWithTag("MainCanvas").transform.transform);
+
+        message.text = messageText;
+
+        StartCoroutine(HideMessage(message, messageDuration)); // uruchomienie korutyny
+
+        // Usuwa instancje obiektu message po odpowiednim czasie (czas wydluzony o 2 sekundy, zeby na spokojnie animacja zanikania z HideMessage mogla sie wykonac)
+        if (message != null)
+            Destroy(message.gameObject, messageDuration + 2f);
     }
 
-    private IEnumerator HideMessage(float messageDuration)
+    private IEnumerator HideMessage(TMP_Text message, float messageDuration)
     {
         // Czeka czas okreslony przez messageDuration
         yield return new WaitForSeconds(messageDuration);
@@ -27,11 +49,13 @@ public class MessageManager : MonoBehaviour
         while (elapsedTime < fadeTime)
         {
             elapsedTime += Time.deltaTime;
-            Message.color = new Color(Message.color.r, Message.color.g, Message.color.b, Mathf.Lerp(1, 0, elapsedTime / fadeTime));
+            message.color = new Color(message.color.r, message.color.g, message.color.b, Mathf.Lerp(1, 0, elapsedTime / fadeTime));
             yield return null;
         }
 
-        Message.gameObject.SetActive(false); // wy³¹czenie obiektu
+        //Usuwa wiadomosc z listy
+        if (allMessages.Contains(message))
+            allMessages.Remove(message);
     }
 }
 

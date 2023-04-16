@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DebugStuff
 {
@@ -11,9 +12,12 @@ namespace DebugStuff
 
         bool doShow;
 
+        [SerializeField] private Slider slider;
+
         void Start()
         {
             doShow = false;
+            //slider.OnValueChanged.AddListener(delegate { OnGUI(); });
         }
 
         void OnEnable()
@@ -43,7 +47,7 @@ namespace DebugStuff
             if (!doShow) { return; }
             {
                 float consoleWidth = Screen.width * 0.45f; // szerokoœæ okna konsoli
-                float consoleHeight = Screen.height * 0.3f; // wysokoœæ okna konsoli
+                float consoleHeight = Screen.height * (slider.value / 10f); // wysokoœæ okna konsoli
                 float consolePosX = (Screen.width - consoleWidth) / 2f; // pozycja X okna konsoli
                 float consolePosY = Screen.height - consoleHeight; // pozycja Y okna konsoli
 

@@ -16,9 +16,6 @@ public class MovementManager : MonoBehaviour
 
     private GridManager grid;
 
-    [SerializeField] private GameObject chargeButton;
-    [SerializeField] private GameObject runButton;
-
     private MessageManager messageManager;
 
     void Start()
@@ -33,8 +30,6 @@ public class MovementManager : MonoBehaviour
     {
         Charge = false;
         Run = false;
-        chargeButton.GetComponent<Image>().color = Color.gray;
-        runButton.GetComponent<Image>().color = Color.gray;
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
@@ -46,20 +41,17 @@ public class MovementManager : MonoBehaviour
 
     public void SetCharge()
     {
-        if(Charge || Run)
-            ResetChargeAndRun();
-
         // Ustalenie ktora postac jest wybrana
         GameObject character = CharacterManager.GetSelectedCharacter();
-        if(character == null) return;
+        if (character == null) return;
 
-        if (!Charge)
+        if (Charge || Run)
+            ResetChargeAndRun();
+        else if (!Charge)
         {
             Charge = true;
             character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2; // zmiana aktualnej predkosci
-            chargeButton.GetComponent<Image>().color = Color.white;
             Run = false;
-            runButton.GetComponent<Image>().color = Color.gray;
         }
 
         // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
@@ -82,9 +74,7 @@ public class MovementManager : MonoBehaviour
         {
             Run = true;
             character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 3; // zmiana aktualnej predkosci
-            runButton.GetComponent<Image>().color = Color.white;
             Charge = false;
-            chargeButton.GetComponent<Image>().color = Color.gray;
         }
 
         // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
@@ -143,8 +133,8 @@ public class MovementManager : MonoBehaviour
             // Odleglosc od postaci do wybranego pola
             float distanceFromCharacterToSelectedTile = (Mathf.Abs(startCharPos.x - selectedTilePos.x)) + (Mathf.Abs(startCharPos.y - selectedTilePos.y));
 
-            // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci
-            if (distanceFromCharacterToSelectedTile <= movementRange)
+            // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci. Warunek ten nie jest konieczny w przypadku automatycznej walki, dlatego dochodzi drugi warunek.
+            if (distanceFromCharacterToSelectedTile <= movementRange || AutoCombat.AutoCombatOn)
             {
                 // Obecna pozycja postaci, aktualizowana po przejsciu kazdego pola. Poczatkowo przyjmuje wartosc pozycji startowej.
                 Vector3 tempCharPos = startCharPos;
@@ -186,15 +176,20 @@ public class MovementManager : MonoBehaviour
                     character.transform.position = new Vector3(adjacentTilesArray[0].transform.position.x, adjacentTilesArray[0].transform.position.y, 0);
                 }  
                 
-                // Jezeli postaci nie uda sie dotrzec na wybrane miejsce docelowe to jego pozycja jest resetowana do tej sprzed rozpoczenia ruchu
-                if(character.transform.position != selectedTilePos)
+                // Jezeli postaci nie uda sie dotrzec na wybrane miejsce docelowe to jego pozycja jest resetowana do tej sprzed rozpoczenia ruchu.
+                // Warunek ten jest wylaczony w przypadku automatycznej walki, zeby mogla dzialac poprawnie
+                if(character.transform.position != selectedTilePos && !AutoCombat.AutoCombatOn)
                 {
                     character.transform.position = startCharPos;
+                    messageManager.ShowMessage("<color=red>Wybrane pole jest poza zasięgiem ruchu postaci.</color>", 4f);
                     Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
                 }
             }
             else
+            {
+                messageManager.ShowMessage("<color=red>Wybrane pole jest poza zasięgiem ruchu postaci.</color>", 4f);
                 Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
+            }
 
             // resetuje podswietlenie pol siatki w zasiegu ruchu postaci
             GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");

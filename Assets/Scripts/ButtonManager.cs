@@ -5,6 +5,32 @@ using UnityEngine.UI;
 
 public class ButtonManager : MonoBehaviour
 {
+    public GameObject actionsButtons;
+
+    #region Show or hide actions buttons function
+    public void ShowOrHideActionsButtons(GameObject character, bool visibility)
+    {
+        if (character == Player.selectedPlayer)
+            actionsButtons = GameObject.Find("ActionsButtonsPlayer");
+        else
+            actionsButtons = GameObject.Find("ActionsButtonsEnemy");
+
+        if(visibility == true)
+        {
+            actionsButtons.transform.Find("Canvas").gameObject.SetActive(true); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
+            actionsButtons.transform.position = character.transform.position;
+        }
+        else
+        {
+            actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca³y obiekt
+        }
+
+        ShowReloadOrChargeButton(character);
+        ShowOrHideMagicButtons(character);
+    }
+    #endregion
+
+    #region Clicked button effect (reduce opacity)
     // Zmniejszenie przezroczystosci przycisku po kliknieciu
     public void DecreaseOpacityAfterClick(GameObject selectedButton)
     {
@@ -18,4 +44,87 @@ public class ButtonManager : MonoBehaviour
         yield return new WaitForSeconds(time);
         selectedButton.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
     }
+    #endregion
+
+    #region Show or hide magic-related buttons function
+    // Okreœla, czy s¹ widoczne przyciski splatania magii i rzucania zaklêæ
+    public void ShowOrHideMagicButtons(GameObject character)
+    {
+        if(character.CompareTag("Enemy"))
+        {
+            if (character.GetComponent<Stats>().Mag > 0)
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/ChannelingButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/ChannelingButton").SetActive(true);
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/SpellButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/SpellButton").SetActive(true);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/ChannelingButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/ChannelingButton").SetActive(false);
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/SpellButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/SpellButton").SetActive(false);
+            }
+        }
+        else
+        {
+            if (character.GetComponent<Stats>().Mag > 0)
+            {
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton").SetActive(true);
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton").SetActive(true);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/ChannelingButton").SetActive(false);
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/SpellButton").SetActive(false);
+            }
+        }
+    }
+    #endregion
+
+    #region Show or hide reload and charge buttons function
+    // Okreœla, czy jest widoczny przycisk przeladowania broni, czy szarzy w zaleznosci od zasiegu broni, ktorej uzywa postac
+    private void ShowReloadOrChargeButton(GameObject character)
+    {
+        if (character.CompareTag("Enemy"))
+        {
+            if (character.GetComponent<Stats>().AttackRange > 1.5f)
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/ReloadButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/ReloadButton").SetActive(true);
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/ChargeButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/ChargeButton").SetActive(false);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/ReloadButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/ReloadButton").SetActive(false);
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/ChargeButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/ChargeButton").SetActive(true);
+            }
+        }
+        else
+        {
+            if (character.GetComponent<Stats>().AttackRange > 1.5f)
+            {
+                if(GameObject.Find("ActionsButtonsPlayer/Canvas/ReloadButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/ReloadButton").SetActive(true);
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/ChargeButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/ChargeButton").SetActive(false);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/ReloadButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/ReloadButton").SetActive(false);
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/ChargeButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/ChargeButton").SetActive(true);
+            }
+        }
+    }
+    #endregion
 }

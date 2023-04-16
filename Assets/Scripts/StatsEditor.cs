@@ -13,13 +13,6 @@ public class StatsEditor : MonoBehaviour
 
     public static bool EditorIsOpen = false;
 
-    private MessageManager messageManager;
-
-    void Start()
-    {
-        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
-        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
-    }
     public void PanelVisibility(GameObject panel)
     {
         panel.SetActive(true);
