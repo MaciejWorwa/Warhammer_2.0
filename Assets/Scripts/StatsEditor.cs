@@ -7,11 +7,9 @@ using TMPro;
 
 public class StatsEditor : MonoBehaviour
 {
-    [SerializeField] GameObject generalPanel; // Panel w ktorym wybieramy, jaki typ cech bedziemy chcieli zmieniac
+    public GameObject generalPanel; // Panel w ktorym wybieramy, jaki typ cech bedziemy chcieli zmieniac
 
     [SerializeField] TMP_InputField charNameText; // Napis przedstawiajacy na panelu imie postaci
-
-    public static bool EditorIsOpen = false;
 
     public void PanelVisibility(GameObject panel)
     {
@@ -37,13 +35,22 @@ public class StatsEditor : MonoBehaviour
         // Otwiera lub zamyka glowny panel
         if(!generalPanel.activeSelf)
         {
-            EditorIsOpen = true;
+            GameManager.PanelIsOpen = true;
             generalPanel.SetActive(true);
         }
         else
         {
             generalPanel.SetActive(false);
-            EditorIsOpen= false;
+            GameManager.PanelIsOpen = false;
+        }
+    }
+
+    public void HideGeneralPanel()
+    {
+        if (generalPanel.activeSelf)
+        {
+            generalPanel.SetActive(false);
+            GameManager.PanelIsOpen = false;
         }
     }
 

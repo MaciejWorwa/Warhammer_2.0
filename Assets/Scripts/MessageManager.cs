@@ -13,7 +13,7 @@ public class MessageManager : MonoBehaviour
         // Zmienia pozycje poprzednich wiadomosci, zeby nie pojawialy sie jedna na drugiej
         if (allMessages.Count > 0)
             foreach (var m in allMessages)
-                m.gameObject.transform.Translate(new Vector3(0, 18, 0));
+                m.gameObject.transform.Translate(new Vector3(0, (int)(Screen.height * 0.035f), 0));
 
         // Gdy ilosc wyswietlanych wiadomosci przekroczy okreslona ilosc to usuwa najwczesniejsza z nich
         if (allMessages.Count > 12)
@@ -30,6 +30,14 @@ public class MessageManager : MonoBehaviour
         message.gameObject.transform.SetParent(GameObject.FindGameObjectWithTag("MainCanvas").transform.transform);
 
         message.text = messageText;
+
+
+        // Ustawienie rozmiaru pola tekstowego
+        message.rectTransform.sizeDelta = new Vector2((int)Screen.width / 1.66f, message.rectTransform.sizeDelta.y);
+
+        // Ustawienie rozmiaru czcionki
+        message.fontSize = (int)(Screen.width * 0.015f);
+
 
         StartCoroutine(HideMessage(message, messageDuration)); // uruchomienie korutyny
 

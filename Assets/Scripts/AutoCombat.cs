@@ -83,6 +83,9 @@ public class AutoCombat : MonoBehaviour
             }
             else
             {
+                // Wlaczenie opcji poruszania
+                MovementManager.canMove = true;
+
                 // wektor we wszystkie osiem kierunkow dookola pola z postacia bedaca celem ataku
                 Vector3[] directions = { Vector3.right, Vector3.left, Vector3.up, Vector3.down, new Vector3(1, 1, 0), new Vector3(-1, -1, 0), new Vector3(-1, 1, 0), new Vector3(1, -1, 0) };
 
@@ -147,7 +150,11 @@ public class AutoCombat : MonoBehaviour
 
             // Usuwa z pola bitwy postacie, ktorych zywotnosc spadla ponizej 0
             if (closestOpponent.GetComponent<Stats>().tempHealth < 0)
+            {
                 Destroy(closestOpponent);
+                GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(closestOpponent, false);
+            }
+                
         }
     }
 

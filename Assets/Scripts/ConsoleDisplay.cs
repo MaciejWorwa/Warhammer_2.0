@@ -17,7 +17,6 @@ namespace DebugStuff
         void Start()
         {
             doShow = false;
-            //slider.OnValueChanged.AddListener(delegate { OnGUI(); });
         }
 
         void OnEnable()
@@ -53,7 +52,13 @@ namespace DebugStuff
 
                 Rect consoleRect = new Rect(consolePosX, consolePosY, consoleWidth, consoleHeight);
 
-                myLog = GUI.TextArea(consoleRect, myLog);
+
+
+                GUIStyle style = GUI.skin.GetStyle("Box"); // Wybranie stylu okna konsoli
+                style.fontSize = (int)(Screen.width * 0.015f); // Wielkosc czcionki
+                style.alignment = TextAnchor.UpperLeft; // Wyrownanie tekstu do lewej gornej krawedzi okna konsoli
+
+                myLog = GUI.TextArea(consoleRect, myLog, style);
             }
         }
         //#endif

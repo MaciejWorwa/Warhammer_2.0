@@ -75,7 +75,7 @@ public class Player : MonoBehaviour
         initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
         nameDisplay.text = this.gameObject.GetComponent<Stats>().Name.ToString();
 
-        if (Input.GetKeyDown(KeyCode.P) && selectedPlayer.name == this.gameObject.name && StatsEditor.EditorIsOpen == false)
+        if (Input.GetKeyDown(KeyCode.P) && selectedPlayer.name == this.gameObject.name && GameManager.PanelIsOpen == false)
         {
             attackManager.Attack(selectedPlayer, Enemy.selectedEnemy);
             buttonManager.ShowOrHideActionsButtons(selectedPlayer, false);
@@ -98,7 +98,7 @@ public class Player : MonoBehaviour
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // Umozliwia zaznaczenie/odznaczenie postaci, tylko gdy inne postacie nie sa wybrane i panel edycji statystyk jest zamkniety
-        if (!StatsEditor.EditorIsOpen && trSelect == null && Enemy.trSelect == null && AttackManager.targetSelecting != true || !StatsEditor.EditorIsOpen && trSelect == transform && Enemy.trSelect == null && AttackManager.targetSelecting != true)
+        if (!GameManager.PanelIsOpen && trSelect == null && Enemy.trSelect == null && AttackManager.targetSelecting != true || !GameManager.PanelIsOpen && trSelect == transform && Enemy.trSelect == null && AttackManager.targetSelecting != true)
         {
             if (trSelect == transform) // klikniecie na postac, ktora juz jest wybrana
             {
@@ -139,6 +139,9 @@ public class Player : MonoBehaviour
         // Jezeli jest aktywny tryb wybierania celu ataku, przekazuje informacje o kliknietym Playerze i wywoluje funkcje Attack traktujac wybranego Enemy jako atakujacego i Playera jako atakowanego.
         if(AttackManager.targetSelecting == true)
         {
+            // Resetuje tryb wyboru celu ataku
+            AttackManager.targetSelecting = false;
+
             // Sprawdza, czy atakujacym nie jest inny Player
             if (trSelect != null)
             {
@@ -149,7 +152,7 @@ public class Player : MonoBehaviour
                 buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);
                 // Resetuje szarze jesli jest aktywna
                 if (MovementManager.Charge)
-                    GameObject.Find("MovementManager").GetComponent<MovementManager>().SetCharge();
+                    GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
                 return;
             }
             selectedPlayer = this.gameObject;
@@ -159,11 +162,11 @@ public class Player : MonoBehaviour
             else
                 attackManager.ChargeAttack(Enemy.selectedEnemy, selectedPlayer);
 
-            // Resetuje tryb wyboru celu ataku
-            AttackManager.targetSelecting = false;
-
             // Przywraca widocznosc przyciskow akcji atakujacej postaci
             buttonManager.ShowOrHideActionsButtons(Enemy.selectedEnemy, true);
+
+            // Resetuje szarze jesli jest aktywna
+            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
         }
     }
     #endregion

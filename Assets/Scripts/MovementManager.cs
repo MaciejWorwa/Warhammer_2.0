@@ -37,6 +37,9 @@ public class MovementManager : MonoBehaviour
         GameObject[] characters = enemies.Concat(players).ToArray();
 
         foreach(var character in characters) character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz;
+
+        // Zresetowanie koloru wszystkich pol
+        grid.ResetTileColors();
     }
 
     public void SetCharge()
@@ -54,7 +57,7 @@ public class MovementManager : MonoBehaviour
             Run = false;
         }
 
-        // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+        // Zresetowanie koloru wszystkich pol
         grid.ResetTileColors();
 
         // Aktualizacja podswietlonego zasiegu ruchu postaci
@@ -191,12 +194,16 @@ public class MovementManager : MonoBehaviour
                 Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
             }
 
-            // resetuje podswietlenie pol siatki w zasiegu ruchu postaci
-            GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
-            foreach (var tile in tiles)
+            // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+            grid.ResetTileColors();
+
+            // Przywraca widocznosc przyciskow akcji postaci po wykonaniu ruchu i ewentualnie resetuje bieg oraz szarze
+            if(!AutoCombat.AutoCombatOn)
             {
-                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+                GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(character, true);
             }
+            canMove = false;
+            ResetChargeAndRun();
         }
     }
 

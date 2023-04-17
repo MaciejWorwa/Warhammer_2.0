@@ -4,20 +4,29 @@ using UnityEngine;
 
 public class OptionsMenu : MonoBehaviour
 {
-    [SerializeField] GameObject optionsPanel; // Panel z opcjami
+    public GameObject optionsPanel; // Panel z opcjami
 
     public void ShowOptionsPanel()
     {
         // Otwiera lub zamyka glowny panel
         if (!optionsPanel.activeSelf)
         {
-            StatsEditor.EditorIsOpen = true; // odwolanie do statycznego boola, zeby nie moc zaznaczac postai podczas wlaczonego menu opcji
+            GameManager.PanelIsOpen = true;
             optionsPanel.SetActive(true);
         }
         else
         {
             optionsPanel.SetActive(false);
-            StatsEditor.EditorIsOpen = false; // odwolanie do statycznego boola, zeby nie moc zaznaczac postai podczas wlaczonego menu opcji
+            GameManager.PanelIsOpen = false;
+        }
+    }
+
+    public void HideOptionsPanel()
+    {
+        if (optionsPanel.activeSelf)
+        {
+            optionsPanel.SetActive(false);
+            GameManager.PanelIsOpen = false;
         }
     }
 }

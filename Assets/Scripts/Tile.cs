@@ -64,7 +64,7 @@ public class Tile : MonoBehaviour
         GameObject character = CharacterManager.GetSelectedCharacter();
 
         // wywoluje akcje ruchu wewnatrz klasy MovementManager
-        if(character != null && !StatsEditor.EditorIsOpen)
+        if(character != null && !GameManager.PanelIsOpen)
             movementManager.MoveSelectedCharacter(this.gameObject, character);    
     }
 }

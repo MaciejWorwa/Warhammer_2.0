@@ -33,6 +33,7 @@ public class MagicManager : MonoBehaviour
         }
         else
         {
+            powerLevel = 0;
             messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakoñczone niepowodzeniem.", 4f);
             Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakoñczone niepowodzeniem.");
         }
