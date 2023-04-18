@@ -82,6 +82,8 @@ public class Stats : MonoBehaviour
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy ¿ycie postaci jest poni¿ej 0
     [HideInInspector] public int parryBonus; // sumaryczna premia do WW przy parowaniu
+    [HideInInspector] public int defensiveBonus; // premia za pozycje obronna
+    [HideInInspector] public int aimingBonus; // premia za przycelowanie
 
     [Header("Broñ")]
     public int Weapon_S;

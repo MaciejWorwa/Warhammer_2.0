@@ -14,7 +14,7 @@ public class AttackManager : MonoBehaviour
 
     private int attackBonus; // sumaryczna premia do WW lub US przy ataku
     private int chargeBonus; //premia za szar¿ê
-    private int aimingBonus; //premia za przycelowanie
+    private int defensiveBonus; // minus do atakow przeciwko postaci z pozycja obronna
 
     private GameObject[] aimButtons; // przyciski celowania zarowno bohatera gracza jak i wroga
 
@@ -87,6 +87,9 @@ public class AttackManager : MonoBehaviour
     {
         do
         {
+            // Sprawdza, czy atakowany posiada bonus za przyjecie pozycji obronnej
+            defensiveBonus = target.GetComponent<Stats>().defensiveBonus;
+
             // liczy dystans pomiedzy walczacymi
             if (attacker != null && target != null)
                 attackDistance = Vector3.Distance(attacker.transform.position, target.transform.position);
@@ -107,12 +110,12 @@ public class AttackManager : MonoBehaviour
                     // sprawdza czy bron jest naladowana
                     if (attacker.GetComponent<Stats>().reloadLeft == 0)
                     {
-                        hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
+                        hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
-                        if (attackBonus > 0)
+                        if (attackBonus > 0 || defensiveBonus > 0)
                         {
-                            messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na US: {wynik}  Premia: {attackBonus}", 6f);
-                            Debug.Log($"{attacker.name} Rzut na US: {wynik}  Premia: {attackBonus}");
+                            messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
+                            Debug.Log($"{attacker.name} Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}");
                         }
                         else
                         {
@@ -143,14 +146,14 @@ public class AttackManager : MonoBehaviour
                     else
                         chargeBonus = 0;
 
-                    attackBonus = chargeBonus + aimingBonus;
+                    attackBonus = chargeBonus + attacker.GetComponent<Stats>().aimingBonus;
 
-                    hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
+                    hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
-                    if (attackBonus > 0)
+                    if (attackBonus > 0 || defensiveBonus > 0)
                     {
-                        messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}  Premia: {attackBonus}", 6f);
-                        Debug.Log($"{attacker.name} Rzut na WW: {wynik}  Premia: {attackBonus}");
+                        messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
+                        Debug.Log($"{attacker.name} Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}");
                     }
                     else
                     {
@@ -180,8 +183,8 @@ public class AttackManager : MonoBehaviour
                 }
 
                 // zresetowanie bonusu za celowanie, jeœli jest aktywny
-                if (aimingBonus != 0)
-                    TakeAim();
+                if (attacker.GetComponent<Stats>().aimingBonus != 0)
+                    attacker.GetComponent<Stats>().aimingBonus = 0;
 
                 if (hit && targetDefended != true)
                 {
@@ -397,33 +400,45 @@ public class AttackManager : MonoBehaviour
     }
     #endregion
 
-    #region Take aim
-    public void TakeAim()
+    #region Defensive position
+    public void DefensivePosition(GameObject button)
     {
-        if (aimingBonus == 0)
-        {
-            messageManager.ShowMessage("Przycelowanie", 3f);
-            Debug.Log("Przycelowanie");
-            aimingBonus = 10;
+        GameObject character = CharacterManager.GetSelectedCharacter();
 
-            //zmiana koloru wszystkich przycisków AimButton, ¿eby by³o wiadomo, ¿e przycelowanie jest aktywne
-            foreach (GameObject button in aimButtons)
-            {
-                button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
-            }
+        if (character.GetComponent<Stats>().defensiveBonus == 0)
+        {
+            messageManager.ShowMessage("Pozycja obronna", 3f);
+            Debug.Log("Pozycja obronna");
+
+            button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+            character.GetComponent<Stats>().defensiveBonus = 20;
         }
         else
         {
-            aimingBonus = 0;
-
-            //przywrócenie domyœlnego koloru przyciskom
-            foreach (GameObject button in aimButtons)
-            {
-                button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
-            }
+            button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+            character.GetComponent<Stats>().defensiveBonus = 0;
         }
+    }
+    #endregion
 
-        attackBonus = chargeBonus + aimingBonus;
+    #region Take aim
+    public void TakeAim(GameObject button)
+    {
+        GameObject character = CharacterManager.GetSelectedCharacter();
+
+        if (character.GetComponent<Stats>().aimingBonus == 0)
+        {
+            messageManager.ShowMessage("Przycelowanie", 3f);
+            Debug.Log("Przycelowanie");
+            character.GetComponent<Stats>().aimingBonus = 10;
+
+            button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+        }
+        else
+        {
+            character.GetComponent<Stats>().aimingBonus = 0;
+            button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+        }
     }
     #endregion
 
@@ -588,6 +603,7 @@ public class AttackManager : MonoBehaviour
                 GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], attacker);
                 Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)
 
+                MovementManager.Charge = true;
                 Attack(attacker, target); // Wykonywany jest jeden atak z bonusem +10, bo to szarza
 
                 // Zresetowanie szarzy

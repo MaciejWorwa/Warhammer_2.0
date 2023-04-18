@@ -27,6 +27,8 @@ public class ButtonManager : MonoBehaviour
 
         ShowReloadOrChargeButton(character);
         ShowOrHideMagicButtons(character);
+        RefreshDefensivePositionButton(character);
+        RefreshAimButton(character);
     }
     #endregion
 
@@ -123,6 +125,72 @@ public class ButtonManager : MonoBehaviour
                     GameObject.Find("ActionsButtonsPlayer/Canvas/ReloadButton").SetActive(false);
                 if (GameObject.Find("ActionsButtonsPlayer/Canvas/ChargeButton") != null)
                     GameObject.Find("ActionsButtonsPlayer/Canvas/ChargeButton").SetActive(true);
+            }
+        }
+    }
+    #endregion
+
+    #region Refresh defensive position button
+    // Odswieza przycisk pozycji obronnej dla kazdej wybranej postaci, w zaleznosci czy pozycja obronna jest u niego aktywna, czy nie
+    private void RefreshDefensivePositionButton(GameObject character)
+    {
+        if (character.CompareTag("Enemy"))
+        {
+            if (character.GetComponent<Stats>().defensiveBonus == 0)
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/DefensivePositionButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/DefensivePositionButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/DefensivePositionButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/DefensivePositionButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+            }
+        }
+        else
+        {
+            if (character.GetComponent<Stats>().defensiveBonus == 0)
+            {
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/DefensivePositionButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/DefensivePositionButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/DefensivePositionButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/DefensivePositionButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+            }
+        }
+    }
+    #endregion
+
+    #region Refresh defensive position button
+    // Odswieza przycisk przycelowania dla kazdej wybranej postaci, w zaleznosci czy przycelowanie jest u niego aktywna, czy nie
+    private void RefreshAimButton(GameObject character)
+    {
+        if (character.CompareTag("Enemy"))
+        {
+            if (character.GetComponent<Stats>().aimingBonus == 0)
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/AimButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsEnemy/Canvas/AimButton") != null)
+                    GameObject.Find("ActionsButtonsEnemy/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+            }
+        }
+        else
+        {
+            if (character.GetComponent<Stats>().aimingBonus == 0)
+            {
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/AimButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+            }
+            else
+            {
+                if (GameObject.Find("ActionsButtonsPlayer/Canvas/AimButton") != null)
+                    GameObject.Find("ActionsButtonsPlayer/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
             }
         }
     }
