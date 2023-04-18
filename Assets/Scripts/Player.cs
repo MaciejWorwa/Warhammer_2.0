@@ -74,12 +74,6 @@ public class Player : MonoBehaviour
         healthDisplay.text = this.gameObject.GetComponent<Stats>().tempHealth + "/" + this.gameObject.GetComponent<Stats>().maxHealth;
         initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
         nameDisplay.text = this.gameObject.GetComponent<Stats>().Name.ToString();
-
-        if (Input.GetKeyDown(KeyCode.P) && selectedPlayer.name == this.gameObject.name && GameManager.PanelIsOpen == false)
-        {
-            attackManager.Attack(selectedPlayer, Enemy.selectedEnemy);
-            buttonManager.ShowOrHideActionsButtons(selectedPlayer, false);
-        }
  
         if (playerStats.tempHealth < 0 && playerStats.criticalCondition == false)
         {

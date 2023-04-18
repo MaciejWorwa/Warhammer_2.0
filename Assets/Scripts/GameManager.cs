@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] GameObject panel;
+    [SerializeField] GameObject quitPanel;
+    [SerializeField] GameObject rollPanel;
     OptionsMenu optionsMenu;
     StatsEditor statsEditor;
 
@@ -23,10 +24,12 @@ public class GameManager : MonoBehaviour
         {
             if (!PanelIsOpen)
                 ShowOrHideQuitGamePanel();
-            else if (statsEditor.generalPanel.activeSelf) 
+            else if (statsEditor.generalPanel.activeSelf)
                 GameObject.Find("StatsEditor").GetComponent<StatsEditor>().HideGeneralPanel();
             else if (optionsMenu.optionsPanel.activeSelf)
                 GameObject.Find("OptionsMenu").GetComponent<OptionsMenu>().HideOptionsPanel();
+            else if (rollPanel.activeSelf)
+                HideRollPanel();
         }
     }
 
@@ -37,9 +40,32 @@ public class GameManager : MonoBehaviour
 
     public void ShowOrHideQuitGamePanel()
     {
-        if (!panel.activeSelf)
-            panel.SetActive(true);
+        if (!quitPanel.activeSelf)
+            quitPanel.SetActive(true);
         else
-            panel.SetActive(false);
+            quitPanel.SetActive(false);
+    }
+
+    public void ShowRollPanel()
+    {
+        if (!rollPanel.activeSelf)
+        {
+            PanelIsOpen = true;
+            rollPanel.SetActive(true);
+        }
+        else
+        {
+            PanelIsOpen = false;
+            rollPanel.SetActive(false);
+        }
+    }
+
+    public void HideRollPanel()
+    {
+        if (rollPanel.activeSelf)
+        {
+            rollPanel.SetActive(false);
+            PanelIsOpen = false;
+        }
     }
 }

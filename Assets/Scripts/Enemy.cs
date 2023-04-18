@@ -96,12 +96,6 @@ public class Enemy : MonoBehaviour
         initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
         nameDisplay.text = this.gameObject.GetComponent<Stats>().Name.ToString();
 
-        if (Input.GetKeyDown(KeyCode.E) && selectedEnemy.name == this.gameObject.name && GameManager.PanelIsOpen == false)
-        {
-            attackManager.Attack(selectedEnemy, Player.selectedPlayer);
-            buttonManager.ShowOrHideActionsButtons(selectedEnemy, false);
-        }
-
         if (enemyStats.tempHealth < 0 && enemyStats.criticalCondition == false)
         {
             enemyStats.GetCriticalHit();
