@@ -10,12 +10,12 @@ public class StatsEditor : Editor
 {
     public override void OnInspectorGUI()
     {        
-        base.OnInspectorGUI(); // Wyúwietlenie wszystkiego z poprzedniego inspektora
+        base.OnInspectorGUI(); // Wy≈õwietlenie wszystkiego z poprzedniego inspektora
         Stats stats = (Stats)target;
 
-        EditorGUILayout.LabelField("Cechy PierwszorzÍdowe"); // Nadanie Headera s≥ownikowi
+        EditorGUILayout.LabelField("Cechy Pierwszorzƒôdowe"); // Nadanie Headera s≈Çownikowi
 
-        // wyúwietlanie wartoúci dla kaødego klucza
+        // wy≈õwietlanie warto≈õci dla ka≈ºdego klucza
         foreach (string key in stats.CechyPierwszorzedowe.Keys)
         {
             int value = stats.CechyPierwszorzedowe[key];
@@ -31,14 +31,17 @@ public class StatsEditor : Editor
 
 public class Stats : MonoBehaviour
 {
-    [Header("ImiÍ")]
+    [Header("Imiƒô")]
     public string Name;
 
     [Header("Rasa")]
     public string Rasa;
 
+    public int Level;
+    public int Exp;
+
     /*
-    // ZROBIENIE S£OWNIKA. ALE NIEZBYT WSPOLGRA TO Z WYSWIETLANIEM I ZMIENIANIEM WARTOSCI Z POZIOMU INSPEKTORA PODCZAS URUCHOMIONEJ GRY.
+    // ZROBIENIE S≈ÅOWNIKA. ALE NIEZBYT WSPOLGRA TO Z WYSWIETLANIEM I ZMIENIANIEM WARTOSCI Z POZIOMU INSPEKTORA PODCZAS URUCHOMIONEJ GRY.
     void Start()
     {
         CechyPierwszorzedowe = new Dictionary<string, int>();
@@ -51,7 +54,7 @@ public class Stats : MonoBehaviour
     }
     */
 
-    [Header("Cechy pierwszorzÍdowe")]//RADA MICHA£A: zrobic slownik ktorego kluczami sa nazwy cech a wartosciami wartosci tych cech
+    [Header("Cechy pierwszorzƒôdowe")]//RADA MICHA≈ÅA: zrobic slownik ktorego kluczami sa nazwy cech a wartosciami wartosci tych cech
     public int WW;
     public int US;
     public int K;
@@ -62,7 +65,7 @@ public class Stats : MonoBehaviour
     public int Ogd;
     // public Dictionary<string, int> CechyPierwszorzedowe;
 
-    [Header("Cechy drugorzÍdowe")]
+    [Header("Cechy drugorzƒôdowe")]
     public int A;
     public int S;
     public int Wt;
@@ -75,17 +78,17 @@ public class Stats : MonoBehaviour
 
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
-    public bool existDodge; // informacja o tym, czy postaÊ posiada zdolnoúÊ uniku
-    public bool instantReload; // informacja o tym, czy postaÊ posiada zdolnoúÊ blyskawicznego przeladowania
-    [HideInInspector] public bool canParry = true; // informacja o tym, czy postac moøe parowaÊ atak
-    [HideInInspector] public bool canDodge; // informacja o tym, czy postac moøe unikaÊ ataku
+    public bool existDodge; // informacja o tym, czy postaƒá posiada zdolno≈õƒá uniku
+    public bool instantReload; // informacja o tym, czy postaƒá posiada zdolno≈õƒá blyskawicznego przeladowania
+    [HideInInspector] public bool canParry = true; // informacja o tym, czy postac mo≈ºe parowaƒá atak
+    [HideInInspector] public bool canDodge; // informacja o tym, czy postac mo≈ºe unikaƒá ataku
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
-    [HideInInspector] public bool criticalCondition = false; // sprawdza czy øycie postaci jest poniøej 0
+    [HideInInspector] public bool criticalCondition = false; // sprawdza czy ≈ºycie postaci jest poni≈ºej 0
     [HideInInspector] public int parryBonus; // sumaryczna premia do WW przy parowaniu
     [HideInInspector] public int defensiveBonus; // premia za pozycje obronna
     [HideInInspector] public int aimingBonus; // premia za przycelowanie
 
-    [Header("BroÒ")]
+    [Header("Bro≈Ñ")]
     public int Weapon_S;
     public double AttackRange;
     public int reloadTime;
@@ -103,7 +106,7 @@ public class Stats : MonoBehaviour
     public int PZ_torso;
     public int PZ_legs;
 
-    // PrÛba wczytania bestiariusza i zaktualizowania wartoúci cech zgodnie z plikiem .json (NIEUDANA, lista potworow w inspektorze jest pusta)
+    // Pr√≥ba wczytania bestiariusza i zaktualizowania warto≈õci cech zgodnie z plikiem .json (NIEUDANA, lista potworow w inspektorze jest pusta)
     /*
     public TextAsset jsonBestiariusz;
 
@@ -198,8 +201,8 @@ public class Stats : MonoBehaviour
     {
         int criticalValue = Random.Range(1, 101);
 
-        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>ØywotnoúÊ spad≥a poniøej 0.</color> Wynik rzutu na obraøenia krytyczne: <color=red>{criticalValue}</color>", 6f);
-        Debug.Log("ØywotnoúÊ spad≥a poniøej 0. Wynik rzutu na obraøenia krytyczne: " + criticalValue);
+        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>≈ªywotno≈õƒá spad≈Ça poni≈ºej 0.</color> Wynik rzutu na obra≈ºenia krytyczne: <color=red>{criticalValue}</color>", 6f);
+        Debug.Log("≈ªywotno≈õƒá spad≈Ça poni≈ºej 0. Wynik rzutu na obra≈ºenia krytyczne: " + criticalValue);
         criticalCondition = true;
     }
     #endregion
@@ -208,19 +211,19 @@ public class Stats : MonoBehaviour
     public void ResetActionsNumber()
     {
         actionsLeft = 2;
-        //Debug.Log($"Nowa runda. {this.gameObject.name} pozosta≥y {actionsLeft} akcje.");
+        //Debug.Log($"Nowa runda. {this.gameObject.name} pozosta≈Çy {actionsLeft} akcje.");
     }
 
     public void TakeAction() // wykonanie akcji
     {
         actionsLeft--;
-        Debug.Log($"{this.gameObject.name} wykona≥ akcjÍ pojedynczπ. Pozosta≥a {actionsLeft} akcja w tej rundzie.");
+        Debug.Log($"{this.gameObject.name} wykona≈Ç akcjƒô pojedynczƒÖ. Pozosta≈Ça {actionsLeft} akcja w tej rundzie.");
     }
 
-    public void TakeDoubleAction() // wykonanie akcji podwÛjnej
+    public void TakeDoubleAction() // wykonanie akcji podw√≥jnej
     {
         actionsLeft -= 2;
-        Debug.Log($"{this.gameObject.name} wykona≥ akcjÍ podwÛjnπ. Pozosta≥o {actionsLeft} akcji w tej rundzie.");
+        Debug.Log($"{this.gameObject.name} wykona≈Ç akcjƒô podw√≥jnƒÖ. Pozosta≈Ço {actionsLeft} akcji w tej rundzie.");
     }
     #endregion
 }

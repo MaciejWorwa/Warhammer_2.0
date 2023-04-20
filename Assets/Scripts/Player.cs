@@ -7,7 +7,7 @@ public class Player : MonoBehaviour
 {
     public static Stats playerStats;
     public enum Rasa { Czlowiek, Elf, Krasnolud, Niziolek }
-    [SerializeField] private Rasa rasa;
+    public Rasa rasa;
 
     private TMP_Text nameDisplay;
     private TMP_Text healthDisplay;
@@ -36,8 +36,8 @@ public class Player : MonoBehaviour
         attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
         //nadanie rasy
         rasa = (Rasa)Random.Range(0, 4);
-        messageManager.ShowMessage($"Stworzy≥eú {this.gameObject.name} o rasie {rasa}", 3f);
-        Debug.Log($"Stworzy≥eú {this.gameObject.name} o rasie {rasa}");
+        messageManager.ShowMessage($"Stworzy≈Çe≈õ {this.gameObject.name} o rasie {rasa}", 3f);
+        Debug.Log($"Stworzy≈Çe≈õ {this.gameObject.name} o rasie {rasa}");
 
         //nadanie temu obiektowi klasy Stats
         playerStats = this.gameObject.AddComponent<Stats>();
@@ -50,7 +50,7 @@ public class Player : MonoBehaviour
         //wygenerowanie poczatkowych statystyk w zaleznosci od rasy. Metoda ta jest zawarta w klasie Stats
         playerStats.SetBaseStatsByRace(rasa);
 
-        // ustawienie aktualnych statystyk punktÛw øycia i szybkosci zgodnie z poczatkowymi
+        // ustawienie aktualnych statystyk punkt√≥w ≈ºycia i szybkosci zgodnie z poczatkowymi
         playerStats.tempHealth = playerStats.maxHealth;
         playerStats.tempSz = playerStats.Sz;
 
@@ -113,8 +113,8 @@ public class Player : MonoBehaviour
 
                 selectedPlayer = this.gameObject;
 
-                messageManager.ShowMessage($"Wybra≥eú {selectedPlayer.GetComponent<Stats>().Name}", 3f);
-                Debug.Log("Wybra≥eú " + selectedPlayer.name);
+                messageManager.ShowMessage($"Wybra≈Çe≈õ {selectedPlayer.GetComponent<Stats>().Name}", 3f);
+                Debug.Log("Wybra≈Çe≈õ " + selectedPlayer.name);
 
                 selectedPlayer.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
 
@@ -139,8 +139,8 @@ public class Player : MonoBehaviour
             // Sprawdza, czy atakujacym nie jest inny Player
             if (trSelect != null)
             {
-                messageManager.ShowMessage($"<color=red>Nie moøesz atakowaÊ swoich sojusznikÛw.</color>", 3f);
-                Debug.Log("Nie moøesz atakowaÊ swoich sojusznikÛw.");
+                messageManager.ShowMessage($"<color=red>Nie mo≈ºesz atakowaƒá swoich sojusznik√≥w.</color>", 3f);
+                Debug.Log("Nie mo≈ºesz atakowaƒá swoich sojusznik√≥w.");
 
                 // Przywraca widocznosc przyciskow akcji
                 buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);

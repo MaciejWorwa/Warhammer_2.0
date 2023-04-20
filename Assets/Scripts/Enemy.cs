@@ -6,7 +6,7 @@ using TMPro;
 public class Enemy : MonoBehaviour
 {
     public static Stats enemyStats;
-    private enum Rasa { Ork, Goblin, Troll, Wilk } // rozkminiÊ gdzie przechowywaÊ informacje o statystykach poczatkowych danej rasy, zeby nie bylo miliona linii kodu w Enemy
+    private enum Rasa { Ork, Goblin, Troll, Wilk } // rozkminiƒá gdzie przechowywaƒá informacje o statystykach poczatkowych danej rasy, zeby nie bylo miliona linii kodu w Enemy
     [SerializeField] private Rasa rasa;
 
     private TMP_Text nameDisplay;
@@ -37,8 +37,8 @@ public class Enemy : MonoBehaviour
 
         // nadanie rasy
         rasa = (Rasa)Random.Range(0, 4);
-        messageManager.ShowMessage($"Stworzy≥eú {this.gameObject.name} o rasie {rasa}", 3f);
-        Debug.Log($"Stworzy≥eú {this.gameObject.name} o rasie {rasa}");
+        messageManager.ShowMessage($"Stworzy≈Çe≈õ {this.gameObject.name} o rasie {rasa}", 3f);
+        Debug.Log($"Stworzy≈Çe≈õ {this.gameObject.name} o rasie {rasa}");
 
         // nadanie temu obiektowi klasy Stats
         enemyStats = this.gameObject.AddComponent<Stats>();
@@ -63,11 +63,11 @@ public class Enemy : MonoBehaviour
         enemyStats.maxHealth = Random.Range(8, 15);
 
 
-        // ustawienie aktualnych statystyk punktÛw øycia i szybkosci zgodnie z poczatkowymi
+        // ustawienie aktualnych statystyk punkt√≥w ≈ºycia i szybkosci zgodnie z poczatkowymi
         enemyStats.tempHealth = enemyStats.maxHealth;
         enemyStats.tempSz = enemyStats.Sz;
 
-        //UWAGA!!!!!!!!!!!!!  nadanie inicjatywy, atakow, Si≥y i Wt docelowo to bedzie robione rowniez w klasie Stats, tylko chce najpierw ogarnac import Jsona ze statami roznych wrogow 
+        //UWAGA!!!!!!!!!!!!!  nadanie inicjatywy, atakow, Si≈Çy i Wt docelowo to bedzie robione rowniez w klasie Stats, tylko chce najpierw ogarnac import Jsona ze statami roznych wrogow 
         enemyStats.Initiative = enemyStats.Zr + Random.Range(1, 11);
         enemyStats.A = 1;
         enemyStats.S = Mathf.RoundToInt(enemyStats.K / 10);
@@ -134,8 +134,8 @@ public class Enemy : MonoBehaviour
 
                 selectedEnemy = this.gameObject;
 
-                messageManager.ShowMessage($"Wybra≥eú {selectedEnemy.GetComponent<Stats>().Name}", 3f);
-                Debug.Log("Wybra≥eú " + selectedEnemy.name);
+                messageManager.ShowMessage($"Wybra≈Çe≈õ {selectedEnemy.GetComponent<Stats>().Name}", 3f);
+                Debug.Log("Wybra≈Çe≈õ " + selectedEnemy.name);
 
                 selectedEnemy.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
 
@@ -160,8 +160,8 @@ public class Enemy : MonoBehaviour
             // Sprawdza, czy atakujacym nie jest inny Enemy
             if (trSelect != null)
             {
-                messageManager.ShowMessage($"<color=red>Nie moøesz atakowaÊ swoich sojusznikÛw.</color>", 3f);
-                Debug.Log("Nie moøesz atakowaÊ swoich sojusznikÛw.");
+                messageManager.ShowMessage($"<color=red>Nie mo≈ºesz atakowaƒá swoich sojusznik√≥w.</color>", 3f);
+                Debug.Log("Nie mo≈ºesz atakowaƒá swoich sojusznik√≥w.");
 
                 // Przywraca widocznosc przyciskow akcji
                 buttonManager.ShowOrHideActionsButtons(selectedEnemy, true);

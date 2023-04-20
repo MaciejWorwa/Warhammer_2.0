@@ -17,12 +17,12 @@ public class ButtonManager : MonoBehaviour
 
         if(visibility == true)
         {
-            actionsButtons.transform.Find("Canvas").gameObject.SetActive(true); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca≥y obiekt
+            actionsButtons.transform.Find("Canvas").gameObject.SetActive(true); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca≈Çy obiekt
             actionsButtons.transform.position = character.transform.position;
         }
         else
         {
-            actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca≥y obiekt
+            actionsButtons.transform.Find("Canvas").gameObject.SetActive(false); // Dezaktywuje jedynie Canvas przypisany do obiektu ActionsButton, a nie ca≈Çy obiekt
         }
 
         ShowReloadOrChargeButton(character);
@@ -40,7 +40,7 @@ public class ButtonManager : MonoBehaviour
         StartCoroutine(ExecuteAfterTime(0.5f, selectedButton));
     }
 
-    // Przywrocenie domyúlnej przeüroczystosci po 0.5 sekundy od klikniecia
+    // Przywrocenie domy≈õlnej prze≈∫roczystosci po 0.5 sekundy od klikniecia
     IEnumerator ExecuteAfterTime(float time, GameObject selectedButton)
     {
         yield return new WaitForSeconds(time);
@@ -49,7 +49,7 @@ public class ButtonManager : MonoBehaviour
     #endregion
 
     #region Show or hide magic-related buttons function
-    // Okreúla, czy sπ widoczne przyciski splatania magii i rzucania zaklÍÊ
+    // Okre≈õla, czy sƒÖ widoczne przyciski splatania magii i rzucania zaklƒôƒá
     public void ShowOrHideMagicButtons(GameObject character)
     {
         if(character.CompareTag("Enemy"))
@@ -90,7 +90,7 @@ public class ButtonManager : MonoBehaviour
     #endregion
 
     #region Show or hide reload and charge buttons function
-    // Okreúla, czy jest widoczny przycisk przeladowania broni, czy szarzy w zaleznosci od zasiegu broni, ktorej uzywa postac
+    // Okre≈õla, czy jest widoczny przycisk przeladowania broni, czy szarzy w zaleznosci od zasiegu broni, ktorej uzywa postac
     private void ShowReloadOrChargeButton(GameObject character)
     {
         if (character.CompareTag("Enemy"))

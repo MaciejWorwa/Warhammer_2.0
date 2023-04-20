@@ -7,6 +7,8 @@ public class CreateEnemy : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
 
+    GameObject newEnemy;
+
     private Vector2 position;
 
     public static int enemiesAmount;  //ilosc wszystkich wrogow
@@ -15,31 +17,57 @@ public class CreateEnemy : MonoBehaviour
     {
         enemiesAmount = 0;
     }
-
     public void CreateNewEnemy()
     {
-        //generuje losowa pozycje na mapie
-        int x = Random.Range(-8, 8);
-        int y = Random.Range(-4, 4);
-        position = new Vector2(x, y);
+        // Liczba dostępnych pól
+        int availableTiles = 17 * 8; // z założenia plansza o wymiarach 17x8
 
-        //sprawdza czy dane pole jest wolne czy zajete
-        Collider2D searchForColliders = Physics2D.OverlapCircle(position, 0.1f);
-
-        if (searchForColliders == null || searchForColliders.tag == "Tile")
+        // Sprawdzenie dostępności pól
+        int attempts = 0;
+        Collider2D searchForColliders;
+        do
         {
-            //tworzy nowego wroga w losowej pozycji i nadaje mu odpowiednia nazwe
-            GameObject newEnemy = Instantiate(enemyPrefab, position, Quaternion.identity);
-            enemiesAmount++;
-            newEnemy.name = "Enemy " + enemiesAmount;
+            // Generowanie losowej pozycji na mapie
+            int x = Random.Range(-8, 9);
+            int y = Random.Range(-4, 4);
+            position = new Vector2(x, y);
 
-            newEnemy.GetComponent<Enemy>();
-            newEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+            // Sprawdzenie czy dane pole jest wolne czy zajęte
+            searchForColliders = Physics2D.OverlapCircle(position, 0.1f);
+
+            if (searchForColliders == null || searchForColliders.tag == "Tile")
+            {
+                // Zmniejszenie liczby dostępnych pól
+                availableTiles--;
+            }
+
+            // Inkrementacja liczby prób
+            attempts++;
+
+            // Sprawdzenie, czy liczba prób nie przekracza maksymalnej liczby dostępnych pól
+            if (attempts >= availableTiles)
+            {
+                Debug.Log("Nie można utworzyć nowego przeciwnika. Brak wolnych pól.");
+                return;
+            }
         }
-        else
-        {
-            //ponawia tworzenie nowego przeciwnika ale tym razem losuje inna pozycje do momentu az pole bedzie wolne
-            CreateNewEnemy();
-        }
+        while (searchForColliders != null && searchForColliders.tag != "Tile");
+
+        // Utworzenie nowego wroga w losowej pozycji i nadanie mu odpowiedniej nazwy
+        newEnemy = Instantiate(enemyPrefab, position, Quaternion.identity);
+        enemiesAmount++;
+        newEnemy.name = "Enemy " + enemiesAmount;
+
+        newEnemy.GetComponent<Enemy>();
+        newEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+
+        // Wywołanie ustawienia poziomu postaci (opóźnienie jest po to, aby inne operacje zdążyły się wykonać)
+        Invoke("SetCharacterLevel", 0.05f);
+    }
+
+
+    void SetCharacterLevel()
+    {
+        GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(newEnemy);
     }
 }

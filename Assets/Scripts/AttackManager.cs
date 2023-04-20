@@ -10,10 +10,10 @@ public class AttackManager : MonoBehaviour
     public static bool targetSelecting; // tryb wyboru celu ataku. Jego wartosc mowi o tym, czy w danym momencie trwa wybieranie celu ataku
 
     private float attackDistance; // dystans pomiedzy walczacymi
-    private bool targetDefended; // informacja o tym, czy postaci uda≥o siÍ sparowaÊ lub uniknπÊ atak
+    private bool targetDefended; // informacja o tym, czy postaci uda≈Ço siƒô sparowaƒá lub uniknƒÖƒá atak
 
     private int attackBonus; // sumaryczna premia do WW lub US przy ataku
-    private int chargeBonus; //premia za szarøÍ
+    private int chargeBonus; //premia za szar≈ºƒô
     private int defensiveBonus; // minus do atakow przeciwko postaci z pozycja obronna
 
     private GameObject[] aimButtons; // przyciski celowania zarowno bohatera gracza jak i wroga
@@ -37,8 +37,8 @@ public class AttackManager : MonoBehaviour
     public void SelectTarget()
     {
         targetSelecting = true;
-        messageManager.ShowMessage("Wybierz cel ataku, klikajπc na niego.", 3f);
-        Debug.Log("Wybierz cel ataku, klikajπc na niego.");
+        messageManager.ShowMessage("Wybierz cel ataku, klikajƒÖc na niego.", 3f);
+        Debug.Log("Wybierz cel ataku, klikajƒÖc na niego.");
 
         // Wylacza widocznosc przyciskow akcji postaci
         if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
@@ -55,13 +55,13 @@ public class AttackManager : MonoBehaviour
             Player.selectedPlayer.GetComponent<Stats>().reloadLeft--;
         if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft == 0)
         {
-            messageManager.ShowMessage($"BroÒ <color=green>{Player.selectedPlayer.name}</color> za≥adowana.", 3f);
-            Debug.Log($"BroÒ {Player.selectedPlayer.name} za≥adowana.");
+            messageManager.ShowMessage($"Bro≈Ñ <color=green>{Player.selectedPlayer.name}</color> za≈Çadowana.", 3f);
+            Debug.Log($"Bro≈Ñ {Player.selectedPlayer.name} za≈Çadowana.");
         }
         else
         {
-            messageManager.ShowMessage($"£adowanie broni <color=green>{Player.selectedPlayer.name}</color>. Pozosta≥a/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
-            Debug.Log($"£adowanie broni {Player.selectedPlayer.name}. Pozosta≥a/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby mÛc strzeliÊ.");
+            messageManager.ShowMessage($"≈Åadowanie broni <color=green>{Player.selectedPlayer.name}</color>. Pozosta≈Ça/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
+            Debug.Log($"≈Åadowanie broni {Player.selectedPlayer.name}. Pozosta≈Ça/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby m√≥c strzeliƒá.");
         }
           
     }
@@ -71,13 +71,13 @@ public class AttackManager : MonoBehaviour
             Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft--;
         if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft == 0)
         {
-            messageManager.ShowMessage($"BroÒ <color=red>{Enemy.selectedEnemy.name}</color> za≥adowana.", 3f);
-            Debug.Log($"BroÒ <color=red>{Enemy.selectedEnemy.name}</color> za≥adowana.");
+            messageManager.ShowMessage($"Bro≈Ñ <color=red>{Enemy.selectedEnemy.name}</color> za≈Çadowana.", 3f);
+            Debug.Log($"Bro≈Ñ <color=red>{Enemy.selectedEnemy.name}</color> za≈Çadowana.");
         }
         else
         {
-            messageManager.ShowMessage($"£adowanie broni <color=red>{Enemy.selectedEnemy.name}</color>. Pozosta≥a/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
-            Debug.Log($"£adowanie broni {Enemy.selectedEnemy.name}. Pozosta≥a/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby mÛc strzeliÊ.");
+            messageManager.ShowMessage($"≈Åadowanie broni <color=red>{Enemy.selectedEnemy.name}</color>. Pozosta≈Ça/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
+            Debug.Log($"≈Åadowanie broni {Enemy.selectedEnemy.name}. Pozosta≈Ça/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby m√≥c strzeliƒá.");
         }
     }
     #endregion
@@ -132,15 +132,15 @@ public class AttackManager : MonoBehaviour
                     }
                     else
                     {
-                        messageManager.ShowMessage($"<color=red>BroÒ wymaga na≥adowania</color>", 2f);
-                        Debug.Log($"BroÒ wymaga na≥adowania");
+                        messageManager.ShowMessage($"<color=red>Bro≈Ñ wymaga na≈Çadowania</color>", 2f);
+                        Debug.Log($"Bro≈Ñ wymaga na≈Çadowania");
                         break;
                     }
                 }
                 // sprawdza czy atak jest atakiem w zwarciu
                 if (attackDistance <= 1.5f)
                 {
-                    //uwzglÍdnienie bonusu do WW zwiazanego z szarøπ
+                    //uwzglƒôdnienie bonusu do WW zwiazanego z szar≈ºƒÖ
                     if (MovementManager.Charge)
                         chargeBonus = 10;
                     else
@@ -162,7 +162,7 @@ public class AttackManager : MonoBehaviour
                     }
                 }
 
-                //wywo≥anie funkcji parowania lub uniku jeúli postaÊ jeszcze moøe to robiÊ w tej rundzie
+                //wywo≈Çanie funkcji parowania lub uniku je≈õli postaƒá jeszcze mo≈ºe to robiƒá w tej rundzie
                 if (hit && attackDistance <= 1.5f)
                 {
                     //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
@@ -182,7 +182,7 @@ public class AttackManager : MonoBehaviour
                     }
                 }
 
-                // zresetowanie bonusu za celowanie, jeúli jest aktywny
+                // zresetowanie bonusu za celowanie, je≈õli jest aktywny
                 if (attacker.GetComponent<Stats>().aimingBonus != 0)
                     attacker.GetComponent<Stats>().aimingBonus = 0;
 
@@ -202,8 +202,8 @@ public class AttackManager : MonoBehaviour
                         int roll1 = UnityEngine.Random.Range(1, 11);
                         int roll2 = UnityEngine.Random.Range(1, 11);
                         rollResult = roll1 >= roll2 ? roll1 : roll2;
-                        messageManager.ShowMessage($"Atak druzgoczπcπ broniπ. Rzut 1: {roll1} Rzut 2: {roll2}", 6f);
-                        Debug.Log($"Atak druzgoczπcπ broniπ. Rzut 1: {roll1} Rzut 2: {roll2}");
+                        messageManager.ShowMessage($"Atak druzgoczƒÖcƒÖ broniƒÖ. Rzut 1: {roll1} Rzut 2: {roll2}", 6f);
+                        Debug.Log($"Atak druzgoczƒÖcƒÖ broniƒÖ. Rzut 1: {roll1} Rzut 2: {roll2}");
                     }
                     else
                         rollResult = UnityEngine.Random.Range(1, 11);
@@ -230,8 +230,8 @@ public class AttackManager : MonoBehaviour
                             else
                             {
                                 rollResult = 10;
-                                messageManager.ShowMessage($"Rzut na WW: {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.", 6f);
-                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.");
+                                messageManager.ShowMessage($"Rzut na WW: {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.", 6f);
+                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.");
                             }
                         }
                         else if (attackDistance > 1.5f)
@@ -246,8 +246,8 @@ public class AttackManager : MonoBehaviour
                             else
                             {
                                 rollResult = 10;
-                                messageManager.ShowMessage($"Rzut na US: {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.", 6f);
-                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.");
+                                messageManager.ShowMessage($"Rzut na US: {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.", 6f);
+                                Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.");
                             }
                         }
 
@@ -265,42 +265,48 @@ public class AttackManager : MonoBehaviour
                     else
                         damage = rollResult + attacker.GetComponent<Stats>().Weapon_S;
 
-                    messageManager.ShowMessage($"<color=green>{attacker.name}</color> wyrzuci≥ {rollResult} i zada≥ <color=green>{damage} obraøeÒ.</color>", 8f);
-                    Debug.Log($"{attacker.name} wyrzuci≥ {rollResult} i zada≥ {damage} obraøeÒ.");
+                    messageManager.ShowMessage($"<color=green>{attacker.name}</color> wyrzuci≈Ç {rollResult} i zada≈Ç <color=green>{damage} obra≈ºe≈Ñ.</color>", 8f);
+                    Debug.Log($"{attacker.name} wyrzuci≈Ç {rollResult} i zada≈Ç {damage} obra≈ºe≈Ñ.");
 
                     if (damage > (target.GetComponent<Stats>().Wt + armor))
                     {
                         target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
 
-                        messageManager.ShowMessage(target.name + " znegowa≥ " + (target.GetComponent<Stats>().Wt + armor) + " obraøeÒ.", 8f);
-                        Debug.Log(target.name + " znegowa≥ " + (target.GetComponent<Stats>().Wt + armor) + " obraøeÒ.");
+                        messageManager.ShowMessage(target.name + " znegowa≈Ç " + (target.GetComponent<Stats>().Wt + armor) + " obra≈ºe≈Ñ.", 8f);
+                        Debug.Log(target.name + " znegowa≈Ç " + (target.GetComponent<Stats>().Wt + armor) + " obra≈ºe≈Ñ.");
 
-                        messageManager.ShowMessage($"<color=red> Punkty øycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
-                        Debug.Log($"Punkty øycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
+                        messageManager.ShowMessage($"<color=red> Punkty ≈ºycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
+                        Debug.Log($"Punkty ≈ºycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
 
-                        //TO PONIØEJ DZIA£A ALE MUSIA£EM WY£•CZY∆ TYMCZASOWO ØEBY AUTOMATYCZNY COMBAT NIE WYWALA£ B£ D”W, BO W NIM NIE MA ØADNYCH SELECTEDENEMY ANI SELECTEDPLAYER
+                        //TO PONI≈ªEJ DZIA≈ÅA ALE MUSIA≈ÅEM WY≈ÅƒÑCZYƒÜ TYMCZASOWO ≈ªEBY AUTOMATYCZNY COMBAT NIE WYWALA≈Å B≈ÅƒòD√ìW, BO W NIM NIE MA ≈ªADNYCH SELECTEDENEMY ANI SELECTEDPLAYER
                         if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
+                        {
                             Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
+                            GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
+                        }
                         else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
+                        {
                             Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
+                            GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
+                        }
                     }
                     else
                     {
-                        messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> nie przebi≥ siÍ przez pancerz.", 6f);
-                        Debug.Log($"Atak {attacker.name} nie przebi≥ siÍ przez pancerz.");
+                        messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> nie przebi≈Ç siƒô przez pancerz.", 6f);
+                        Debug.Log($"Atak {attacker.name} nie przebi≈Ç siƒô przez pancerz.");
                     }
                 }
                 else
                 {
-                    messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> chybi≥.", 6f);
-                    Debug.Log($"Atak {attacker.name} chybi≥.");
+                    messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> chybi≈Ç.", 6f);
+                    Debug.Log($"Atak {attacker.name} chybi≈Ç.");
                 }
-                targetDefended = false; // przestawienie boola na false, øeby przy kolejnym ataku znowu musia≥ siÍ broniÊ, a nie by≥ obroniony na starcie
+                targetDefended = false; // przestawienie boola na false, ≈ºeby przy kolejnym ataku znowu musia≈Ç siƒô broniƒá, a nie by≈Ç obroniony na starcie
             }
             else
             {
-                messageManager.ShowMessage($"<color=red>Cel ataku stoi poza zasiÍgiem.</color>", 3f);
-                Debug.Log($"Cel ataku stoi poza zasiÍgiem.");
+                messageManager.ShowMessage($"<color=red>Cel ataku stoi poza zasiƒôgiem.</color>", 3f);
+                Debug.Log($"Cel ataku stoi poza zasiƒôgiem.");
             }
         }
         while (false);
@@ -316,18 +322,18 @@ public class AttackManager : MonoBehaviour
         switch (attackLocalization)
         {
             case int n when (n >= 1 && n <= 15):
-                messageManager.ShowMessage("Trafienie w g≥owÍ", 6f);
-                Debug.Log("Trafienie w g≥owÍ");
+                messageManager.ShowMessage("Trafienie w g≈Çowƒô", 6f);
+                Debug.Log("Trafienie w g≈Çowƒô");
                 armor = target.GetComponent<Stats>().PZ_head;
                 break;
             case int n when (n >= 16 && n <= 35):
-                messageManager.ShowMessage("Trafienie w prawπ rÍkÍ", 6f);
-                Debug.Log("Trafienie w prawπ rÍkÍ");
+                messageManager.ShowMessage("Trafienie w prawƒÖ rƒôkƒô", 6f);
+                Debug.Log("Trafienie w prawƒÖ rƒôkƒô");
                 armor = target.GetComponent<Stats>().PZ_arms;
                 break;
             case int n when (n >= 36 && n <= 55):
-                messageManager.ShowMessage("Trafienie w lewπ rÍkÍ", 6f);
-                Debug.Log("Trafienie w lewπ rÍkÍ");
+                messageManager.ShowMessage("Trafienie w lewƒÖ rƒôkƒô", 6f);
+                Debug.Log("Trafienie w lewƒÖ rƒôkƒô");
                 armor = target.GetComponent<Stats>().PZ_arms;
                 break;
             case int n when (n >= 56 && n <= 80):
@@ -336,13 +342,13 @@ public class AttackManager : MonoBehaviour
                 armor = target.GetComponent<Stats>().PZ_torso;
                 break;
             case int n when (n >= 81 && n <= 90):
-                messageManager.ShowMessage("Trafienie w prawπ nogÍ", 6f);
-                Debug.Log("Trafienie w prawπ nogÍ");
+                messageManager.ShowMessage("Trafienie w prawƒÖ nogƒô", 6f);
+                Debug.Log("Trafienie w prawƒÖ nogƒô");
                 armor = target.GetComponent<Stats>().PZ_legs;
                 break;
             case int n when (n >= 91 && n <= 100):
-                messageManager.ShowMessage("Trafienie w lewπ nogÍ", 6f);
-                Debug.Log("Trafienie w lewπ nogÍ");
+                messageManager.ShowMessage("Trafienie w lewƒÖ nogƒô", 6f);
+                Debug.Log("Trafienie w lewƒÖ nogƒô");
                 armor = target.GetComponent<Stats>().PZ_legs;
                 break;
         }
@@ -354,7 +360,7 @@ public class AttackManager : MonoBehaviour
     #region Parry and dodge
     private void ParryAttack(GameObject attacker, GameObject target)
     {
-        // sprawdza, czy atakowany ma jakieú bonusy do parowania
+        // sprawdza, czy atakowany ma jakie≈õ bonusy do parowania
         if (target.GetComponent<Stats>().Parujacy)
             target.GetComponent<Stats>().parryBonus += 10;
         if (attacker.GetComponent<Stats>().Powolny)
@@ -449,8 +455,8 @@ public class AttackManager : MonoBehaviour
         int wynik = UnityEngine.Random.Range(1, 101);
         bool hit = false;
 
-        messageManager.ShowMessage($"Ruch spowodowa≥ atak okazyjny. Rzut na WW <color=red>{attacker.name}</color>: {wynik}", 6f);
-        Debug.Log($"Ruch spowodowa≥ atak okazyjny. Rzut na WW {attacker.name}: {wynik}");
+        messageManager.ShowMessage($"Ruch spowodowa≈Ç atak okazyjny. Rzut na WW <color=red>{attacker.name}</color>: {wynik}", 6f);
+        Debug.Log($"Ruch spowodowa≈Ç atak okazyjny. Rzut na WW {attacker.name}: {wynik}");
 
         hit = wynik <= attacker.GetComponent<Stats>().WW;  // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
@@ -470,8 +476,8 @@ public class AttackManager : MonoBehaviour
                 int roll1 = UnityEngine.Random.Range(1, 11);
                 int roll2 = UnityEngine.Random.Range(1, 11);
                 rollResult = roll1 >= roll2 ? roll1 : roll2;
-                messageManager.ShowMessage($"Atak druzgoczπcπ broniπ. Rzut 1: {roll1} Rzut 2: {roll2}", 6f);
-                Debug.Log($"Atak druzgoczπcπ broniπ. Rzut 1: {roll1} Rzut 2: {roll2}");
+                messageManager.ShowMessage($"Atak druzgoczƒÖcƒÖ broniƒÖ. Rzut 1: {roll1} Rzut 2: {roll2}", 6f);
+                Debug.Log($"Atak druzgoczƒÖcƒÖ broniƒÖ. Rzut 1: {roll1} Rzut 2: {roll2}");
             }
             else
                 rollResult = UnityEngine.Random.Range(1, 11);
@@ -498,8 +504,8 @@ public class AttackManager : MonoBehaviour
                     else
                     {
                         rollResult = 10;
-                        messageManager.ShowMessage($"Rzut na WW: {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.", 6f);
-                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.");
+                        messageManager.ShowMessage($"Rzut na WW: {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.", 6f);
+                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.");
                     }
                 }
                 else if (attackDistance > 1.5f)
@@ -514,8 +520,8 @@ public class AttackManager : MonoBehaviour
                     else
                     {
                         rollResult = 10;
-                        messageManager.ShowMessage($"Rzut na US: {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.", 6f);
-                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≥o siÍ potwierdziÊ Furii Ulryka.");
+                        messageManager.ShowMessage($"Rzut na US: {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.", 6f);
+                        Debug.Log($"Rzut na potwierdzenie {confirmRoll}. Nie uda≈Ço siƒô potwierdziƒá Furii Ulryka.");
                     }
                 }
 
@@ -530,17 +536,17 @@ public class AttackManager : MonoBehaviour
 
             damage = rollResult + attacker.GetComponent<Stats>().S;
 
-            messageManager.ShowMessage($"<color=green>{attacker.name}</color> wyrzuci≥ {rollResult} i zada≥ <color=green>{damage} obraøeÒ.</color>", 8f);
-            Debug.Log($"{attacker.name} wyrzuci≥ {rollResult} i zada≥ {damage} obraøeÒ.");
+            messageManager.ShowMessage($"<color=green>{attacker.name}</color> wyrzuci≈Ç {rollResult} i zada≈Ç <color=green>{damage} obra≈ºe≈Ñ.</color>", 8f);
+            Debug.Log($"{attacker.name} wyrzuci≈Ç {rollResult} i zada≈Ç {damage} obra≈ºe≈Ñ.");
 
             if (damage > (target.GetComponent<Stats>().Wt + armor))
             {
                 target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
 
-                messageManager.ShowMessage(target.name + " znegowa≥ " + (target.GetComponent<Stats>().Wt + armor) + " obraøeÒ.", 8f);
-                Debug.Log(target.name + " znegowa≥ " + (target.GetComponent<Stats>().Wt + armor) + " obraøeÒ.");
-                messageManager.ShowMessage($"<color=red> Punkty øycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
-                Debug.Log($"Punkty øycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
+                messageManager.ShowMessage(target.name + " znegowa≈Ç " + (target.GetComponent<Stats>().Wt + armor) + " obra≈ºe≈Ñ.", 8f);
+                Debug.Log(target.name + " znegowa≈Ç " + (target.GetComponent<Stats>().Wt + armor) + " obra≈ºe≈Ñ.");
+                messageManager.ShowMessage($"<color=red> Punkty ≈ºycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
+                Debug.Log($"Punkty ≈ºycia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
 
                 if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
                     Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
@@ -549,14 +555,14 @@ public class AttackManager : MonoBehaviour
             }
             else
             {
-                messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> nie przebi≥ siÍ przez pancerz.", 6f);
-                Debug.Log($"Atak {attacker.name} nie przebi≥ siÍ przez pancerz.");
+                messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> nie przebi≈Ç siƒô przez pancerz.", 6f);
+                Debug.Log($"Atak {attacker.name} nie przebi≈Ç siƒô przez pancerz.");
             }
         }
         else
         {
-            messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> chybi≥.", 6f);
-            Debug.Log($"Atak {attacker.name} chybi≥.");
+            messageManager.ShowMessage($"Atak <color=red>{attacker.name}</color> chybi≈Ç.", 6f);
+            Debug.Log($"Atak {attacker.name} chybi≈Ç.");
         }
     }
     #endregion
@@ -614,14 +620,14 @@ public class AttackManager : MonoBehaviour
         }
         else if (distanceBetweenOpponents < 3) // Jesli jest zbyt blisko na szarze
         {
-            messageManager.ShowMessage($"<color=red>Zbyt ma≥a odleg≥oúÊ na wykonanie szarøy.</color>", 3f);
-            Debug.Log("Zbyt ma≥a odleg≥oúÊ na wykonanie szarøy");
+            messageManager.ShowMessage($"<color=red>Zbyt ma≈Ça odleg≈Ço≈õƒá na wykonanie szar≈ºy.</color>", 3f);
+            Debug.Log("Zbyt ma≈Ça odleg≈Ço≈õƒá na wykonanie szar≈ºy");
             movementManager.SetCharge();
         }
         else
         {
-            messageManager.ShowMessage($"<color=red>Cel ataku stoi poza zasiÍgiem szarøy.</color>", 3f);
-            Debug.Log($"Cel ataku stoi poza zasiÍgiem szarøy.");
+            messageManager.ShowMessage($"<color=red>Cel ataku stoi poza zasiƒôgiem szar≈ºy.</color>", 3f);
+            Debug.Log($"Cel ataku stoi poza zasiƒôgiem szar≈ºy.");
             movementManager.SetCharge();
         }
     }

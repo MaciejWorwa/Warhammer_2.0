@@ -28,54 +28,54 @@ public class MagicManager : MonoBehaviour
         if (wizard.GetComponent<Stats>().SW >= rollResult)
         {
             powerLevel += wizard.GetComponent<Stats>().Mag;
-            messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakoñczone sukcesem.", 4f);
-            Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakoñczone sukcesem.");
+            messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakoÅ„czone sukcesem.", 4f);
+            Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakoÅ„czone sukcesem.");
         }
         else
         {
             powerLevel = 0;
-            messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakoñczone niepowodzeniem.", 4f);
-            Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakoñczone niepowodzeniem.");
+            messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakoÅ„czone niepowodzeniem.", 4f);
+            Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakoÅ„czone niepowodzeniem.");
         }
     }
 
-    // Rzucenie zaklêcia
+    // Rzucenie zaklÄ™cia
     public void CastASpell()
     {
-        // Ustalenie kto rzuca zaklêcie
+        // Ustalenie kto rzuca zaklÄ™cie
         if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
             wizard = Player.selectedPlayer;
         else if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
             wizard = Enemy.selectedEnemy;
 
-        // Lista i s³ownik wszystkich wyników rzutów, potrzebne do sprawdzenia wyst¹pienia manifestacji chaosu
+        // Lista i sÅ‚ownik wszystkich wynikÃ³w rzutÃ³w, potrzebne do sprawdzenia wystÄ…pienia manifestacji chaosu
         List<int> allRollResults = new List<int>();
         Dictionary<int, int> doubletCount = new Dictionary<int, int>();
 
-        // Rzuty na poziom mocy w zale¿noœci od wartoœci Magii
+        // Rzuty na poziom mocy w zaleÅ¼noÅ›ci od wartoÅ›ci Magii
         for (int i = 0; i < wizard.GetComponent<Stats>().Mag; i++)
         {
             int rollResult = Random.Range(1, 11);
             allRollResults.Add(rollResult);
             powerLevel += rollResult;
 
-            messageManager.ShowMessage($"Wynik rzutu na poziom mocy, koœæ {i + 1}: {rollResult}", 6f);
-            Debug.Log($"Wynik rzutu na poziom mocy, koœæ {i+1}: {rollResult}");
+            messageManager.ShowMessage($"Wynik rzutu na poziom mocy, koÅ›Ä‡ {i + 1}: {rollResult}", 6f);
+            Debug.Log($"Wynik rzutu na poziom mocy, koÅ›Ä‡ {i+1}: {rollResult}");
         }
         messageManager.ShowMessage($"Uzyskany poziom mocy: <color=red>{powerLevel}</color>", 6f);
         Debug.Log($"Uzyskany poziom mocy: <color=red>{powerLevel}</color>");
 
 
-        // Liczenie dubletów
+        // Liczenie dubletÃ³w
         foreach (int rollResult in allRollResults)
         {
             if (doubletCount.ContainsKey(rollResult))
-                doubletCount[rollResult] += 1; // jeœli wartoœæ istnieje w s³owniku, zwiêkszamy jej licznik
+                doubletCount[rollResult] += 1; // jeÅ›li wartoÅ›Ä‡ istnieje w sÅ‚owniku, zwiÄ™kszamy jej licznik
             else
-                doubletCount.Add(rollResult, 1); // jeœli wartoœæ nie istnieje w s³owniku, dodajemy j¹ i ustawiamy licznik na 1
+                doubletCount.Add(rollResult, 1); // jeÅ›li wartoÅ›Ä‡ nie istnieje w sÅ‚owniku, dodajemy jÄ… i ustawiamy licznik na 1
         }
 
-        // Rzuty na manifestacjê w zale¿noœci od iloœci wyników, które siê powtórzy³y
+        // Rzuty na manifestacjÄ™ w zaleÅ¼noÅ›ci od iloÅ›ci wynikÃ³w, ktÃ³re siÄ™ powtÃ³rzyÅ‚y
         foreach (KeyValuePair<int, int> kvp in doubletCount)
         {
             int value = kvp.Key;
@@ -83,26 +83,26 @@ public class MagicManager : MonoBehaviour
             if (count == 2)
             {
                 int rollResult = Random.Range(1, 101);
-                messageManager.ShowMessage($"Wartoœæ {value} wystêpuje {count} razy.", 6f);
-                Debug.Log($"Wartoœæ {value} wystêpuje {count} razy.");
-                messageManager.ShowMessage($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjê: {rollResult}", 6f);
-                Debug.Log($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjê: {rollResult}");
+                messageManager.ShowMessage($"WartoÅ›Ä‡ {value} wystÄ™puje {count} razy.", 6f);
+                Debug.Log($"WartoÅ›Ä‡ {value} wystÄ™puje {count} razy.");
+                messageManager.ShowMessage($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjÄ™: {rollResult}", 6f);
+                Debug.Log($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjÄ™: {rollResult}");
             }
             else if (count == 3)
             {
                 int rollResult = Random.Range(1, 101);
-                messageManager.ShowMessage($"Wartoœæ {value} wystêpuje {count} razy.", 6f);
-                Debug.Log($"Wartoœæ {value} wystêpuje {count} razy.");
-                messageManager.ShowMessage($"<color=red>POWA¯NA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjê: {rollResult}", 6f);
-                Debug.Log($"<color=red>POWA¯NA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjê: {rollResult}");
+                messageManager.ShowMessage($"WartoÅ›Ä‡ {value} wystÄ™puje {count} razy.", 6f);
+                Debug.Log($"WartoÅ›Ä‡ {value} wystÄ™puje {count} razy.");
+                messageManager.ShowMessage($"<color=red>POWAÅ»NA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjÄ™: {rollResult}", 6f);
+                Debug.Log($"<color=red>POWAÅ»NA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjÄ™: {rollResult}");
             }
             else if (count > 3)
             {
                 int rollResult = Random.Range(1, 101);
-                messageManager.ShowMessage($"Wartoœæ {value} wystêpuje {count} razy.", 6f);
-                Debug.Log($"Wartoœæ {value} wystêpuje {count} razy.");
-                messageManager.ShowMessage($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjê: {rollResult}", 6f);
-                Debug.Log($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjê: {rollResult}");
+                messageManager.ShowMessage($"WartoÅ›Ä‡ {value} wystÄ™puje {count} razy.", 6f);
+                Debug.Log($"WartoÅ›Ä‡ {value} wystÄ™puje {count} razy.");
+                messageManager.ShowMessage($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjÄ™: {rollResult}", 6f);
+                Debug.Log($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestacjÄ™: {rollResult}");
             }
         }
         // Zresetowanie poziomu mocy

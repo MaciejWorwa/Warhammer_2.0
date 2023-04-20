@@ -28,7 +28,7 @@ public class RoundManager : MonoBehaviour
 
         Stats[] allObjectsWithStats = FindObjectsOfType<Stats>();
 
-        //przywracanie parowania i/lub uników ka¿dej postaci wraz z now¹ rund¹
+        //przywracanie parowania i/lub unikÃ³w kaÅ¼dej postaci wraz z nowÄ… rundÄ…
         foreach (Stats obj in allObjectsWithStats)
         {
             obj.GetComponent<Stats>().ResetParryAndDodge();

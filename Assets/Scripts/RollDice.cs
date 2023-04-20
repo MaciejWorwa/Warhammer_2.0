@@ -23,8 +23,8 @@ public class RollDice : MonoBehaviour
 
         if (character == null)
         {
-            messageManager.ShowMessage("Musisz najpierw zaznaczyæ konkretn¹ postaæ.", 3f);
-            Debug.Log("Musisz najpierw zaznaczyæ konkretn¹ postaæ.");
+            messageManager.ShowMessage("Musisz najpierw zaznaczyÄ‡ konkretnÄ… postaÄ‡.", 3f);
+            Debug.Log("Musisz najpierw zaznaczyÄ‡ konkretnÄ… postaÄ‡.");
             return;
         }
 
@@ -35,13 +35,13 @@ public class RollDice : MonoBehaviour
 
         if ((value + (slider.value * 10)) >= rollResult)
         {
-            messageManager.ShowMessage($"<color=green>Rzut na {button.name}: {rollResult}. Wartoœæ cechy: {value}. Poziom sukcesu: {(value + (slider.value * 10)) - rollResult}</color>", 6f);
-            Debug.Log($"<color=green>Rzut na {button.name}: {rollResult}. Wartoœæ cechy: {value}. Poziom sukcesu: {(value + (slider.value * 10)) - rollResult}</color>");
+            messageManager.ShowMessage($"<color=green>Rzut na {button.name}: {rollResult}. WartoÅ›Ä‡ cechy: {value}. Poziom sukcesu: {(value + (slider.value * 10)) - rollResult}</color>", 6f);
+            Debug.Log($"<color=green>Rzut na {button.name}: {rollResult}. WartoÅ›Ä‡ cechy: {value}. Poziom sukcesu: {(value + (slider.value * 10)) - rollResult}</color>");
         }
         else
         {
-            messageManager.ShowMessage($"<color=red>Rzut na {button.name}: {rollResult}. Wartoœæ cechy: {value}. Poziom pora¿ki: {rollResult - (value + (slider.value * 10))}</color>", 6f);
-            Debug.Log($"<color=red>Rzut na {button.name}: {rollResult}. Wartoœæ cechy: {value}. Poziom pora¿ki: {rollResult - (value + (slider.value * 10))}</color>");
+            messageManager.ShowMessage($"<color=red>Rzut na {button.name}: {rollResult}. WartoÅ›Ä‡ cechy: {value}. Poziom poraÅ¼ki: {rollResult - (value + (slider.value * 10))}</color>", 6f);
+            Debug.Log($"<color=red>Rzut na {button.name}: {rollResult}. WartoÅ›Ä‡ cechy: {value}. Poziom poraÅ¼ki: {rollResult - (value + (slider.value * 10))}</color>");
         }
     }
 }
