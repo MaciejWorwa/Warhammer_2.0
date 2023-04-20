@@ -139,6 +139,9 @@ public class MovementManager : MonoBehaviour
             // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci. Warunek ten nie jest konieczny w przypadku automatycznej walki, dlatego dochodzi drugi warunek.
             if (distanceFromCharacterToSelectedTile <= movementRange || AutoCombat.AutoCombatOn)
             {
+                // Sprawdza, czy ruch spowoduje atak okazyjny
+                CheckForOpportunityAttack(character, selectedTilePos);
+
                 // Obecna pozycja postaci, aktualizowana po przejsciu kazdego pola. Poczatkowo przyjmuje wartosc pozycji startowej.
                 Vector3 tempCharPos = startCharPos;
 
@@ -176,7 +179,8 @@ public class MovementManager : MonoBehaviour
                     Array.Sort(adjacentTilesArray, (x, y) => Vector3.Distance(x.transform.position, selectedTilePos).CompareTo(Vector3.Distance(y.transform.position, selectedTilePos)));
 
                     // Pojedynczy ruch gracza na przylegajace do niego pole, ktore znajduje sie najblizej pola docelego
-                    character.transform.position = new Vector3(adjacentTilesArray[0].transform.position.x, adjacentTilesArray[0].transform.position.y, 0);
+                    if (adjacentTilesArray.Length > 0)
+                        character.transform.position = new Vector3(adjacentTilesArray[0].transform.position.x, adjacentTilesArray[0].transform.position.y, 0);
                 }  
                 
                 // Jezeli postaci nie uda sie dotrzec na wybrane miejsce docelowe to jego pozycja jest resetowana do tej sprzed rozpoczenia ruchu.

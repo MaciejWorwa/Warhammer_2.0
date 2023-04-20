@@ -128,5 +128,8 @@ public class StatsEditor : MonoBehaviour
         }
         else
             Debug.Log($"Nie udało się zmienić wartości cechy.");
+
+        // Aktualizuje poziom postaci
+        GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);
     }
 }

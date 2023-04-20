@@ -163,7 +163,7 @@ public class ButtonManager : MonoBehaviour
     }
     #endregion
 
-    #region Refresh defensive position button
+    #region Refresh aim button
     // Odswieza przycisk przycelowania dla kazdej wybranej postaci, w zaleznosci czy przycelowanie jest u niego aktywna, czy nie
     private void RefreshAimButton(GameObject character)
     {

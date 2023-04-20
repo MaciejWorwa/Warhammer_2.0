@@ -33,7 +33,7 @@ public class MessageManager : MonoBehaviour
 
 
         // Ustawienie rozmiaru pola tekstowego
-        message.rectTransform.sizeDelta = new Vector2((int)Screen.width / 1.66f, message.rectTransform.sizeDelta.y);
+        message.rectTransform.sizeDelta = new Vector2((int)Screen.width / 2.38f, message.rectTransform.sizeDelta.y);
 
         // Ustawienie rozmiaru czcionki
         message.fontSize = (int)(Screen.width * 0.015f);

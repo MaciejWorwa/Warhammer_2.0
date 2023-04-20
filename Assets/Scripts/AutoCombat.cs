@@ -30,13 +30,13 @@ public class AutoCombat : MonoBehaviour
         if (AutoCombatOn)
         {
             AutoCombatOn = false;
-            messageManager.ShowMessage($"<color=green>Walka automatyczna została wyłączona.</color>", 3f);
+            messageManager.ShowMessage($"<color=#00FF9A>Walka automatyczna została wyłączona.</color>", 3f);
             Debug.Log($"Walka automatyczna została wyłączona.");
         }
         else
         {
             AutoCombatOn = true;
-            messageManager.ShowMessage($"<color=green>Walka automatyczna została aktywowana.</color>", 3f);
+            messageManager.ShowMessage($"<color=#00FF9A>Walka automatyczna została aktywowana.</color>", 3f);
             Debug.Log($"Walka automatyczna została aktywowana.");
         }
 
@@ -92,7 +92,7 @@ public class AutoCombat : MonoBehaviour
                 // lista pol przylegajacych do postaci
                 List<GameObject> adjacentTiles = new List<GameObject>();
 
-                // Szuka pol w ka�dym kierunku
+                // Szuka pol w każdym kierunku
                 foreach (Vector3 direction in directions)
                 {
                     // znajdz wszystkie kolidery w miejscach przylegajacych do postaci bedacej celem ataku
@@ -110,8 +110,11 @@ public class AutoCombat : MonoBehaviour
                 // Sortuje przylegajace do postaci pola wg odleglosci od atakujacego. Te ktore sa najblizej znajduja sie na poczatku tablicy
                 Array.Sort(adjacentTilesArray, (x, y) => Vector3.Distance(x.transform.position, character.transform.position).CompareTo(Vector3.Distance(y.transform.position, character.transform.position)));
 
+
                 // Sprawdza dystans do pola docelowego
-                float distanceBetweenOpponents = (Mathf.Abs(character.transform.position.x - adjacentTilesArray[0].transform.position.x)) + (Mathf.Abs(character.transform.position.y - adjacentTilesArray[0].transform.position.y));
+                float distanceBetweenOpponents = 0f;
+                if (adjacentTilesArray.Length > 0)
+                    distanceBetweenOpponents = (Mathf.Abs(character.transform.position.x - adjacentTilesArray[0].transform.position.x)) + (Mathf.Abs(character.transform.position.y - adjacentTilesArray[0].transform.position.y));
 
                 if (distanceBetweenOpponents > character.GetComponent<Stats>().tempSz * 2) // Jesli jest poza zasiegiem szarzy
                 {
@@ -121,7 +124,7 @@ public class AutoCombat : MonoBehaviour
                 else if (distanceBetweenOpponents >= 3 && distanceBetweenOpponents <= character.GetComponent<Stats>().tempSz * 2) // Jesli jest w zasiegu szarzy
                 {
                     //Wykonanie szarzy
-                    if (adjacentTilesArray != null)
+                    if (adjacentTilesArray.Length > 0)
                     {
                         MovementManager.Charge = true;
                         character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2;
@@ -138,7 +141,7 @@ public class AutoCombat : MonoBehaviour
                 }
                 else if (distanceBetweenOpponents < 3) // Jesli jest zbyt blisko na szarze
                 {
-                    if (adjacentTilesArray != null)
+                    if (adjacentTilesArray.Length > 0)
                     {
                         GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
                         Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)

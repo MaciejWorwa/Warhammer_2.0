@@ -55,12 +55,12 @@ public class AttackManager : MonoBehaviour
             Player.selectedPlayer.GetComponent<Stats>().reloadLeft--;
         if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft == 0)
         {
-            messageManager.ShowMessage($"Broń <color=green>{Player.selectedPlayer.name}</color> załadowana.", 3f);
+            messageManager.ShowMessage($"Broń <color=#00FF9A>{Player.selectedPlayer.name}</color> załadowana.", 3f);
             Debug.Log($"Broń {Player.selectedPlayer.name} załadowana.");
         }
         else
         {
-            messageManager.ShowMessage($"Ładowanie broni <color=green>{Player.selectedPlayer.name}</color>. Pozostała/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
+            messageManager.ShowMessage($"Ładowanie broni <color=#00FF9A>{Player.selectedPlayer.name}</color>. Pozostała/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
             Debug.Log($"Ładowanie broni {Player.selectedPlayer.name}. Pozostała/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzelić.");
         }
           
@@ -87,6 +87,15 @@ public class AttackManager : MonoBehaviour
     {
         do
         {
+            //uwzględnienie bonusu do WW zwiazanego z szarżą
+            if (MovementManager.Charge)
+                chargeBonus = 10;
+            else
+                chargeBonus = 0;
+
+            // Ustala bonus do trafienia (za szarżę i przycelowanie)
+            attackBonus = attacker.GetComponent<Stats>().aimingBonus + chargeBonus;
+
             // Sprawdza, czy atakowany posiada bonus za przyjecie pozycji obronnej
             defensiveBonus = target.GetComponent<Stats>().defensiveBonus;
 
@@ -114,12 +123,12 @@ public class AttackManager : MonoBehaviour
 
                         if (attackBonus > 0 || defensiveBonus > 0)
                         {
-                            messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
+                            messageManager.ShowMessage($"<color=#00FF9A>{attacker.name}</color> Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
                             Debug.Log($"{attacker.name} Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}");
                         }
                         else
                         {
-                            messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na US: {wynik}", 6f);
+                            messageManager.ShowMessage($"<color=#00FF9A>{attacker.name}</color> Rzut na US: {wynik}", 6f);
                             Debug.Log($"{attacker.name} Rzut na US: {wynik}");
                         }
 
@@ -140,24 +149,16 @@ public class AttackManager : MonoBehaviour
                 // sprawdza czy atak jest atakiem w zwarciu
                 if (attackDistance <= 1.5f)
                 {
-                    //uwzględnienie bonusu do WW zwiazanego z szarżą
-                    if (MovementManager.Charge)
-                        chargeBonus = 10;
-                    else
-                        chargeBonus = 0;
-
-                    attackBonus = chargeBonus + attacker.GetComponent<Stats>().aimingBonus;
-
                     hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                     if (attackBonus > 0 || defensiveBonus > 0)
                     {
-                        messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
+                        messageManager.ShowMessage($"<color=#00FF9A>{attacker.name}</color> Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
                         Debug.Log($"{attacker.name} Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}");
                     }
                     else
                     {
-                        messageManager.ShowMessage($"<color=green>{attacker.name}</color> Rzut na WW: {wynik}", 6f);
+                        messageManager.ShowMessage($"<color=#00FF9A>{attacker.name}</color> Rzut na WW: {wynik}", 6f);
                         Debug.Log($"{attacker.name} Rzut na WW: {wynik}");
                     }
                 }
@@ -185,6 +186,8 @@ public class AttackManager : MonoBehaviour
                 // zresetowanie bonusu za celowanie, jeśli jest aktywny
                 if (attacker.GetComponent<Stats>().aimingBonus != 0)
                     attacker.GetComponent<Stats>().aimingBonus = 0;
+                // Zresetowanie bonusu do trafienia
+                attackBonus = 0;
 
                 if (hit && targetDefended != true)
                 {
@@ -265,7 +268,7 @@ public class AttackManager : MonoBehaviour
                     else
                         damage = rollResult + attacker.GetComponent<Stats>().Weapon_S;
 
-                    messageManager.ShowMessage($"<color=green>{attacker.name}</color> wyrzucił {rollResult} i zadał <color=green>{damage} obrażeń.</color>", 8f);
+                    messageManager.ShowMessage($"<color=#00FF9A>{attacker.name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
                     Debug.Log($"{attacker.name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
 
                     if (damage > (target.GetComponent<Stats>().Wt + armor))
@@ -536,7 +539,7 @@ public class AttackManager : MonoBehaviour
 
             damage = rollResult + attacker.GetComponent<Stats>().S;
 
-            messageManager.ShowMessage($"<color=green>{attacker.name}</color> wyrzucił {rollResult} i zadał <color=green>{damage} obrażeń.</color>", 8f);
+            messageManager.ShowMessage($"<color=#00FF9A>{attacker.name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
             Debug.Log($"{attacker.name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
 
             if (damage > (target.GetComponent<Stats>().Wt + armor))

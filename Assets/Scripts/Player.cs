@@ -164,6 +164,83 @@ public class Player : MonoBehaviour
         }
     }
     #endregion
+
+    #region Select with right or middle mouse button
+    void OnMouseOver()
+    {
+        GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
+
+        // PRAWY PRZYCISK MYSZY == Zaatakuj klikniętą postać
+        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen && Enemy.trSelect != null) // wciśnięcie prawego przycisku myszy
+        {
+            // Sprawdza, czy atakujacym nie jest inny Player
+            if (trSelect != null)
+            {
+                messageManager.ShowMessage($"<color=red>Nie możesz atakować swoich sojuszników.</color>", 3f);
+                Debug.Log("Nie możesz atakować swoich sojuszników.");
+
+                // Przywraca widocznosc przyciskow akcji
+                buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);
+                // Resetuje szarze jesli jest aktywna
+                if (MovementManager.Charge)
+                    GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+                return;
+            }
+            selectedPlayer = this.gameObject;
+
+            if (!MovementManager.Charge)
+                attackManager.Attack(Enemy.selectedEnemy, selectedPlayer);
+            else
+                attackManager.ChargeAttack(Enemy.selectedEnemy, selectedPlayer);
+
+            // Przywraca widocznosc przyciskow akcji atakujacej postaci
+            buttonManager.ShowOrHideActionsButtons(Enemy.selectedEnemy, true);
+
+            // Resetuje szarze jesli jest aktywna
+            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
+        }
+        // ŚRODKOWY PRZYCISK MYSZY == Wybierz klikniętą postać, nie musisz odznaczać obecnie wybranej
+        else if (Input.GetMouseButtonDown(2) && !GameManager.PanelIsOpen) // wcisniecie srodkowego przycisku myszy
+        {
+            // Zresetowanie zmiany koloru i wielkosci poprzedniego wybranego Enemy i Playera, a także wyłączenie widoczności przycisków akcji dla przeciwnika
+            if (selectedPlayer != null)
+            {
+                selectedPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
+                selectedPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+            }
+            if (Enemy.selectedEnemy != null)
+            {
+                Enemy.selectedEnemy.transform.localScale = new Vector3(1f, 1f, 1f);
+                Enemy.selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+                buttonManager.ShowOrHideActionsButtons(Enemy.selectedEnemy, false);
+                Enemy.trSelect = null;
+            }
+
+            trSelect = transform;
+            transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+
+            selectedPlayer = this.gameObject;
+
+            messageManager.ShowMessage($"Wybrałeś {selectedPlayer.GetComponent<Stats>().Name}", 3f);
+            Debug.Log("Wybrałeś " + selectedPlayer.name);
+
+            selectedPlayer.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
+
+            buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);
+
+            MovementManager.canMove = false;
+
+            //Zresetowanie szarzy i biegu
+            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
+            // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+            grid.ResetTileColors();
+        }
+    }
+    #endregion
+
+
 }
 
 

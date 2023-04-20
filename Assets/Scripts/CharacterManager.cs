@@ -6,6 +6,7 @@ public class CharacterManager : MonoBehaviour
 {
     [SerializeField] private GameObject setStatsButton;
     [SerializeField] private GameObject destroyButton;
+    [SerializeField] private GameObject rollButton;
 
     public static GameObject GetSelectedCharacter()
     {
@@ -24,11 +25,13 @@ public class CharacterManager : MonoBehaviour
         {
             destroyButton.SetActive(false);
             setStatsButton.SetActive(false);
+            rollButton.SetActive(false);
         }
         else
         {
             destroyButton.SetActive(true);
             setStatsButton.SetActive(true);
+            rollButton.SetActive(true);
         }
 
     }

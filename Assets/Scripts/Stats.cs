@@ -91,7 +91,7 @@ public class Stats : MonoBehaviour
     [Header("Broń")]
     public int Weapon_S;
     public double AttackRange;
-    public int reloadTime;
+    public int reloadTime = 1;
     public int reloadLeft;
     public bool Ciezki;
     public bool Druzgoczacy;
@@ -154,12 +154,22 @@ public class Stats : MonoBehaviour
         else if (rollMaxHealth == 10)
             maxHealth = 13;
 
+        int rollPP = Random.Range(1, 11);
+        if (rollPP <= 4)
+            PP = 2;
+        else if (rollPP <= 7)
+            PP = 3;
+        else if (rollPP >= 8)
+            PP = 3;
+
+
         if (rasa == Player.Rasa.Elf)
         {
             US += 10;
             Zr += 10;
             maxHealth -= 1;
             Sz = 5;
+            PP--;
         }
         else if (rasa == Player.Rasa.Krasnolud)
         {
@@ -169,6 +179,8 @@ public class Stats : MonoBehaviour
             Ogd -= 10;
             maxHealth += 1;
             Sz = 3;
+            if(PP != 3)
+                PP--;
         }
         else if (rasa == Player.Rasa.Niziolek)
         {
@@ -179,6 +191,8 @@ public class Stats : MonoBehaviour
             Zr += 10;
             Ogd += 10;
             maxHealth -= 2;
+            if (rollPP <= 7 && rollPP > 4)
+                PP--;
         }
 
         Initiative = Zr + Random.Range(1, 11);

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] GameObject mainMenuPanel;
     [SerializeField] GameObject quitPanel;
     [SerializeField] GameObject rollPanel;
     OptionsMenu optionsMenu;
@@ -23,19 +24,25 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown("escape"))
         {
             if (!PanelIsOpen)
-                ShowOrHideQuitGamePanel();
+                ShowOrHideMainMenuPanel();
             else if (statsEditor.generalPanel.activeSelf)
-                GameObject.Find("StatsEditor").GetComponent<StatsEditor>().HideGeneralPanel();
+                statsEditor.HideGeneralPanel();
             else if (optionsMenu.optionsPanel.activeSelf)
-                GameObject.Find("OptionsMenu").GetComponent<OptionsMenu>().HideOptionsPanel();
+            {
+                optionsMenu.HideOptionsPanel();
+                ShowOrHideMainMenuPanel();
+            }
             else if (rollPanel.activeSelf)
                 HideRollPanel();
         }
     }
 
-    public void QuitGame()
+    public void ShowOrHideMainMenuPanel()
     {
-        Application.Quit();
+        if (!mainMenuPanel.activeSelf)
+            mainMenuPanel.SetActive(true);
+        else
+            mainMenuPanel.SetActive(false);
     }
 
     public void ShowOrHideQuitGamePanel()
@@ -44,6 +51,11 @@ public class GameManager : MonoBehaviour
             quitPanel.SetActive(true);
         else
             quitPanel.SetActive(false);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     public void ShowRollPanel()
