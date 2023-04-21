@@ -16,3 +16,5 @@ This game is
 1. Feature 2
 1. Feature 3
 
+Ścieżka do folderu z save'ami:
+C:\Users\macie\AppData\LocalLow\DefaultCompany\Warhammer 2_0
