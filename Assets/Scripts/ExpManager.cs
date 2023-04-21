@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class ExpManager : MonoBehaviour
 {
+    private MessageManager messageManager;
+
+    void Start()
+    {
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+    }
+
     // Ustawia poziom postaci (Przecietny poziom poczatkowej postaci to około 62. Krasnolud 62, Elf 66, Czlowiek 63, Niziolek 59). Zakres waha sie miedzy 54-74. 
     //Funkcja ta powinna byc wywolywana zawsze przy tworzeniu nowej postaci oraz przy kazdym jej rozwijaniu
     public void SetCharacterLevel(GameObject character)
@@ -90,10 +98,14 @@ public class ExpManager : MonoBehaviour
         if(((targetStats.Level - attackerStats.Level + 20) /2) > 0)
         {
             attackerStats.Exp += (targetStats.Level - attackerStats.Level + 20) /2;
+            messageManager.ShowMessage($"<color=#D82FDE>{attackerStats.Name} zdobył {(targetStats.Level - attackerStats.Level + 20) / 2} punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.</color>", 5f);
             Debug.Log($"<color=#D82FDE>{attackerStats.Name} zdobył {(targetStats.Level - attackerStats.Level + 20) /2} punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.</color>");
         }
         else
+        {
+            messageManager.ShowMessage($"{attackerStats.Name} zdobył 0 punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.", 5f);
             Debug.Log($"{attackerStats.Name} zdobył 0 punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.");
+        }
     }
 
 

@@ -113,9 +113,6 @@ public class Player : MonoBehaviour
 
                 selectedPlayer = this.gameObject;
 
-                messageManager.ShowMessage($"Wybrałeś {selectedPlayer.GetComponent<Stats>().Name}", 3f);
-                Debug.Log("Wybrałeś " + selectedPlayer.name);
-
                 selectedPlayer.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
 
                 buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);

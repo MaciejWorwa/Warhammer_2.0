@@ -281,15 +281,12 @@ public class AttackManager : MonoBehaviour
                         messageManager.ShowMessage($"<color=red> Punkty życia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
                         Debug.Log($"Punkty życia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
 
-                        //TO PONIŻEJ DZIAŁA ALE MUSIAŁEM WYŁĄCZYĆ TYMCZASOWO ŻEBY AUTOMATYCZNY COMBAT NIE WYWALAŁ BŁĘDÓW, BO W NIM NIE MA ŻADNYCH SELECTEDENEMY ANI SELECTEDPLAYER
-                        if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
+                        if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == false && Enemy.selectedEnemy.GetComponent<Stats>().tempHealth < 0)
                         {
-                            Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
                             GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
                         }
-                        else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
+                        else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == false && Player.selectedPlayer.GetComponent<Stats>().tempHealth < 0)
                         {
-                            Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
                             GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
                         }
                     }
@@ -551,10 +548,14 @@ public class AttackManager : MonoBehaviour
                 messageManager.ShowMessage($"<color=red> Punkty życia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
                 Debug.Log($"Punkty życia {target.name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
 
-                if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == true)
-                    Enemy.selectedEnemy.GetComponent<Stats>().GetCriticalHit();
-                else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == true)
-                    Player.selectedPlayer.GetComponent<Stats>().GetCriticalHit();
+                if (target == Enemy.selectedEnemy && Enemy.selectedEnemy.GetComponent<Stats>().criticalCondition == false && Enemy.selectedEnemy.GetComponent<Stats>().tempHealth < 0)
+                {
+                    GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
+                }
+                else if (target == Player.selectedPlayer && Player.selectedPlayer.GetComponent<Stats>().criticalCondition == false && Player.selectedPlayer.GetComponent<Stats>().tempHealth < 0)
+                {
+                    GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
+                }
             }
             else
             {

@@ -26,14 +26,15 @@ public class MessageManager : MonoBehaviour
         TMP_Text message = Instantiate(messagePrefab, messagePrefab.transform.position, Quaternion.identity);
         allMessages.Add(message);
 
-        // Ustala pozycje nowo powstalej wiadomosci i przypisuje ja do glownego Canvasa
+        // Ustala pozycje nowo powstalej wiadomosci i przypisuje ja do glownego Canvasa oraz ustawia go jako dziecko z indexem 0, ¿eby by³ wartw¹ na samym dole
         message.gameObject.transform.SetParent(GameObject.FindGameObjectWithTag("MainCanvas").transform.transform);
+        message.gameObject.transform.SetSiblingIndex(0);
 
         message.text = messageText;
 
 
         // Ustawienie rozmiaru pola tekstowego
-        message.rectTransform.sizeDelta = new Vector2((int)Screen.width / 2.38f, message.rectTransform.sizeDelta.y);
+        message.rectTransform.sizeDelta = new Vector2((int)Screen.width / 2.05f, message.rectTransform.sizeDelta.y);
 
         // Ustawienie rozmiaru czcionki
         message.fontSize = (int)(Screen.width * 0.015f);

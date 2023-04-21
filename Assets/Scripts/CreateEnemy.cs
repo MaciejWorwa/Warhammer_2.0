@@ -20,7 +20,7 @@ public class CreateEnemy : MonoBehaviour
         enemiesAmount = 0;
         gridManager = GameObject.Find("Grid").GetComponent<GridManager>();
     }
-    public void CreateNewEnemy()
+    public void CreateNewEnemy(string characterName = "")
     {
         // Liczba dostępnych pól
         int availableTiles = gridManager.width * gridManager.height; // wymiary planszy
@@ -77,7 +77,10 @@ public class CreateEnemy : MonoBehaviour
         // Utworzenie nowego wroga w losowej pozycji i nadanie mu odpowiedniej nazwy
         newEnemy = Instantiate(enemyPrefab, position, Quaternion.identity);
         enemiesAmount++;
-        newEnemy.name = "Enemy " + enemiesAmount;
+        if (characterName == "")
+            newEnemy.name = "Enemy " + enemiesAmount;
+        else
+            newEnemy.name = characterName;
 
         newEnemy.GetComponent<Enemy>();
         newEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);

@@ -134,9 +134,6 @@ public class Enemy : MonoBehaviour
 
                 selectedEnemy = this.gameObject;
 
-                messageManager.ShowMessage($"Wybrałeś {selectedEnemy.GetComponent<Stats>().Name}", 3f);
-                Debug.Log("Wybrałeś " + selectedEnemy.name);
-
                 selectedEnemy.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
 
                 buttonManager.ShowOrHideActionsButtons(selectedEnemy, true);

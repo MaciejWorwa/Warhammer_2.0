@@ -19,7 +19,7 @@ public class CreateTeam : MonoBehaviour
         gridManager = GameObject.Find("Grid").GetComponent<GridManager>();
     }
 
-    public void CreateNewPlayer()
+    public void CreateNewPlayer(string characterName = "")
     {
         // Liczba dostępnych pól
         int availableTiles = gridManager.width * gridManager.height; // wymiary planszy
@@ -76,7 +76,10 @@ public class CreateTeam : MonoBehaviour
         //tworzy nowego bohatera gracza w losowej pozycji i nadaje mu odpowiednia nazwe
         newPlayer = Instantiate(playerObject, position, Quaternion.identity);
         playersAmount++;
-        newPlayer.name = ("Player " + playersAmount);
+        if (characterName == "")
+            newPlayer.name = ("Player " + playersAmount);
+        else
+            newPlayer.name = characterName;
 
         newPlayer.GetComponent<Player>();
         newPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
