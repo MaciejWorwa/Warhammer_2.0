@@ -173,14 +173,14 @@ public class AutoCombat : MonoBehaviour
                     character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
                 else if (character.GetComponent<Stats>().reloadLeft == 1)
                 {
-                    character.GetComponent<Enemy>().attackManager.ReloadEnemy();
+                    character.GetComponent<Enemy>().attackManager.Reload();
                     character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
                     return;
                 }
                 else if (character.GetComponent<Stats>().reloadLeft > 1)
                 {
-                    character.GetComponent<Enemy>().attackManager.ReloadEnemy();
-                    character.GetComponent<Enemy>().attackManager.ReloadEnemy();
+                    character.GetComponent<Enemy>().attackManager.Reload();
+                    character.GetComponent<Enemy>().attackManager.Reload();
                     return;
                 }
             }
@@ -195,14 +195,14 @@ public class AutoCombat : MonoBehaviour
                     character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
                 else if (character.GetComponent<Stats>().reloadLeft == 1)
                 {
-                    character.GetComponent<Player>().attackManager.ReloadPlayer();
+                    character.GetComponent<Player>().attackManager.Reload();
                     character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
                     return;
                 }
                 else if (character.GetComponent<Stats>().reloadLeft > 1)
                 {
-                    character.GetComponent<Player>().attackManager.ReloadPlayer();
-                    character.GetComponent<Player>().attackManager.ReloadPlayer();
+                    character.GetComponent<Player>().attackManager.Reload();
+                    character.GetComponent<Player>().attackManager.Reload();
                     return;
                 }
             }

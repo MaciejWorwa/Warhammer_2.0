@@ -38,7 +38,7 @@ public class ExpManager : MonoBehaviour
             stats.PZ_arms,
             stats.PZ_torso,
             stats.PZ_legs,
-            stats.existDodge,
+            stats.Dodge,
             stats.instantReload,
             stats.Ciezki,
             stats.Druzgoczacy,
@@ -46,7 +46,7 @@ public class ExpManager : MonoBehaviour
             stats.Powolny,
             stats.PrzebijajacyZbroje,
             stats.Szybki
-        }, new List<int> { 0, 1, 2, 3, 4, 5, 6, 7 }); // przekazuje indexy wartosci, ktore maja byc dodane w calosci, a nie podzielone przez 5 (jak w przypadku cech glownych)
+        }, new List<int> { 0, 1, 2, 3, 4, 5, 6, 7 }); // przekazuje indexy wartosci, ktore maja byc podzielone przez 5, a nie dodane w calosci
 
         // Ustawia poziom postaci
         stats.Level = level;

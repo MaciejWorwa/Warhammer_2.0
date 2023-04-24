@@ -41,44 +41,31 @@ public class AttackManager : MonoBehaviour
         Debug.Log("Wybierz cel ataku, klikając na niego.");
 
         // Wylacza widocznosc przyciskow akcji postaci
-        if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
-            GameObject.Find("ActionsButtonsPlayer/Canvas").SetActive(false);
-        if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
-            GameObject.Find("ActionsButtonsEnemy/Canvas").SetActive(false);
+        if(GameObject.Find("ActionsButtons/Canvas") != null)
+            GameObject.Find("ActionsButtons/Canvas").SetActive(false);
+
+        // Ukrywa przyciski zaklęć, jeśli są aktywne
+        GameObject.Find("ButtonManager").GetComponent<ButtonManager>().HideSpellButtons();
     }
     #endregion
 
-    #region Reload functions for player and enemy
-    public void ReloadPlayer()
+    #region Reload functions
+    public void Reload()
     {
-        if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft > 0)
-            Player.selectedPlayer.GetComponent<Stats>().reloadLeft--;
-        if (Player.selectedPlayer.GetComponent<Stats>().reloadLeft == 0)
+        GameObject character = CharacterManager.GetSelectedCharacter();
+
+        if (character.GetComponent<Stats>().reloadLeft > 0)
+            character.GetComponent<Stats>().reloadLeft--;
+        if (character.GetComponent<Stats>().reloadLeft == 0)
         {
-            messageManager.ShowMessage($"Broń <color=#00FF9A>{Player.selectedPlayer.name}</color> załadowana.", 3f);
-            Debug.Log($"Broń {Player.selectedPlayer.name} załadowana.");
+            messageManager.ShowMessage($"Broń <color=#00FF9A>{character.GetComponent<Stats>().Name}</color> załadowana.", 3f);
+            Debug.Log($"Broń {character.GetComponent<Stats>().Name} załadowana.");
         }
         else
         {
-            messageManager.ShowMessage($"Ładowanie broni <color=#00FF9A>{Player.selectedPlayer.name}</color>. Pozostała/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
-            Debug.Log($"Ładowanie broni {Player.selectedPlayer.name}. Pozostała/y {Player.selectedPlayer.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzelić.");
-        }
-          
-    }
-    public void ReloadEnemy()
-    {
-        if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft > 0)
-            Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft--;
-        if (Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft == 0)
-        {
-            messageManager.ShowMessage($"Broń <color=red>{Enemy.selectedEnemy.name}</color> załadowana.", 3f);
-            Debug.Log($"Broń <color=red>{Enemy.selectedEnemy.name}</color> załadowana.");
-        }
-        else
-        {
-            messageManager.ShowMessage($"Ładowanie broni <color=red>{Enemy.selectedEnemy.name}</color>. Pozostała/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
-            Debug.Log($"Ładowanie broni {Enemy.selectedEnemy.name}. Pozostała/y {Enemy.selectedEnemy.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzelić.");
-        }
+            messageManager.ShowMessage($"Ładowanie broni <color=#00FF9A>{character.GetComponent<Stats>().Name}</color>. Pozostała/y {character.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
+            Debug.Log($"Ładowanie broni {character.GetComponent<Stats>().Name}. Pozostała/y {character.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzelić.");
+        }        
     }
     #endregion
 
@@ -167,7 +154,7 @@ public class AttackManager : MonoBehaviour
                 if (hit && attackDistance <= 1.5f)
                 {
                     //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
-                    if (target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus > target.GetComponent<Stats>().Zr)
+                    if (target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus > (target.GetComponent<Stats>().Zr + (target.GetComponent<Stats>().Dodge * 10) - 10))
                     {
                         if (target.GetComponent<Stats>().canParry)
                             ParryAttack(attacker, target);
@@ -398,6 +385,8 @@ public class AttackManager : MonoBehaviour
 
         messageManager.ShowMessage($"{target.name} Rzut na unik: {wynik}", 5f);
         Debug.Log($"{target.name} Rzut na unik: {wynik}");
+
+        wynik -= (target.GetComponent<Stats>().Dodge * 10) - 10;
 
         if (wynik <= target.GetComponent<Stats>().Zr)
             targetDefended = true;

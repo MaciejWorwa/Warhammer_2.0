@@ -1,11 +1,12 @@
 # Warhammer game
 
-This game is 
-* about Warhammer
-* developed in Unity x.x Engine
+This game is
 
+- about Warhammer
+- developed in Unity x.x Engine
 
 # TODO
+
 - [ ] Implement features
 - [ ] Test them
 - [ ] Do graphics
@@ -16,3 +17,5 @@ This game is
 1. Feature 2
 1. Feature 3
 
+Ścieżka do pliku z save'ami:
+C:\Users\macie\AppData\LocalLow\DefaultCompany\Warhammer 2_0

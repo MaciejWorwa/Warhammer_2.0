@@ -121,7 +121,7 @@ public class Enemy : MonoBehaviour
                 trSelect = null;
                 selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
 
-                buttonManager.ShowOrHideActionsButtons(selectedEnemy, false);
+                buttonManager.ShowOrHideActionsButtons(selectedEnemy, false);     
                 MovementManager.canMove = true;
 
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
@@ -146,6 +146,9 @@ public class Enemy : MonoBehaviour
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
                 grid.ResetTileColors();
             }
+
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
         }
 
         // Jezeli jest aktywny tryb wybierania celu ataku, przekazuje informacje o kliknietym Enemy i wywoluje funkcje Attack traktujac wybranego Playera jako atakujacego i Enemy jako atakowanego.
@@ -212,6 +215,9 @@ public class Enemy : MonoBehaviour
             else
                 attackManager.ChargeAttack(Player.selectedPlayer, selectedEnemy);
 
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
             // Przywraca widocznosc przyciskow akcji atakujacej postaci
             buttonManager.ShowOrHideActionsButtons(Player.selectedPlayer, true);
 
@@ -246,7 +252,10 @@ public class Enemy : MonoBehaviour
 
             selectedEnemy.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
 
-            buttonManager.ShowOrHideActionsButtons(selectedEnemy, true);         
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
+            buttonManager.ShowOrHideActionsButtons(selectedEnemy, true);
 
             MovementManager.canMove = false;
 

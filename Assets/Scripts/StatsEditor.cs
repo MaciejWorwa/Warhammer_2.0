@@ -71,7 +71,11 @@ public class StatsEditor : MonoBehaviour
             if (field != null && field.FieldType == typeof(int)) // to dziala dla cech opisywanych wartosciami int
             {
                 int value = (int)field.GetValue(character.GetComponent<Stats>());
-                inputField.GetComponent<TMPro.TMP_InputField>().text = value.ToString();
+
+                if (inputField.GetComponent<TMPro.TMP_InputField>() != null)
+                    inputField.GetComponent<TMPro.TMP_InputField>().text = value.ToString();
+                else if (inputField.GetComponent<Slider>() != null)
+                    inputField.GetComponent<Slider>().value = value;
             }
             else if (field != null && field.FieldType == typeof(bool)) // to dziala dla cech opisywanych wartosciami bool
             {
@@ -100,7 +104,11 @@ public class StatsEditor : MonoBehaviour
         // Jezeli znajdzie to zmienia wartosc cechy
         if (field != null && field.FieldType == typeof(int))
         {
-            int.TryParse(textInput.GetComponent<TMPro.TMP_InputField>().text, out int value); // Zamienia wprowadzony text na wartość int
+            // Sprawdza, czy textINput zawiera komponent TMP_text. Jeśli tak to zamienia wprowadzony tekst na int. Jeżeli nie to znaczy, że użyłem slidera, więc pobiera jego wartość.
+            int value = (textInput.GetComponent<TMP_InputField>() != null) ?
+                        (int.TryParse(textInput.GetComponent<TMP_InputField>().text, out int tempValue) ? tempValue : 0) :
+                        (int)textInput.GetComponent<Slider>().value;
+
             field.SetValue(character.GetComponent<Stats>(), value);
             Debug.Log($"Atrybut {field.Name} zmieniony na {value}");
         }

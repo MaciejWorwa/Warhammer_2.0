@@ -18,10 +18,7 @@ public class MagicManager : MonoBehaviour
     // Splatanie magii
     public void ChannelingMagic()
     {
-        if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
-            wizard = Player.selectedPlayer;
-        else if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
-            wizard = Enemy.selectedEnemy;
+        wizard = CharacterManager.GetSelectedCharacter();
 
         int rollResult = Random.Range(1, 101);
 
@@ -43,10 +40,7 @@ public class MagicManager : MonoBehaviour
     public void CastASpell()
     {
         // Ustalenie kto rzuca zaklęcie
-        if (Player.trSelect != null && GameObject.Find("ActionsButtonsPlayer/Canvas") != null)
-            wizard = Player.selectedPlayer;
-        else if (Enemy.trSelect != null && GameObject.Find("ActionsButtonsEnemy/Canvas") != null)
-            wizard = Enemy.selectedEnemy;
+        wizard = CharacterManager.GetSelectedCharacter();
 
         // Lista i słownik wszystkich wyników rzutów, potrzebne do sprawdzenia wystąpienia manifestacji chaosu
         List<int> allRollResults = new List<int>();

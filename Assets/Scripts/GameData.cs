@@ -39,7 +39,7 @@ public class GameData
 
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
-    public bool existDodge; // informacja o tym, czy postaæ posiada zdolnoœæ uniku
+    public int Dodge; // informacja o tym, czy postaæ posiada zdolnoœæ uniku
     public bool instantReload; // informacja o tym, czy postaæ posiada zdolnoœæ blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac mo¿e parowaæ atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac mo¿e unikaæ ataku
@@ -95,7 +95,7 @@ public class GameData
         tempHealth = stats.tempHealth;
         PP = stats.PP;
         Initiative = stats.Initiative;
-        existDodge = stats.existDodge;
+        Dodge = stats.Dodge;
         instantReload = stats.instantReload;
         canParry = stats.canParry;
         canDodge = stats.canDodge;

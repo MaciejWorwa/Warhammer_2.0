@@ -78,7 +78,7 @@ public class Stats : MonoBehaviour
 
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
-    public bool existDodge; // informacja o tym, czy postać posiada zdolność uniku
+    public int Dodge; // informacja o tym, czy postać posiada zdolność uniku
     public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
@@ -205,7 +205,7 @@ public class Stats : MonoBehaviour
     public void ResetParryAndDodge()
     {
         canParry = true;
-        if (existDodge) //sprawdzenie czy postac posiada zdolnosc Unik
+        if (Dodge > 0) //sprawdzenie czy postac posiada zdolnosc Unik
             canDodge = true;
     }
     #endregion

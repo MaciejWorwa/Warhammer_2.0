@@ -136,7 +136,7 @@ public class SaveSystem : MonoBehaviour
                 character.GetComponent<Stats>().Mag = data.Mag;
                 character.GetComponent<Stats>().PP = data.PP;
                 character.GetComponent<Stats>().Initiative = data.Initiative;
-                character.GetComponent<Stats>().existDodge = data.existDodge;
+                character.GetComponent<Stats>().Dodge = data.Dodge;
                 character.GetComponent<Stats>().instantReload = data.instantReload;
                 character.GetComponent<Stats>().canParry = data.canParry;
                 character.GetComponent<Stats>().canDodge = data.canDodge;

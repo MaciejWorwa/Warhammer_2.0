@@ -125,10 +125,14 @@ public class Player : MonoBehaviour
                 // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
                 grid.ResetTileColors();
             }
+
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
         }
 
         // Jezeli jest aktywny tryb wybierania celu ataku, przekazuje informacje o kliknietym Playerze i wywoluje funkcje Attack traktujac wybranego Enemy jako atakujacego i Playera jako atakowanego.
-        if(AttackManager.targetSelecting == true)
+        if (AttackManager.targetSelecting == true)
         {
             // Resetuje tryb wyboru celu ataku
             AttackManager.targetSelecting = false;
@@ -190,6 +194,9 @@ public class Player : MonoBehaviour
             else
                 attackManager.ChargeAttack(Enemy.selectedEnemy, selectedPlayer);
 
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
             // Przywraca widocznosc przyciskow akcji atakujacej postaci
             buttonManager.ShowOrHideActionsButtons(Enemy.selectedEnemy, true);
 
@@ -223,6 +230,9 @@ public class Player : MonoBehaviour
             Debug.Log("Wybrałeś " + selectedPlayer.name);
 
             selectedPlayer.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
+
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
 
             buttonManager.ShowOrHideActionsButtons(selectedPlayer, true);
 
