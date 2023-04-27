@@ -11,11 +11,11 @@ public class AverageLevelCounter : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.A))
         {
-            CountAverageLevelOfPlayers();
+            CountAverageLevelOfCharacters();
         }
     }
 
-    void CountAverageLevelOfPlayers()
+    void CountAverageLevelOfCharacters()
     {
         int sumaCzlowiek= 0;
         int sumaKrasnolud= 0;
@@ -31,7 +31,7 @@ public class AverageLevelCounter : MonoBehaviour
         int maxLevel = 0;
         int minLevel = 0;
 
-        GameObject[] gracze = GameObject.FindGameObjectsWithTag("Player");
+        GameObject[] gracze = GameObject.FindGameObjectsWithTag("Character");
 
         foreach(var gracz in gracze)
         {
@@ -42,22 +42,22 @@ public class AverageLevelCounter : MonoBehaviour
             if(minLevel > gracz.GetComponent<Stats>().Level || minLevel == 0)
                 minLevel = gracz.GetComponent<Stats>().Level;
 
-            if(gracz.GetComponent<Player>().rasa == Player.Rasa.Krasnolud)
+            if(gracz.GetComponent<Character>().rasa == Character.Rasa.Krasnolud)
             {
                 sumaKrasnolud += gracz.GetComponent<Stats>().Level;
                 iloscKrasnolud++;
             }
-            else if(gracz.GetComponent<Player>().rasa == Player.Rasa.Czlowiek)
+            else if(gracz.GetComponent<Character>().rasa == Character.Rasa.Człowiek)
             {
                 iloscCzlowiek++;
                 sumaCzlowiek += gracz.GetComponent<Stats>().Level;
             }
-            else if(gracz.GetComponent<Player>().rasa == Player.Rasa.Elf)
+            else if(gracz.GetComponent<Character>().rasa == Character.Rasa.Elf)
             {
                 iloscElf++;
                 sumaElf += gracz.GetComponent<Stats>().Level;
             }
-            else if(gracz.GetComponent<Player>().rasa == Player.Rasa.Niziolek)
+            else if(gracz.GetComponent<Character>().rasa == Character.Rasa.Niziołek)
             {
                 sumaNiziolek += gracz.GetComponent<Stats>().Level;
                 iloscNiziolek++;

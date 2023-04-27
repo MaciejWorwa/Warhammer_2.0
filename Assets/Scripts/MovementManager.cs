@@ -7,7 +7,7 @@ using System;
 
 public class MovementManager : MonoBehaviour
 {
-    public static bool canMove = true; // okresla czy postac moze wykonac ruch
+    public static bool canMove = false; // okresla czy postac moze wykonac ruch
     public static bool Charge; // szarza
     public static bool Run; //bieg
 
@@ -45,7 +45,7 @@ public class MovementManager : MonoBehaviour
     public void SetCharge()
     {
         // Ustalenie ktora postac jest wybrana
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
         if (character == null) return;
 
         if (Charge || Run)
@@ -70,7 +70,7 @@ public class MovementManager : MonoBehaviour
             ResetChargeAndRun();
 
         // Ustalenie ktora postac jest wybrana
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
         if (character == null) return;
 
         if (!Run)
@@ -92,30 +92,12 @@ public class MovementManager : MonoBehaviour
     {
         canMove = true;
 
-        //wylaczanie widocznosci buttonow akcji oraz odznaczanie drugiej zaznaczonej postaci, jezeli taka istnieje
-        if (Player.trSelect != null && GameObject.Find("ActionsButtons/Canvas") != null)
+        //wylaczanie widocznosci buttonow akcji
+        if (Character.trSelect != null && GameObject.Find("ActionsButtons/Canvas") != null)
         {
             GameObject.Find("ActionsButtons/Canvas").SetActive(false);
-            if (Enemy.trSelect != null)
-            {
-                Enemy.trSelect = null;
-                Enemy.selectedEnemy.transform.localScale = new Vector3(1f, 1f, 1f);
-                Enemy.selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
-            }
 
-            HighlightTilesInMovementRange(Player.selectedPlayer);
-        }
-        if (Enemy.trSelect != null && GameObject.Find("ActionsButtons/Canvas") != null)
-        {
-            GameObject.Find("ActionsButtons/Canvas").SetActive(false);
-            if (Player.trSelect != null)
-            {
-                Player.trSelect = null;
-                Player.selectedPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
-                Player.selectedPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
-            }
-
-            HighlightTilesInMovementRange(Enemy.selectedEnemy);
+            HighlightTilesInMovementRange(Character.selectedCharacter);
         }
     }
 
@@ -215,7 +197,7 @@ public class MovementManager : MonoBehaviour
     // Sprawdza czy ruch powoduje atak okazyjny
     public void CheckForOpportunityAttack(GameObject movingCharacter, Vector3 selectedTilePosition)
     {
-        if (movingCharacter == Player.selectedPlayer)
+        if (movingCharacter.CompareTag("Player"))
         {
             // Stworzenie listy wszystkich wrogow
             GameObject[] nearEnemies;
@@ -225,18 +207,18 @@ public class MovementManager : MonoBehaviour
             foreach (GameObject enemy in nearEnemies)
             {
                 // Sprawdzenie ilu wrogow jest w zwarciu z bohaterem gracza i czy ruch bohatera gracza powoduje oddalenie sie od nich (czyli atak okazyjny)
-                float distanceFromOpponent = Vector3.Distance(Player.selectedPlayer.transform.position, enemy.transform.position);
+                float distanceFromOpponent = Vector3.Distance(movingCharacter.transform.position, enemy.transform.position);
                 float distanceFromOpponentAfterMove = Vector3.Distance(selectedTilePosition, enemy.transform.position);
 
                 if (distanceFromOpponent <= 1.8f && distanceFromOpponentAfterMove > 1.8f)
                 {
                     // Wywolanie ataku okazyjnego w klasie AttackManager
                     AttackManager attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
-                    attackManager.OpportunityAttack(enemy, Player.selectedPlayer);
+                    attackManager.OpportunityAttack(enemy, movingCharacter);
                 }
             }
         }
-        if (movingCharacter == Enemy.selectedEnemy)
+        if (movingCharacter.CompareTag("Enemy"))
         {
             // Stworzenie listy wszystkich bohaterow graczy
             GameObject[] nearPlayers;
@@ -246,14 +228,14 @@ public class MovementManager : MonoBehaviour
             foreach (GameObject player in nearPlayers)
             {
                 // Sprawdzenie ilu bohaterow gracza jest w zwarciu z wrogiem i czy ruch wroga powoduje oddalenie sie od nich (czyli atak okazyjny)
-                float distanceFromOpponent = Vector3.Distance(Enemy.selectedEnemy.transform.position, player.transform.position);
+                float distanceFromOpponent = Vector3.Distance(movingCharacter.transform.position, player.transform.position);
                 float distanceFromOpponentAfterMove = Vector3.Distance(selectedTilePosition, player.transform.position);
 
                 if (distanceFromOpponent <= 1.8f && distanceFromOpponentAfterMove > 1.8f)
                 {
                     // Wywolanie ataku okazyjnego w klasie AttackManager
                     AttackManager attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
-                    attackManager.OpportunityAttack(player, Enemy.selectedEnemy);
+                    attackManager.OpportunityAttack(player, movingCharacter);
                 }
             }
         }

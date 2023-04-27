@@ -27,17 +27,15 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        // To niby restartuje scenê, ale nie da siê póŸniej z niewiadomych przyczyn zaznaczaæ postaci
+        // To niby restartuje scenÄ™, ale nie da siÄ™ pÃ³niej z niewiadomych przyczyn zaznaczac postaci
         //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
-        /* Wiêc tymczasowo robimy tak:*/
+        /* Wiec tymczasowo robimy tak:*/
 
         RoundManager.roundNumber = 1;
 
-        if (Player.trSelect != null)
-            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Player.selectedPlayer, false);
-        if (Enemy.trSelect != null)
-            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Enemy.selectedEnemy, false);
+        if (Character.trSelect != null)
+            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
          
         List<Stats> allStats = new List<Stats>();
 
@@ -49,10 +47,8 @@ public class GameManager : MonoBehaviour
         foreach (var character in characters)
             Destroy(character);
 
-        CreateTeam.playersAmount = 0;
-        CreateEnemy.enemiesAmount = 0;
-
-
+        CharacterManager.playersAmount = 0;
+        CharacterManager.enemiesAmount = 0;
     }
 
     // Update is called once per frame

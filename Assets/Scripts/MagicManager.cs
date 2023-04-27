@@ -1,13 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using System.Linq;
 
 public class MagicManager : MonoBehaviour
 {
-    private int powerLevel;
+    private int powerLevelBonus;
     private GameObject wizard;
 
     private MessageManager messageManager;
+
+    public static bool targetSelecting;
+    public static GameObject target;
+
+    [SerializeField] private GameObject etherArmorButton;
 
     void Start()
     {
@@ -18,29 +25,32 @@ public class MagicManager : MonoBehaviour
     // Splatanie magii
     public void ChannelingMagic()
     {
-        wizard = CharacterManager.GetSelectedCharacter();
+        wizard = Character.selectedCharacter;
 
         int rollResult = Random.Range(1, 101);
 
         if (wizard.GetComponent<Stats>().SW >= rollResult)
         {
-            powerLevel += wizard.GetComponent<Stats>().Mag;
+            powerLevelBonus += wizard.GetComponent<Stats>().Mag;
             messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakończone sukcesem.", 4f);
             Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakończone sukcesem.");
         }
         else
         {
-            powerLevel = 0;
+            powerLevelBonus = 0;
             messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakończone niepowodzeniem.", 4f);
             Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakończone niepowodzeniem.");
         }
     }
 
-    // Rzucenie zaklęcia
-    public void CastASpell()
+    // Rzut na poziom mocy
+    public int PowerLevelRoll()
     {
+        // Zresetowanie poziomu mocy
+        int powerLevel = 0;
+
         // Ustalenie kto rzuca zaklęcie
-        wizard = CharacterManager.GetSelectedCharacter();
+        wizard = Character.selectedCharacter;
 
         // Lista i słownik wszystkich wyników rzutów, potrzebne do sprawdzenia wystąpienia manifestacji chaosu
         List<int> allRollResults = new List<int>();
@@ -56,9 +66,8 @@ public class MagicManager : MonoBehaviour
             messageManager.ShowMessage($"Wynik rzutu na poziom mocy, kość {i + 1}: {rollResult}", 6f);
             Debug.Log($"Wynik rzutu na poziom mocy, kość {i+1}: {rollResult}");
         }
-        messageManager.ShowMessage($"Uzyskany poziom mocy: <color=red>{powerLevel}</color>", 6f);
-        Debug.Log($"Uzyskany poziom mocy: <color=red>{powerLevel}</color>");
-
+        messageManager.ShowMessage($"Uzyskany poziom mocy: <color=red>{powerLevel + powerLevelBonus}</color>", 6f);
+        Debug.Log($"Uzyskany poziom mocy: <color=red>{powerLevel + powerLevelBonus}</color>");
 
         // Liczenie dubletów
         foreach (int rollResult in allRollResults)
@@ -99,7 +108,147 @@ public class MagicManager : MonoBehaviour
                 Debug.Log($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestację: {rollResult}");
             }
         }
-        // Zresetowanie poziomu mocy
-        powerLevel = 0;
+
+        return powerLevel;
+    }
+
+    public void SetSpellToOffensive()
+    {
+        Character.selectedCharacter.GetComponent<Stats>().OffensiveSpell = true;
+    }
+
+    public void SetSpellToDeffensive()
+    {
+        Character.selectedCharacter.GetComponent<Stats>().OffensiveSpell = false;
+    }
+
+    public void HealingSpell(GameObject target)
+    {
+        GameObject character = Character.selectedCharacter;
+
+        int powerLevel = PowerLevelRoll();
+
+        if(powerLevel < character.GetComponent<Stats>().PowerRequired)
+        {
+            messageManager.ShowMessage($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>", 6f);
+            Debug.Log($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>");
+            return;
+        }
+        else
+            powerLevel = (Random.Range(1,11) + character.GetComponent<Stats>().Mag);
+        
+        // Leczy punkty życia 
+        target.GetComponent<Stats>().tempHealth += powerLevel;
+        // Zapobiega wyleczeniu ponad maksymalne punkty życia
+        if (target.GetComponent<Stats>().tempHealth > target.GetComponent<Stats>().maxHealth)
+            target.GetComponent<Stats>().tempHealth = target.GetComponent<Stats>().maxHealth;
+
+        messageManager.ShowMessage($"<color=#00FF9A>{character.GetComponent<Stats>().Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>", 6f);
+        Debug.Log($"<color=#00FF9A>{character.GetComponent<Stats>().Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>");
+
+    }
+
+    public void GetMagicDamage(GameObject target)
+    {
+        GameObject character = Character.selectedCharacter;
+
+        double range = character.GetComponent<Stats>().SpellRange;
+
+        if(range < Vector3.Distance(character.transform.position, target.transform.position))
+        {
+            messageManager.ShowMessage($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>", 3f);
+            Debug.Log($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>");
+            return;
+        }
+
+        int powerLevel = PowerLevelRoll();
+
+        if(powerLevel < character.GetComponent<Stats>().PowerRequired)
+        {
+            messageManager.ShowMessage($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>", 6f);
+            Debug.Log($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>");
+            return;
+        }
+
+        int rollResult = Random.Range(1,11);
+        int damage = character.GetComponent<Stats>().Spell_S + rollResult;
+        double areaSize = character.GetComponent<Stats>().AreaSize;
+        int castDuration = character.GetComponent<Stats>().CastDuration;
+
+        int armor = GameObject.Find("AttackManager").GetComponent<AttackManager>().CheckAttackLocalization(target);
+
+        messageManager.ShowMessage($"<color=#00FF9A>{character.GetComponent<Stats>().Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
+        Debug.Log($"{character.GetComponent<Stats>().Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
+
+        if(!character.GetComponent<Stats>().IgnoreArmor && damage > (target.GetComponent<Stats>().Wt + armor))
+        {
+            target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
+
+            messageManager.ShowMessage(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.", 8f);
+            Debug.Log(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.");
+
+            messageManager.ShowMessage($"<color=red> Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
+            Debug.Log($"Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
+        }
+        else if (damage > target.GetComponent<Stats>().Wt)
+        {
+            target.GetComponent<Stats>().tempHealth -= (damage - target.GetComponent<Stats>().Wt);
+
+            messageManager.ShowMessage(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt) + " obrażeń.", 8f);
+            Debug.Log(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt) + " obrażeń.");
+
+            messageManager.ShowMessage($"<color=red> Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
+            Debug.Log($"Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
+        }
+        else
+        {
+            messageManager.ShowMessage($"Atak <color=red>{character.GetComponent<Stats>().Name}</color> nie przebił się przez pancerz.", 6f);
+            Debug.Log($"Atak {character.GetComponent<Stats>().Name} nie przebił się przez pancerz.");
+        }   
+    }
+
+    public void EtherArmorSpell()
+    {
+        Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
+
+        if (charStats.etherArmorActive == true)
+        {
+            charStats.etherArmorActive = false;
+            etherArmorButton.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+
+            charStats.PZ_head = 0;
+            charStats.PZ_arms = 0;
+            charStats.PZ_torso = 0;
+            charStats.PZ_legs = 0;
+
+            messageManager.ShowMessage($"<color=red>Pancerz Eteru dezaktywowany.</color>", 3f);
+            Debug.Log($"<color=red>Pancerz Eteru dezaktywowany.</color>");
+            return;
+        }
+        if (charStats.PZ_head > 0 || charStats.PZ_arms > 0 || charStats.PZ_torso > 0 || charStats.PZ_legs > 0)
+        {
+            messageManager.ShowMessage($"<color=red>Nie możesz rzucać Pancerzu Eteru jeśli nosisz zbroję.</color>", 3f);
+            Debug.Log($"<color=red>Nie możesz rzucać Pancerzu Eteru jeśli nosisz zbroję.</color>");
+            return;
+        }
+
+        int powerLevel = PowerLevelRoll();
+        if(powerLevel < 5)
+        {
+            messageManager.ShowMessage($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>", 6f);
+            Debug.Log($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>");
+            return;
+        }
+
+        charStats.etherArmorActive = true;
+        etherArmorButton.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+
+        charStats.PZ_head = charStats.Mag;
+        charStats.PZ_arms = charStats.Mag;
+        charStats.PZ_torso = charStats.Mag;
+        charStats.PZ_legs = charStats.Mag;
+
+        messageManager.ShowMessage($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>", 6f);
+        Debug.Log($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>");
     }
 }

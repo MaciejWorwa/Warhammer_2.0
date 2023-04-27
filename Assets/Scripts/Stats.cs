@@ -3,32 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor; // Potrzebne przy edytowaniu inspektora i szukaniu pliku .json w folderze Resources
 
-/*
-// EDYTOWANIE INSPEKTORA TAK, ABY WYSWIETLAL SLOWNIK WRAZ Z JEGO KLUCZAMI I WARTOSCIAMI I MOZNA BYLO TO ZMIENIAC (ALE OBECNIE JEST TO WADLIWE).
-[CustomEditor(typeof(Stats))]
-public class StatsEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {        
-        base.OnInspectorGUI(); // Wyświetlenie wszystkiego z poprzedniego inspektora
-        Stats stats = (Stats)target;
-
-        EditorGUILayout.LabelField("Cechy Pierwszorzędowe"); // Nadanie Headera słownikowi
-
-        // wyświetlanie wartości dla każdego klucza
-        foreach (string key in stats.CechyPierwszorzedowe.Keys)
-        {
-            int value = stats.CechyPierwszorzedowe[key];
-            int newValue = EditorGUILayout.IntField(key, value);
-            if (newValue != value)
-            {
-                stats.CechyPierwszorzedowe[key] = newValue;
-            }
-        }
-    }
-}
-*/
-
 public class Stats : MonoBehaviour
 {
     [Header("Imię")]
@@ -40,21 +14,7 @@ public class Stats : MonoBehaviour
     public int Level;
     public int Exp;
 
-    /*
-    // ZROBIENIE SŁOWNIKA. ALE NIEZBYT WSPOLGRA TO Z WYSWIETLANIEM I ZMIENIANIEM WARTOSCI Z POZIOMU INSPEKTORA PODCZAS URUCHOMIONEJ GRY.
-    void Start()
-    {
-        CechyPierwszorzedowe = new Dictionary<string, int>();
-        string[] cechy = { "WW", "US", "K", "Odp", "Zr", "Int", "SW", "Ogd" };
-
-        foreach (string cecha in cechy)
-        {
-            CechyPierwszorzedowe.Add(cecha, 20 + Random.Range(2, 21));
-        }
-    }
-    */
-
-    [Header("Cechy pierwszorzędowe")]//RADA MICHAŁA: zrobic slownik ktorego kluczami sa nazwy cech a wartosciami wartosci tych cech
+    [Header("Cechy pierwszorzędowe")]
     public int WW;
     public int US;
     public int K;
@@ -63,7 +23,6 @@ public class Stats : MonoBehaviour
     public int Int;
     public int SW;
     public int Ogd;
-    // public Dictionary<string, int> CechyPierwszorzedowe;
 
     [Header("Cechy drugorzędowe")]
     public int A;
@@ -89,7 +48,7 @@ public class Stats : MonoBehaviour
     [HideInInspector] public int aimingBonus; // premia za przycelowanie
 
     [Header("Broń")]
-    public int Weapon_S;
+    public int Weapon_S; // Siła broni dystansowej
     public double AttackRange;
     public int reloadTime = 1;
     public int reloadLeft;
@@ -105,6 +64,18 @@ public class Stats : MonoBehaviour
     public int PZ_arms;
     public int PZ_torso;
     public int PZ_legs;
+
+    [Header("Statystyki zaklęć")]
+    public int Spell_S = 3; // siła zaklęcia
+    public int PowerRequired = 6; // wymagany poziom mocy zaklęcia ofensywnego
+    public double SpellRange = 8; // zasięg zaklęcia
+    public double AreaSize = 1; // wielkość obszaru objętego działaniem zaklęcia
+    public int CastDuration; // czas rzucania zaklęcia
+    [HideInInspector] public bool OffensiveSpell; // określa, czy zaklęcie jest ofensywne (może byc rzucane tylko na przeciwników)
+    public bool IgnoreArmor; // Określa, czy zaklęcie ofensywne ignoruje pancerz
+    [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru
+
+
 
     // Próba wczytania bestiariusza i zaktualizowania wartości cech zgodnie z plikiem .json (NIEUDANA, lista potworow w inspektorze jest pusta)
     /*
@@ -129,9 +100,11 @@ public class Stats : MonoBehaviour
     }
     */
 
-    #region Set base stats for players by race function
-    public void SetBaseStatsByRace(Player.Rasa rasa)
+    #region Set base stats for Characters by race function
+    public void SetBaseStatsByRace(Character.Rasa rasa)
     {
+        Rasa = rasa.ToString();
+
         WW = 20 + Random.Range(2, 21);
         US = 20 + Random.Range(2, 21);
         K = 20 + Random.Range(2, 21);
@@ -162,8 +135,15 @@ public class Stats : MonoBehaviour
         else if (rollPP >= 8)
             PP = 3;
 
+        // ustawienie bazowego zasiegu broni (bron do walki w zwarciu lub łuk) i sily broni (dystansowa)
+        Weapon_S = 3;
+        int rollWeaponType = Random.Range(1, 11);
+        if (rollWeaponType <= 7)
+            AttackRange = 1.5;
+        else
+            AttackRange = 15;
 
-        if (rasa == Player.Rasa.Elf)
+        if (rasa == Character.Rasa.Elf)
         {
             US += 10;
             Zr += 10;
@@ -171,7 +151,7 @@ public class Stats : MonoBehaviour
             Sz = 5;
             PP--;
         }
-        else if (rasa == Player.Rasa.Krasnolud)
+        else if (rasa == Character.Rasa.Krasnolud)
         {
             WW += 10;
             Odp += 10;
@@ -182,7 +162,7 @@ public class Stats : MonoBehaviour
             if(PP != 3)
                 PP--;
         }
-        else if (rasa == Player.Rasa.Niziolek)
+        else if (rasa == Character.Rasa.Niziołek)
         {
             WW -= 10;
             US += 10;
@@ -194,10 +174,79 @@ public class Stats : MonoBehaviour
             if (rollPP <= 7 && rollPP > 4)
                 PP--;
         }
+        else if (rasa == Character.Rasa.Goblin) // To jest zrobione na probe. Ale chcę zrobić to dla różnych potworów
+        {
+            WW -= 6;
+            US --;
+            K --;
+            Odp --;
+            Zr -= 6;
+            Int -= 6;
+            SW --;
+            Ogd -= 11;
+
+            maxHealth -= 3;
+        }
+        else if (rasa == Character.Rasa.Ork)
+        {
+            WW += 4;
+            US += 4;
+            K += 4;
+            Odp += 14;
+            Zr -= 6;
+            Int -= 6;
+            SW --;
+            Ogd -= 11;
+
+            maxHealth += 1;
+        }
+        else if (rasa == Character.Rasa.Smok)
+        {
+            WW += 28;
+            US = 0;
+            K += 34;
+            Odp += 37;
+            Zr -= 1;
+            Int += 16;
+            SW += 58;
+            Ogd += 3;
+
+            A += 5;
+            maxHealth += 44;
+            Sz = 6;
+
+            PZ_head = 5;
+            PZ_arms = 5;
+            PZ_torso = 5;
+            PZ_legs = 5;
+
+            AttackRange = 1.5;
+            Druzgoczacy = true;
+            PrzebijajacyZbroje = true;
+        }
+        else if (rasa == Character.Rasa.Troll)
+        {
+            WW += 6;
+            US -= 16;
+            K += 20;
+            Odp += 17;
+            Zr -= 11;
+            Int -= 13;
+            SW -= 4;
+            Ogd -= 21;
+
+            A += 2;
+            maxHealth += 19;
+            Sz = 6;
+
+            AttackRange = 1.5;
+        }
 
         Initiative = Zr + Random.Range(1, 11);
         S = Mathf.RoundToInt(K / 10);
         Wt = Mathf.RoundToInt(Odp / 10);
+        tempHealth = maxHealth;
+        tempSz = Sz;
     }
     #endregion
 

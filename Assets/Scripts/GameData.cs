@@ -7,7 +7,7 @@ public class GameData
 {
     public int NumberOfRounds;
 
-    [Header("Imiê")]
+    [Header("Imiï¿½")]
     public string Name;
 
     [Header("Rasa")]
@@ -16,7 +16,7 @@ public class GameData
     public int Level;
     public int Exp;
 
-    [Header("Cechy pierwszorzêdowe")]
+    [Header("Cechy pierwszorzï¿½dowe")]
     public int WW;
     public int US;
     public int K;
@@ -26,7 +26,7 @@ public class GameData
     public int SW;
     public int Ogd;
 
-    [Header("Cechy drugorzêdowe")]
+    [Header("Cechy drugorzï¿½dowe")]
     public int A;
     public int S;
     public int Wt;
@@ -39,17 +39,17 @@ public class GameData
 
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
-    public int Dodge; // informacja o tym, czy postaæ posiada zdolnoœæ uniku
-    public bool instantReload; // informacja o tym, czy postaæ posiada zdolnoœæ blyskawicznego przeladowania
-    [HideInInspector] public bool canParry = true; // informacja o tym, czy postac mo¿e parowaæ atak
-    [HideInInspector] public bool canDodge; // informacja o tym, czy postac mo¿e unikaæ ataku
+    public int Dodge; // informacja o tym, czy postaï¿½ posiada zdolnoï¿½ï¿½ uniku
+    public bool instantReload; // informacja o tym, czy postaï¿½ posiada zdolnoï¿½ï¿½ blyskawicznego przeladowania
+    [HideInInspector] public bool canParry = true; // informacja o tym, czy postac moï¿½e parowaï¿½ atak
+    [HideInInspector] public bool canDodge; // informacja o tym, czy postac moï¿½e unikaï¿½ ataku
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
-    [HideInInspector] public bool criticalCondition = false; // sprawdza czy ¿ycie postaci jest poni¿ej 0
+    [HideInInspector] public bool criticalCondition = false; // sprawdza czy ï¿½ycie postaci jest poniï¿½ej 0
     [HideInInspector] public int parryBonus; // sumaryczna premia do WW przy parowaniu
     [HideInInspector] public int defensiveBonus; // premia za pozycje obronna
     [HideInInspector] public int aimingBonus; // premia za przycelowanie
 
-    [Header("Broñ")]
+    [Header("Broï¿½")]
     public int Weapon_S;
     public double AttackRange;
     public int reloadTime = 1;
@@ -66,6 +66,16 @@ public class GameData
     public int PZ_arms;
     public int PZ_torso;
     public int PZ_legs;
+
+    [Header("Statystyki zaklÄ™Ä‡")]
+    public int Spell_S;
+    public int PowerRequired;
+    public double SpellRange;
+    public double AreaSize;
+    public int CastDuration;
+    public bool OffensiveSpell;
+    public bool IgnoreArmor;
+    [HideInInspector] public bool etherArmorActive = false; // OkreÅ›la, czy postaÄ‡ ma aktywny pancerz eteru
 
     public float[] position;
 
@@ -85,6 +95,7 @@ public class GameData
         Int = stats.Int;
         SW = stats.SW;
         Ogd = stats.Ogd;
+        
         A = stats.A;
         S = stats.S;
         Wt = stats.Wt;
@@ -94,6 +105,7 @@ public class GameData
         maxHealth = stats.maxHealth;
         tempHealth = stats.tempHealth;
         PP = stats.PP;
+
         Initiative = stats.Initiative;
         Dodge = stats.Dodge;
         instantReload = stats.instantReload;
@@ -104,6 +116,7 @@ public class GameData
         parryBonus = stats.parryBonus;
         defensiveBonus = stats.defensiveBonus;
         aimingBonus = stats.aimingBonus;
+
         Weapon_S = stats.Weapon_S;
         AttackRange = stats.AttackRange;
         reloadTime = stats.reloadTime;
@@ -114,10 +127,20 @@ public class GameData
         Powolny = stats.Powolny;
         PrzebijajacyZbroje = stats.PrzebijajacyZbroje;
         Szybki = stats.Szybki;
+
         PZ_head = stats.PZ_head;
         PZ_arms = stats.PZ_arms;
         PZ_torso = stats.PZ_torso;
         PZ_legs = stats.PZ_legs;
+
+        Spell_S = stats.Spell_S;
+        PowerRequired = stats.PowerRequired;
+        SpellRange = stats.SpellRange;
+        AreaSize = stats.AreaSize;
+        CastDuration = stats.CastDuration;
+        OffensiveSpell = stats.OffensiveSpell;
+        IgnoreArmor = stats.IgnoreArmor;
+        etherArmorActive = stats.etherArmorActive;
 
         position = new float[3];
         position[0] = stats.gameObject.transform.position.x;

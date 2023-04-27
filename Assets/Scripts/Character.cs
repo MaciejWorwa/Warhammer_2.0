@@ -1,0 +1,292 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using TMPro;
+using System;
+
+public class Character : MonoBehaviour
+{
+    public static Stats charStats;
+    public enum Rasa { Człowiek, Elf, Krasnolud, Niziołek, Goblin, Ork, Skaven, Smok, Troll, Zwierzoczłek }
+    public Rasa rasa;
+
+    private TMP_Text nameDisplay;
+    private TMP_Text healthDisplay;
+    private TMP_Text initiativeDisplay;
+
+    public static GameObject selectedCharacter;
+    public static Transform trSelect = null;
+
+    private ButtonManager buttonManager;
+
+    private float attackDistance;
+
+    [HideInInspector] public AttackManager attackManager;
+
+    private MessageManager messageManager;
+
+    void Start()
+    {
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+
+        // Odniesienie do Managera Przyciskow
+        buttonManager = GameObject.Find("ButtonManager").GetComponent<ButtonManager>();
+
+        //Odniesienie do Managera Ataku
+        attackManager = GameObject.Find("AttackManager").GetComponent<AttackManager>();
+        //nadanie rasy
+        if (this.gameObject.CompareTag("Player"))
+            rasa = (Rasa)UnityEngine.Random.Range(0, 4);
+        else
+            rasa = (Rasa)UnityEngine.Random.Range(4, Enum.GetValues(typeof(Rasa)).Length); 
+
+        messageManager.ShowMessage($"Stworzyłeś {this.gameObject.name} o rasie {rasa}", 3f);
+        Debug.Log($"Stworzyłeś {this.gameObject.name} o rasie {rasa}");
+
+        //nadanie temu obiektowi klasy Stats
+        charStats = this.gameObject.AddComponent<Stats>();
+        this.gameObject.GetComponent<MovementManager>();
+
+        // nadanie poczatkowego imienia takiego jak nazwa obiektu gry, np. Player 1
+        charStats.Name = this.gameObject.name;
+
+        //wygenerowanie poczatkowych statystyk w zaleznosci od rasy. Metoda ta jest zawarta w klasie Stats
+        charStats.SetBaseStatsByRace(rasa);
+
+        if(this.gameObject.CompareTag("Player"))
+        {
+            healthDisplay = this.transform.Find("healthPointsPlayer").gameObject.GetComponent<TMP_Text>();
+            initiativeDisplay = this.transform.Find("initiativePlayer").gameObject.GetComponent<TMP_Text>();
+            nameDisplay = this.transform.Find("namePlayer").gameObject.GetComponent<TMP_Text>();
+        }
+        else if (this.gameObject.CompareTag("Enemy"))
+        {
+            healthDisplay = this.transform.Find("healthPointsEnemy").gameObject.GetComponent<TMP_Text>();
+            initiativeDisplay = this.transform.Find("initiativeEnemy").gameObject.GetComponent<TMP_Text>();
+            nameDisplay = this.transform.Find("nameEnemy").gameObject.GetComponent<TMP_Text>();
+        }
+
+        healthDisplay.transform.position = this.gameObject.transform.position;
+
+        initiativeDisplay.transform.position = new Vector3(this.gameObject.transform.position.x + 0.5f, this.gameObject.transform.position.y + 0.5f, this.gameObject.transform.position.z);
+
+        nameDisplay.transform.position = new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y - 0.6f, this.gameObject.transform.position.z);
+    }
+
+    void Update()
+    {
+        // wyswietlanie na biezaco aktualnych punktow zycia, imienia oraz inicjatywy
+        healthDisplay.text = this.gameObject.GetComponent<Stats>().tempHealth + "/" + this.gameObject.GetComponent<Stats>().maxHealth;
+        initiativeDisplay.text = this.gameObject.GetComponent<Stats>().Initiative.ToString();
+        nameDisplay.text = this.gameObject.GetComponent<Stats>().Name.ToString();
+ 
+        if (charStats.tempHealth < 0 && charStats.criticalCondition == false)
+        {
+            charStats.GetCriticalHit();
+        }
+    }
+
+    #region Select or deselect character method
+    public void OnMouseDown()
+    {
+        GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
+
+        // Umozliwia zaznaczenie/odznaczenie postaci, tylko gdy inne postacie nie sa wybrane i panel edycji statystyk jest zamkniety
+        if (!GameManager.PanelIsOpen && trSelect == null && AttackManager.targetSelecting != true || !GameManager.PanelIsOpen && trSelect == transform && AttackManager.targetSelecting != true)
+        {
+            if (trSelect == transform) // klikniecie na postac, ktora juz jest wybrana
+            {
+                transform.localScale = new Vector3(1f, 1f, 1f);
+                trSelect = null;
+
+                if (selectedCharacter.CompareTag("Player"))
+                    selectedCharacter.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+                else if (selectedCharacter.CompareTag("Enemy"))
+                    selectedCharacter.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, false);
+
+                // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+                grid.ResetTileColors();
+            }
+            else // klikniecie na postac, gdy zadna postac nie jest wybrana
+            {
+                trSelect = transform;
+                transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+
+                selectedCharacter = this.gameObject;
+
+                if (selectedCharacter.CompareTag("Player"))
+                    selectedCharacter.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
+                else if (selectedCharacter.CompareTag("Enemy"))
+                    selectedCharacter.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
+
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+
+                //Zresetowanie szarzy i biegu
+                GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
+                // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+                grid.ResetTileColors();
+            }
+
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
+        }
+
+        // Jezeli jest aktywny tryb wybierania celu ataku, przekazuje informacje o kliknietej postaci i wywoluje funkcje Attack traktujac wybraną postać jako atakujacego, a klikniętą jako atakowanego.
+        if (AttackManager.targetSelecting == true)
+        {
+            // Jezeli jest rzucane zaklęcie i nie jest to zaklęcie ofensywne to wywoływana jest funkcja zaklęcia leczącego
+            if(MagicManager.targetSelecting == true && selectedCharacter.GetComponent<Stats>().OffensiveSpell != true)
+            {
+                GameObject.Find("MagicManager").GetComponent<MagicManager>().HealingSpell(this.gameObject);
+
+                // Przywraca widocznosc przyciskow akcji atakujacej postaci
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                // Ukrywa przyciski zaklęć, jeśli są aktywne
+                buttonManager.HideSpellButtons();
+
+                // Resetuje tryb wyboru celu ataku
+                AttackManager.targetSelecting = false;
+                MagicManager.targetSelecting = false;
+
+                return;
+            }
+
+            // Sprawdza, czy atakujacym nie jest sojusznik
+            if (selectedCharacter.tag == this.gameObject.tag)
+            {
+                messageManager.ShowMessage($"<color=red>Nie możesz atakować swoich sojuszników.</color>", 3f);
+                Debug.Log("Nie możesz atakować swoich sojuszników.");
+
+                // Przywraca widocznosc przyciskow akcji
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                // Ukrywa przyciski zaklęć, jeśli są aktywne
+                buttonManager.HideSpellButtons();
+
+                // Resetuje szarze jesli jest aktywna
+                if (MovementManager.Charge)
+                    GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+            
+                // Resetuje tryb wyboru celu ataku
+                AttackManager.targetSelecting = false;
+                MagicManager.targetSelecting = false;
+
+                return;
+            }
+
+            if (!MovementManager.Charge && MagicManager.targetSelecting != true)
+                attackManager.Attack(selectedCharacter, this.gameObject);
+            else if (MovementManager.Charge)
+                attackManager.ChargeAttack(selectedCharacter, this.gameObject);
+            else if (MagicManager.targetSelecting == true)
+                GameObject.Find("MagicManager").GetComponent<MagicManager>().GetMagicDamage(this.gameObject);
+
+
+            // Przywraca widocznosc przyciskow akcji atakujacej postaci
+            buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
+            // Resetuje szarze jesli jest aktywna
+            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
+            // Resetuje tryb wyboru celu ataku
+            AttackManager.targetSelecting = false;
+            MagicManager.targetSelecting = false;
+        }
+    }
+    #endregion
+
+    #region Select with right or middle mouse button
+    void OnMouseOver()
+    {
+        GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
+
+        // PRAWY PRZYCISK MYSZY == Zaatakuj klikniętą postać
+        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen) // wciśnięcie prawego przycisku myszy
+        {
+            // Sprawdza, czy atakujacym nie jest sojusznik
+            if (selectedCharacter.tag == this.gameObject.tag)
+            {
+                messageManager.ShowMessage($"<color=red>Nie możesz atakować swoich sojuszników.</color>", 3f);
+                Debug.Log("Nie możesz atakować swoich sojuszników.");
+
+                // Przywraca widocznosc przyciskow akcji
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                // Resetuje szarze jesli jest aktywna
+                if (MovementManager.Charge)
+                    GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+                return;
+            }
+
+            if (!MovementManager.Charge)
+                attackManager.Attack(selectedCharacter, this.gameObject);
+            else
+                attackManager.ChargeAttack(selectedCharacter, this.gameObject);
+
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
+            // Przywraca widocznosc przyciskow akcji atakujacej postaci
+            buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+
+            // Resetuje szarze jesli jest aktywna
+            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
+        }
+        // ŚRODKOWY PRZYCISK MYSZY == Wybierz klikniętą postać, nie musisz odznaczać obecnie wybranej
+        else if (Input.GetMouseButtonDown(2) && !GameManager.PanelIsOpen) // wcisniecie srodkowego przycisku myszy
+        {
+            // Zresetowanie zmiany koloru i wielkosci poprzednio wybranej posataci
+            if (selectedCharacter != null)
+            {
+                selectedCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+                
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, false);
+
+                if (selectedCharacter.CompareTag("Player"))
+                    selectedCharacter.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+                else if (selectedCharacter.CompareTag("Enemy"))
+                    selectedCharacter.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+            }
+
+            trSelect = transform;
+            transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+
+            selectedCharacter = this.gameObject;
+
+            messageManager.ShowMessage($"Wybrałeś {selectedCharacter.GetComponent<Stats>().Name}", 3f);
+            Debug.Log("Wybrałeś " + selectedCharacter.name);
+
+            if (selectedCharacter.CompareTag("Player"))
+                selectedCharacter.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
+            else if (selectedCharacter.CompareTag("Enemy"))
+                selectedCharacter.GetComponent<Renderer>().material.color = new Color(1.0f, 0.64f, 0.0f);
+
+            // Ukrywa przyciski zaklęć, jeśli są aktywne
+            buttonManager.HideSpellButtons();
+
+            buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+
+            MovementManager.canMove = false;
+
+            //Zresetowanie szarzy i biegu
+            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+
+            // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
+            grid.ResetTileColors();
+        }
+    }
+    #endregion
+
+
+}
+
+
+
+
+

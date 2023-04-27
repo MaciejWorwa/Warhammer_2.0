@@ -36,6 +36,5 @@ public class RoundManager : MonoBehaviour
             obj.GetComponent<Stats>().ResetParryAndDodge();
             obj.GetComponent<Stats>().ResetActionsNumber();
         }
-
     }
 }

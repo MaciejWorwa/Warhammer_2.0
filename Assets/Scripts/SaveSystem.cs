@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
+using System;
 
 public class SaveSystem : MonoBehaviour
 {
@@ -30,33 +31,21 @@ public class SaveSystem : MonoBehaviour
     public void LoadAllCharactersStats()
     {
         // Odznaczenie postaci, jeżeli podczas kliknięcia "Load" była zaznaczona, aby przyciski akcji nie zostawały widocznie w złym miejscu
-        if (Player.trSelect != null)
+        if (Character.trSelect != null)
         {
-            Player.selectedPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
-            Player.trSelect = null;
-            Player.selectedPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+            Character.selectedCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+            Character.trSelect = null;
+            if (Character.selectedCharacter.CompareTag("Player"))
+                    Character.selectedCharacter.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+            else if (Character.selectedCharacter.CompareTag("Enemy"))
+                    Character.selectedCharacter.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
 
-            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Player.selectedPlayer, false);
+            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
             MovementManager.canMove = true;
 
             // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
             GameObject.Find("Grid").GetComponent<GridManager>().ResetTileColors();
         }
-        if (Enemy.trSelect != null)
-        {
-            Enemy.selectedEnemy.transform.localScale = new Vector3(1f, 1f, 1f);
-            Enemy.trSelect = null;
-            Enemy.selectedEnemy.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
-
-            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Enemy.selectedEnemy, false);
-            MovementManager.canMove = true;
-
-            // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-            GameObject.Find("Grid").GetComponent<GridManager>().ResetTileColors();
-        }
-
-
-
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
@@ -74,7 +63,7 @@ public class SaveSystem : MonoBehaviour
         // Pobranie listy zapisanych plików
         string[] files = Directory.GetFiles(Application.persistentDataPath, "*.fun");
 
-        // Sprawdzenie, czy w liście znajdują się pliki, których nazwa nie pasuje do nazw postaci w 'characters' i usunięcie ich
+        // Wczytuje każdy plik o nazwie istniejącej w liście nazw obecnie istniejących na polu bitwy postaci
         foreach (string file in files)
         {
             string fileName = Path.GetFileNameWithoutExtension(file);
@@ -82,11 +71,11 @@ public class SaveSystem : MonoBehaviour
             {
                 if (fileName.StartsWith("P")) // Sprawdza, czy ten string zaczyna się o litery 'P'. W ten sposób wykryje Playera.
                 {
-                    GameObject.Find("CreateTeam").GetComponent<CreateTeam>().CreateNewPlayer(fileName);
+                    GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter("Player", fileName);
                 }
                 if (fileName.StartsWith("E")) // Sprawdza, czy ten string zaczyna się o litery 'E'. w ten sposób wykryje Enemy.
                 {
-                    GameObject.Find("CreateEnemy").GetComponent<CreateEnemy>().CreateNewEnemy(fileName);
+                    GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter("Enemy", fileName);
                 }
             }
         }
@@ -97,13 +86,36 @@ public class SaveSystem : MonoBehaviour
 
     void LoadWithDelay()
     {
-
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
+        CharacterManager.playersAmount = players.Length;
+        CharacterManager.enemiesAmount = enemies.Length;
+
         GameObject[] characters = enemies.Concat(players).ToArray();
 
-        foreach (var character in characters)
+        // Utworzenie list unikalnych postaci
+        List<GameObject> uniqueCharacters = new List<GameObject>();
+        foreach (GameObject character in characters)
+        {
+            if (!uniqueCharacters.Exists(e => e.name == name))
+                uniqueCharacters.Add(character);
+        }
+
+        // Usunięcie duplikatów
+        foreach (GameObject character in uniqueCharacters)
+        {
+            int count = characters.Count(e => e.name == character.name);
+            if (count > 1)
+            {
+                for (int i = 1; i < count; i++)
+                {
+                    Destroy(GameObject.Find(character.name));
+                }
+            }
+        }
+
+        foreach (var character in uniqueCharacters)
         {
             string path = Application.persistentDataPath + "/" + character.name + ".fun";
 
@@ -112,6 +124,8 @@ public class SaveSystem : MonoBehaviour
             {
                 GameData data = LoadCharacterStats(character.name);
 
+                character.GetComponent<Character>().rasa = (Character.Rasa)Array.IndexOf(Enum.GetNames(typeof(Character.Rasa)), data.Rasa);;
+
                 // Wczytaj wartości do komponentu Stats
                 character.GetComponent<Stats>().Name = data.Name;
                 character.GetComponent<Stats>().maxHealth = data.maxHealth;
@@ -119,6 +133,7 @@ public class SaveSystem : MonoBehaviour
                 character.GetComponent<Stats>().gameObject.transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
                 character.GetComponent<Stats>().Rasa = data.Rasa;
                 character.GetComponent<Stats>().Level = data.Level;
+                
                 character.GetComponent<Stats>().Exp = data.Exp;
                 character.GetComponent<Stats>().WW = data.WW;
                 character.GetComponent<Stats>().US = data.US;
@@ -128,6 +143,7 @@ public class SaveSystem : MonoBehaviour
                 character.GetComponent<Stats>().Int = data.Int;
                 character.GetComponent<Stats>().SW = data.SW;
                 character.GetComponent<Stats>().Ogd = data.Ogd;
+
                 character.GetComponent<Stats>().A = data.A;
                 character.GetComponent<Stats>().S = data.S;
                 character.GetComponent<Stats>().Wt = data.Wt;
@@ -135,6 +151,7 @@ public class SaveSystem : MonoBehaviour
                 character.GetComponent<Stats>().tempSz = data.tempSz;
                 character.GetComponent<Stats>().Mag = data.Mag;
                 character.GetComponent<Stats>().PP = data.PP;
+
                 character.GetComponent<Stats>().Initiative = data.Initiative;
                 character.GetComponent<Stats>().Dodge = data.Dodge;
                 character.GetComponent<Stats>().instantReload = data.instantReload;
@@ -145,6 +162,7 @@ public class SaveSystem : MonoBehaviour
                 character.GetComponent<Stats>().parryBonus = data.parryBonus;
                 character.GetComponent<Stats>().defensiveBonus = data.defensiveBonus;
                 character.GetComponent<Stats>().aimingBonus = data.aimingBonus;
+
                 character.GetComponent<Stats>().Weapon_S = data.Weapon_S;
                 character.GetComponent<Stats>().AttackRange = data.AttackRange;
                 character.GetComponent<Stats>().reloadTime = data.reloadTime;
@@ -155,10 +173,20 @@ public class SaveSystem : MonoBehaviour
                 character.GetComponent<Stats>().Powolny = data.Powolny;
                 character.GetComponent<Stats>().PrzebijajacyZbroje = data.PrzebijajacyZbroje;
                 character.GetComponent<Stats>().Szybki = data.Szybki;
+
                 character.GetComponent<Stats>().PZ_head = data.PZ_head;
                 character.GetComponent<Stats>().PZ_arms = data.PZ_arms;
                 character.GetComponent<Stats>().PZ_torso = data.PZ_torso;
                 character.GetComponent<Stats>().PZ_legs = data.PZ_legs;
+
+                character.GetComponent<Stats>().Spell_S = data.Spell_S;
+                character.GetComponent<Stats>().PowerRequired = data.PowerRequired;
+                character.GetComponent<Stats>().SpellRange = data.SpellRange;
+                character.GetComponent<Stats>().AreaSize = data.AreaSize;
+                character.GetComponent<Stats>().CastDuration = data.CastDuration;
+                character.GetComponent<Stats>().OffensiveSpell = data.OffensiveSpell;
+                character.GetComponent<Stats>().IgnoreArmor = data.IgnoreArmor;
+                character.GetComponent<Stats>().etherArmorActive = data.etherArmorActive;
 
                 Vector3 position;
                 position.x = data.position[0];
@@ -174,9 +202,9 @@ public class SaveSystem : MonoBehaviour
                 // Usuń postać
                 Destroy(character);
                 if (character.CompareTag("Player"))
-                    CreateTeam.playersAmount--; ;
+                    CharacterManager.playersAmount--;
                 if (character.CompareTag("Enemy"))
-                    CreateEnemy.enemiesAmount--;
+                    CharacterManager.enemiesAmount--;
             }
 
         }

@@ -4,12 +4,16 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Reflection;
 using TMPro;
+using System;
 
 public class StatsEditor : MonoBehaviour
 {
     public GameObject generalPanel; // Panel w ktorym wybieramy, jaki typ cech bedziemy chcieli zmieniac
 
     [SerializeField] TMP_InputField charNameText; // Napis przedstawiajacy na panelu imie postaci
+
+    [SerializeField] TMP_Dropdown rasaDropdown; // Dropdown z wyborem rasy
+
 
     public void PanelVisibility(GameObject panel)
     {
@@ -23,7 +27,7 @@ public class StatsEditor : MonoBehaviour
         GameObject[] otherPanels = GameObject.FindGameObjectsWithTag("Panel");
 
         // Zmiana wysietlanego w panelu imienia na imie wybranej postaci
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
         charNameText.text = character.GetComponent<Stats>().Name;
 
         // Zamyka wszystkie inne panele poza glownym
@@ -43,6 +47,8 @@ public class StatsEditor : MonoBehaviour
             generalPanel.SetActive(false);
             GameManager.PanelIsOpen = false;
         }
+
+        SetRaceDropdown();
     }
 
     public void HideGeneralPanel()
@@ -57,7 +63,7 @@ public class StatsEditor : MonoBehaviour
     public void LoadAttributes()
     {
 
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
 
         // Wyszukuje wszystkie pola tekstowe i przyciski do ustalania statystyk postaci wewnatrz gry
         GameObject[] inputFields = GameObject.FindGameObjectsWithTag("StatsButton");
@@ -96,7 +102,7 @@ public class StatsEditor : MonoBehaviour
 
     public void EditAttribute(GameObject textInput)
     {
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
 
         // Pobiera pole o nazwie takiej jak nazwa textInputa
         FieldInfo field = character.GetComponent<Stats>().GetType().GetField(textInput.name);
@@ -138,6 +144,71 @@ public class StatsEditor : MonoBehaviour
             Debug.Log($"Nie udało się zmienić wartości cechy.");
 
         // Aktualizuje poziom postaci
+        GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);
+    }
+
+    public void SetInitiative()
+    {
+        GameObject character = Character.selectedCharacter;
+        character.GetComponent<Stats>().Initiative = character.GetComponent<Stats>().Zr + UnityEngine.Random.Range(1,11);
+        
+        Debug.Log($"Inicjatywa zmieniony na {character.GetComponent<Stats>().Initiative}");
+    }
+
+    // Kod odpowiadajacy za dropdown do wyboru rasy postaci
+    void SetRaceDropdown()
+    {
+        GameObject character = Character.selectedCharacter;
+
+        // Resetuje opcje dropdownu
+        rasaDropdown.ClearOptions();
+
+        List<string> options = new List<string>();
+
+        // Tworzy listę dostępnych ras i dodaje ją do opcji dropdownu
+        if (character.CompareTag("Player"))
+        {
+            foreach (Character.Rasa rasa in Enum.GetValues(typeof(Character.Rasa)))
+            { 
+                if ((int)rasa > 3) break; // przerwij pętlę po czterech pierwszych wartościach enumeratora
+                options.Add(rasa.ToString());
+            }
+
+            rasaDropdown.AddOptions(options);
+            // Ustawia wartość dropdownu na aktualną rasę postaci
+            rasaDropdown.value = (int)character.GetComponent<Character>().rasa;
+        }
+        else if (character.CompareTag("Enemy"))
+        {
+            foreach (Character.Rasa rasa in Enum.GetValues(typeof(Character.Rasa)))
+            { 
+                if ((int)rasa > 3) // pomija pierwsze cztery wartości enumeratora
+                    options.Add(rasa.ToString());
+            }
+
+            rasaDropdown.AddOptions(options);
+            // Ustawia wartość dropdownu na aktualną rasę postaci
+            rasaDropdown.value = (int)character.GetComponent<Character>().rasa - 4;
+        }
+    }
+
+    public void ChangeRace()
+    {
+        GameObject character = Character.selectedCharacter;
+        
+        // Jeżeli nie doszło do zmiany rasy to przerwij funkcję
+        if (character.GetComponent<Character>().rasa == (Character.Rasa)rasaDropdown.value || character.GetComponent<Character>().rasa == (Character.Rasa)rasaDropdown.value + 4)
+            return;
+
+        if (character.CompareTag("Player"))
+                character.GetComponent<Character>().rasa = (Character.Rasa)rasaDropdown.value;
+        else if (character.CompareTag("Enemy"))
+            character.GetComponent<Character>().rasa = (Character.Rasa)rasaDropdown.value + 4;
+
+        character.GetComponent<Stats>().SetBaseStatsByRace(character.GetComponent<Character>().rasa);
+
+        Debug.Log($"Rasa zmieniona na {character.GetComponent<Character>().rasa}. Statystyki postaci zostały zresetowane.");
+
         GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);
     }
 }

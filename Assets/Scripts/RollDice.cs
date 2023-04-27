@@ -19,7 +19,7 @@ public class RollDice : MonoBehaviour
 
     public void RollK100(GameObject button)
     {
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
 
         if (character == null)
         {

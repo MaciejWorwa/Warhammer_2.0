@@ -65,12 +65,16 @@ public class ButtonManager : MonoBehaviour
 
     public void ShowSpellButtons()
     {
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
 
         if (GameObject.Find("SpellButtons/SpellButtonsCanvas") != null)
         {
             GameObject.Find("SpellButtons/SpellButtonsCanvas").SetActive(true);
             GameObject.Find("SpellButtons/SpellButtonsCanvas").transform.position = character.transform.position;
+            if(character.GetComponent<Stats>().etherArmorActive)
+                GameObject.Find("EtherArmorSpellButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+            else
+                GameObject.Find("EtherArmorSpellButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
         }
     }
 
@@ -123,15 +127,13 @@ public class ButtonManager : MonoBehaviour
     // Odswieza przycisk przycelowania dla kazdej wybranej postaci, w zaleznosci czy przycelowanie jest u niego aktywna, czy nie
     private void RefreshAimButton(GameObject character)
     {
-        if (character.GetComponent<Stats>().aimingBonus == 0)
+        if (character.GetComponent<Stats>().aimingBonus == 0 && GameObject.Find("ActionsButtons/Canvas/AimButton") != null)
         {
-            if (GameObject.Find("ActionsButtons/Canvas/AimButton") != null)
-                GameObject.Find("ActionsButtons/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+            GameObject.Find("ActionsButtons/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
         }
-        else
+        else if (GameObject.Find("ActionsButtons/Canvas/AimButton") != null)
         {
-            if (GameObject.Find("ActionsButtons/Canvas/AimButton") != null)
-                GameObject.Find("ActionsButtons/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+            GameObject.Find("ActionsButtons/Canvas/AimButton").GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
         }
     }
     #endregion

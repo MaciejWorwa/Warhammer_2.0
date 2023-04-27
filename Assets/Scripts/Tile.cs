@@ -61,10 +61,10 @@ public class Tile : MonoBehaviour
         MovementManager movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
 
         // Ustala jaka postac ma sie ruszyc
-        GameObject character = CharacterManager.GetSelectedCharacter();
+        GameObject character = Character.selectedCharacter;
 
         // wywoluje akcje ruchu wewnatrz klasy MovementManager
-        if(character != null && !GameManager.PanelIsOpen)
+        if(character != null && !GameManager.PanelIsOpen && MovementManager.canMove)
             movementManager.MoveSelectedCharacter(this.gameObject, character);    
     }
 }

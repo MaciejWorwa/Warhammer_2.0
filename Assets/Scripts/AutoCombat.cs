@@ -39,7 +39,6 @@ public class AutoCombat : MonoBehaviour
             messageManager.ShowMessage($"<color=#00FF9A>Walka automatyczna została aktywowana.</color>", 3f);
             Debug.Log($"Walka automatyczna została aktywowana.");
         }
-
     }
 
     // Wykonuje automatyczne akcje za kazda postac
@@ -47,10 +46,6 @@ public class AutoCombat : MonoBehaviour
     {
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
         players = GameObject.FindGameObjectsWithTag("Player");
-
-        // Gdy na polu bitwy wystepuja tylko postacie Enemy albo tylko postacie Player to automatyczna akcja nie jest wykonywana
-        if (enemies.Length == 0 || players.Length == 0)
-            return;
 
         // Polaczenie tablicy enemies z tablica players. Zbior wszystkich postaci.
         // Potem sortuje tablice wg inicjatywy. Domyslnie jest rosnaco, dlatego pozniej jeszcze obracamy kolejnosc przy pomocy Reverse()
@@ -60,16 +55,24 @@ public class AutoCombat : MonoBehaviour
 
         foreach (GameObject character in characters)
         {
+            // Jeśli postać jest w stanie krytycznym to nie wykonuje akcji
+            if (character.GetComponent<Stats>().tempHealth < 0)
+                return;
+
+            // Gdy na polu bitwy wystepuja tylko postacie Enemy albo tylko postacie Player to automatyczna akcja nie jest wykonywana
+            if (enemies.Length == 0 || players.Length == 0)
+                return;
+
             GameObject closestOpponent;
+
+            Character.selectedCharacter = character;
 
             if (character.tag == "Enemy")
             {
-                Enemy.selectedEnemy = character;
                 closestOpponent = GetClosestOpponent(players, character.transform);
             }
             else
             {
-                Player.selectedPlayer = character;
                 closestOpponent = GetClosestOpponent(enemies, character.transform);
             }
 
@@ -149,40 +152,65 @@ public class AutoCombat : MonoBehaviour
                         AutomaticAttack(character, closestOpponent, 1); // Wykonywany jest jeden atak, bo wczesniej zostal wykonany ruch
                     }
                 }
-            }
-
-            // Usuwa z pola bitwy postacie, ktorych zywotnosc spadla ponizej 0
-            if (closestOpponent.GetComponent<Stats>().tempHealth < 0)
-            {
-                Destroy(closestOpponent);
-                GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(closestOpponent, false);
-            }
-                
+            }              
         }
     }
 
     void AutomaticAttack(GameObject character, GameObject closestOpponent, int attacksAmount)
     {
-        if (character.tag == "Enemy")
+        float distance = Vector3.Distance(closestOpponent.transform.position, character.transform.position);
+
+        if(distance > 1.5f)
         {
-            // Wykonuje tyle atakow ile wynosi cecha Ataki postaci
-            for (int i = 0; i < attacksAmount; i++)
+            // Jezeli postać ma błyskawiczne przeładowanie i czas ładowania to akcja to wykonuje tyle strzałów ile wynosi ilość ataków postaci
+            if(character.GetComponent<Stats>().reloadTime == 1 && character.GetComponent<Stats>().instantReload == true)
             {
-                // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
-                if (character.GetComponent<Stats>().reloadLeft == 0)
-                    character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
-                else if (character.GetComponent<Stats>().reloadLeft == 1)
+                for (int i = 0; i < attacksAmount; i++)
                 {
-                    character.GetComponent<Enemy>().attackManager.Reload();
-                    character.GetComponent<Enemy>().attackManager.Attack(character, closestOpponent);
-                    return;
+                    if(distance <= character.GetComponent<Stats>().AttackRange) // Musze to dopisać, bo po pokonaniu jednego wroga może się okazać, że inny najbliższy jest poza zasięgiem, więc akcja wiellokrotnego ataku powinna zostać przerwana
+                        character.GetComponent<Character>().attackManager.Attack(character, closestOpponent);
+
+                    if (closestOpponent.GetComponent<Stats>().tempHealth < 0)
+                    {
+                        Destroy(closestOpponent);
+                        GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(closestOpponent, false);
+
+                        // Zaktualizowanie listy postaci usuwając z nich tą, która została zniszczona. Funkcja Destroy() zostaje wywołana dopiero po zakończeniu pętli, więc trzeba usunąć ręcznie
+                        GameObject[] newEnemies = GameObject.FindGameObjectsWithTag("Enemy").Where(enemy => enemy != closestOpponent).ToArray();
+                        GameObject[] newPlayers = GameObject.FindGameObjectsWithTag("Player").Where(player => player != closestOpponent).ToArray();
+
+                        if(character.CompareTag("Enemy"))
+                            closestOpponent = GetClosestOpponent(newPlayers, character.transform);
+                        if(character.CompareTag("Player"))
+                            closestOpponent = GetClosestOpponent(newEnemies, character.transform);
+
+                        if (closestOpponent == null)
+                            break;
+
+                        distance = Vector3.Distance(closestOpponent.transform.position, character.transform.position);
+                    }
                 }
-                else if (character.GetComponent<Stats>().reloadLeft > 1)
-                {
-                    character.GetComponent<Enemy>().attackManager.Reload();
-                    character.GetComponent<Enemy>().attackManager.Reload();
-                    return;
-                }
+
+                return;
+            }
+
+            // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
+            if (character.GetComponent<Stats>().reloadLeft == 0)
+            {
+                character.GetComponent<Character>().attackManager.Attack(character, closestOpponent);
+                character.GetComponent<Character>().attackManager.Reload();
+            }
+            else if (character.GetComponent<Stats>().reloadLeft == 1)
+            {
+                character.GetComponent<Character>().attackManager.Reload();
+                character.GetComponent<Character>().attackManager.Attack(character, closestOpponent);
+                return;
+            }
+            else if (character.GetComponent<Stats>().reloadLeft > 1)
+            {
+                character.GetComponent<Character>().attackManager.Reload();
+                character.GetComponent<Character>().attackManager.Reload();
+                return;
             }
         }
         else
@@ -190,23 +218,30 @@ public class AutoCombat : MonoBehaviour
             // Wykonuje tyle atakow ile wynosi cecha Ataki postaci
             for (int i = 0; i < attacksAmount; i++)
             {
-                // Jesli bron nie wymaga naladowania to wykonuje atak, w przeciwnym razie wykonuje ladowanie
-                if (character.GetComponent<Stats>().reloadLeft == 0)
-                    character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
-                else if (character.GetComponent<Stats>().reloadLeft == 1)
+                if(distance <= character.GetComponent<Stats>().AttackRange) // Musze to dopisać, bo po pokonaniu jednego wroga może się okazać, że inny najbliższy jest poza zasięgiem, więc akcja wiellokrotnego ataku powinna zostać przerwana
+                    character.GetComponent<Character>().attackManager.Attack(character, closestOpponent);
+
+                if (closestOpponent.GetComponent<Stats>().tempHealth < 0)
                 {
-                    character.GetComponent<Player>().attackManager.Reload();
-                    character.GetComponent<Player>().attackManager.Attack(character, closestOpponent);
-                    return;
-                }
-                else if (character.GetComponent<Stats>().reloadLeft > 1)
-                {
-                    character.GetComponent<Player>().attackManager.Reload();
-                    character.GetComponent<Player>().attackManager.Reload();
-                    return;
+                    Destroy(closestOpponent);
+                    GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(closestOpponent, false);
+
+                    // Zaktualizowanie listy postaci usuwając z nich tą, która została zniszczona. Funkcja Destroy() zostaje wywołana dopiero po zakończeniu pętli, więc trzeba usunąć ręcznie
+                    GameObject[] newEnemies = GameObject.FindGameObjectsWithTag("Enemy").Where(enemy => enemy != closestOpponent).ToArray();
+                    GameObject[] newPlayers = GameObject.FindGameObjectsWithTag("Player").Where(player => player != closestOpponent).ToArray();
+
+                    if(character.CompareTag("Enemy"))
+                        closestOpponent = GetClosestOpponent(newPlayers, character.transform);
+                    if(character.CompareTag("Player"))
+                        closestOpponent = GetClosestOpponent(newEnemies, character.transform);
+
+                    if (closestOpponent == null)
+                        break;
+                    
+                    distance = Vector3.Distance(closestOpponent.transform.position, character.transform.position);
                 }
             }
-        }
+        } 
     }
 
     GameObject GetClosestOpponent(GameObject[] characters, Transform currentCharacter)

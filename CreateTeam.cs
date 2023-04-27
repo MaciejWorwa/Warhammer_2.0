@@ -11,51 +11,30 @@ public class CreateTeam : MonoBehaviour
 
     public static int playersAmount;
 
-    private GridManager gridManager;
-
     void Start()
     {
         playersAmount = 0;
-        gridManager = GameObject.Find("Grid").GetComponent<GridManager>();
     }
 
-    public void CreateNewPlayer(string characterName = "")
+    public void CreateNewPlayer()
     {
         // Liczba dostępnych pól
-        int availableTiles = gridManager.width * gridManager.height; // wymiary planszy
-
-        bool xParzysty = (gridManager.width % 2 == 0) ? true : false; // zmienna potrzebna do prawidlowego generowania losowej pozycji postaci
-        bool yParzysty = (gridManager.height % 2 == 0) ? true : false; // zmienna potrzebna do prawidlowego generowania losowej pozycji postaci
+        int availableTiles = 17 * 8; // z założenia plansza o wymiarach 17x8
 
         // Sprawdzenie dostępności pól
         int attempts = 0;
         Collider2D searchForColliders;
         do
         {
-            int x;
-            int y;
-
             // Generowanie losowej pozycji na mapie
-            if (xParzysty)
-                x = Random.Range(-gridManager.width / 2, gridManager.width / 2);
-            else
-                x = Random.Range(-gridManager.width / 2, gridManager.width / 2 + 1);
-            if (yParzysty)
-                y = Random.Range(-gridManager.height / 2, gridManager.height / 2);
-            else
-                y = Random.Range(-gridManager.height / 2, gridManager.height / 2 + 1);
-
+            int x = Random.Range(-8, 9);
+            int y = Random.Range(-4, 4);
             position = new Vector2(x, y);
-
-            if (gridManager.width == 1)
-                position.x = 0;
-            if (gridManager.height == 1)
-                position.y = 0;
 
             // Sprawdzenie czy dane pole jest wolne czy zajęte
             searchForColliders = Physics2D.OverlapCircle(position, 0.1f);
 
-            if (searchForColliders == null || searchForColliders.tag == "Tile" && availableTiles > 1)
+            if (searchForColliders == null || searchForColliders.tag == "Tile")
             {
                 // Zmniejszenie liczby dostępnych pól
                 availableTiles--;
@@ -65,7 +44,7 @@ public class CreateTeam : MonoBehaviour
             attempts++;
 
             // Sprawdzenie, czy liczba prób nie przekracza maksymalnej liczby dostępnych pól
-            if (attempts > availableTiles)
+            if (attempts >= availableTiles)
             {
                 Debug.Log("Nie można utworzyć nowego bohatera gracza. Brak wolnych pól.");
                 return;
@@ -76,10 +55,7 @@ public class CreateTeam : MonoBehaviour
         //tworzy nowego bohatera gracza w losowej pozycji i nadaje mu odpowiednia nazwe
         newPlayer = Instantiate(playerObject, position, Quaternion.identity);
         playersAmount++;
-        if (characterName == "")
-            newPlayer.name = ("Player " + playersAmount);
-        else
-            newPlayer.name = characterName;
+        newPlayer.name = ("Player " + playersAmount);
 
         newPlayer.GetComponent<Player>();
         newPlayer.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
@@ -89,7 +65,7 @@ public class CreateTeam : MonoBehaviour
 
     }
 
-    void SetCharacterLevel()
+        void SetCharacterLevel()
     {
         GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(newPlayer);
     }
