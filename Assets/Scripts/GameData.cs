@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 [System.Serializable]
 public class GameData
 {
+    #region All fields
     public int NumberOfRounds;
 
     [Header("Imi�")]
@@ -78,73 +80,32 @@ public class GameData
     [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru
 
     public float[] position;
+    #endregion
 
+    // Przypisanie wszystkim polom wartości z konkretnej instancji klasy Stats, a także zapisanie numery rundy
     public GameData(Stats stats)
     {
         NumberOfRounds = RoundManager.roundNumber;
 
-        Name = stats.Name;
-        Rasa = stats.Rasa;
-        Level = stats.Level;
-        Exp = stats.Exp;
-        WW = stats.WW;
-        US = stats.US;
-        K = stats.K;
-        Odp = stats.Odp;
-        Zr = stats.Zr;
-        Int = stats.Int;
-        SW = stats.SW;
-        Ogd = stats.Ogd;
-        
-        A = stats.A;
-        S = stats.S;
-        Wt = stats.Wt;
-        Sz = stats.Sz;
-        tempSz = stats.tempSz;
-        Mag = stats.Mag;
-        maxHealth = stats.maxHealth;
-        tempHealth = stats.tempHealth;
-        PP = stats.PP;
+        // Pobiera wszystkie pola (zmienne) z klasy Stats
+        var fields = stats.GetType().GetFields();
+        var thisFields = this.GetType().GetFields();
 
-        Initiative = stats.Initiative;
-        Dodge = stats.Dodge;
-        instantReload = stats.instantReload;
-        canParry = stats.canParry;
-        canDodge = stats.canDodge;
-        actionsLeft = stats.actionsLeft;
-        criticalCondition = stats.criticalCondition;
-        parryBonus = stats.parryBonus;
-        defensiveBonus = stats.defensiveBonus;
-        aimingBonus = stats.aimingBonus;
+        // Dla każdego pola z klasy stats odnajduje pole w klasie this (czyli GameData) i ustawia mu wartość jego odpowiednika z klasy stats
+        foreach (var thisField in thisFields)
+        {
+            var field = fields.FirstOrDefault(f => f.Name == thisField.Name); // Znajduje pierwsze pole o tej samej nazwie wsród pol z klasy Stats
 
-        Weapon_S = stats.Weapon_S;
-        AttackRange = stats.AttackRange;
-        reloadTime = stats.reloadTime;
-        reloadLeft = stats.reloadLeft;
-        Ciezki = stats.Ciezki;
-        Druzgoczacy = stats.Druzgoczacy;
-        Parujacy = stats.Parujacy;
-        Powolny = stats.Powolny;
-        PrzebijajacyZbroje = stats.PrzebijajacyZbroje;
-        Szybki = stats.Szybki;
-
-        PZ_head = stats.PZ_head;
-        PZ_arms = stats.PZ_arms;
-        PZ_torso = stats.PZ_torso;
-        PZ_legs = stats.PZ_legs;
-
-        Spell_S = stats.Spell_S;
-        PowerRequired = stats.PowerRequired;
-        SpellRange = stats.SpellRange;
-        AreaSize = stats.AreaSize;
-        CastDuration = stats.CastDuration;
-        OffensiveSpell = stats.OffensiveSpell;
-        IgnoreArmor = stats.IgnoreArmor;
-        etherArmorActive = stats.etherArmorActive;
+            if (field != null && field.GetValue(stats) != null)
+            {
+                thisField.SetValue(this, field.GetValue(stats));
+            }
+        }
 
         position = new float[3];
         position[0] = stats.gameObject.transform.position.x;
         position[1] = stats.gameObject.transform.position.y;
         position[2] = stats.gameObject.transform.position.z;
     }
+
 }

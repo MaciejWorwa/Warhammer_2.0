@@ -5,11 +5,23 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System;
+using TMPro;
 
 public class SaveSystem : MonoBehaviour
 {
+    [SerializeField] TMP_Dropdown savedFilesDropdown; // Dropdown z wszystkimi savami
+    private static string dropdownText = "";
+
+    #region Save functions
     public void SaveAllCharactersStats()
     {
+        if(GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text.Length < 1)
+        {
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Zapis nieudany. Nie podano nazwy pliku.</color>", 4f);
+            Debug.Log($"<color=red>Zapis nieudany. Nie podano nazwy pliku.</color>");
+            return;
+        }
+
         List<Stats> allStats = new List<Stats>();
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
@@ -28,8 +40,74 @@ public class SaveSystem : MonoBehaviour
         Debug.Log($"<color=green>Zapisano stan gry.</color>");
     }
 
+    public static void SaveCharacterStats(Stats[] characters)
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        // Utworzenie listy nazw postaci w 'characters'
+        List<string> charNames = new List<string>();
+        foreach (var character in characters)
+        {
+            charNames.Add(character.gameObject.name);
+        }
+
+        // Stworzenie folderu dla zapisów
+        string savesFolderName = GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text;
+        Directory.CreateDirectory(Application.persistentDataPath + "/" + savesFolderName);
+
+        // Pobranie listy zapisanych plików
+        string[] files = Directory.GetFiles(Application.persistentDataPath + "/" + savesFolderName, "*.fun");
+
+        // Sprawdzenie, czy w liście znajdują się pliki, których nazwa nie pasuje do nazw postaci w 'characters' i usunięcie ich
+        foreach (string file in files)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(file);
+            if (!charNames.Contains(fileName))
+            {
+                Debug.Log("usuwam " + fileName);
+                File.Delete(file);
+            }
+        }
+
+        // Zapis wszystkich postaci w 'characters'
+        foreach (var character in characters)
+        {
+            string charName = character.gameObject.name;
+            string path = Application.persistentDataPath + "/" + savesFolderName + "/" + charName + ".fun";
+
+            FileStream stream = new FileStream(path, FileMode.Create);
+            GameData data = new GameData(character);
+            formatter.Serialize(stream, data);
+            stream.Close();
+        }
+    }
+    #endregion
+
+    #region Update saved files dropdown
+    public void SetSavedFilesDropdown()
+    {
+        // Resetuje opcje dropdownu
+        savedFilesDropdown.ClearOptions();
+
+        List<string> options = new List<string>();
+
+        // Wykonuje pętle dla wszystkich folderów wewnątrz głównego folderu z save'ami
+        foreach (string saveFolder in Directory.GetDirectories(Application.persistentDataPath))
+        {
+            options.Add(Path.GetFileName(saveFolder));
+        }
+
+        savedFilesDropdown.AddOptions(options);
+    }
+    #endregion
+
+
+    #region Load all characters stats
     public void LoadAllCharactersStats()
     {
+        if (savedFilesDropdown.GetComponent<TMP_Dropdown>().options.Count == 0)
+            return;
+
         // Odznaczenie postaci, jeżeli podczas kliknięcia "Load" była zaznaczona, aby przyciski akcji nie zostawały widocznie w złym miejscu
         if (Character.trSelect != null)
         {
@@ -52,7 +130,6 @@ public class SaveSystem : MonoBehaviour
 
         GameObject[] characters = enemies.Concat(players).ToArray();
 
-
         // Utworzenie listy nazw postaci w 'characters'
         List<string> charNames = new List<string>();
         foreach (var character in characters)
@@ -60,8 +137,10 @@ public class SaveSystem : MonoBehaviour
             charNames.Add(character.gameObject.name);
         }
 
+        dropdownText = savedFilesDropdown.GetComponent<TMP_Dropdown>().options[savedFilesDropdown.value].text;
+
         // Pobranie listy zapisanych plików
-        string[] files = Directory.GetFiles(Application.persistentDataPath, "*.fun");
+        string[] files = Directory.GetFiles(Application.persistentDataPath + "/" + dropdownText, "*.fun");
 
         // Wczytuje każdy plik o nazwie istniejącej w liście nazw obecnie istniejących na polu bitwy postaci
         foreach (string file in files)
@@ -83,7 +162,9 @@ public class SaveSystem : MonoBehaviour
         // Opóźniam wczytanie statystyk, bo program nie jest w stanie zrobić tego natychmiastowo. Cały kod, który tu był przeniosłem do metody LoadWithDelay
         Invoke("LoadWithDelay", 0.01f);   
     }
+    #endregion
 
+    #region Load with delay
     void LoadWithDelay()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
@@ -116,8 +197,8 @@ public class SaveSystem : MonoBehaviour
         }
 
         foreach (var character in uniqueCharacters)
-        {
-            string path = Application.persistentDataPath + "/" + character.name + ".fun";
+        {           
+            string path = Application.persistentDataPath + "/" + dropdownText + "/" + character.name + ".fun";
 
             // Sprawdza, czy w pliku zapisu znajduje się dana postać. Jesli się znajduje to wczytuje jej staty i pozycje, a jak jej tam nie ma to ją usuwa.
             if (File.Exists(path))
@@ -126,74 +207,21 @@ public class SaveSystem : MonoBehaviour
 
                 character.GetComponent<Character>().rasa = (Character.Rasa)Array.IndexOf(Enum.GetNames(typeof(Character.Rasa)), data.Rasa);;
 
-                // Wczytaj wartości do komponentu Stats
-                character.GetComponent<Stats>().Name = data.Name;
-                character.GetComponent<Stats>().maxHealth = data.maxHealth;
-                character.GetComponent<Stats>().tempHealth = data.tempHealth;
-                character.GetComponent<Stats>().gameObject.transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
-                character.GetComponent<Stats>().Rasa = data.Rasa;
-                character.GetComponent<Stats>().Level = data.Level;
-                
-                character.GetComponent<Stats>().Exp = data.Exp;
-                character.GetComponent<Stats>().WW = data.WW;
-                character.GetComponent<Stats>().US = data.US;
-                character.GetComponent<Stats>().K = data.K;
-                character.GetComponent<Stats>().Odp = data.Odp;
-                character.GetComponent<Stats>().Zr = data.Zr;
-                character.GetComponent<Stats>().Int = data.Int;
-                character.GetComponent<Stats>().SW = data.SW;
-                character.GetComponent<Stats>().Ogd = data.Ogd;
 
-                character.GetComponent<Stats>().A = data.A;
-                character.GetComponent<Stats>().S = data.S;
-                character.GetComponent<Stats>().Wt = data.Wt;
-                character.GetComponent<Stats>().Sz = data.Sz;
-                character.GetComponent<Stats>().tempSz = data.tempSz;
-                character.GetComponent<Stats>().Mag = data.Mag;
-                character.GetComponent<Stats>().PP = data.PP;
+                Stats stats = character.GetComponent<Stats>();
 
-                character.GetComponent<Stats>().Initiative = data.Initiative;
-                character.GetComponent<Stats>().Dodge = data.Dodge;
-                character.GetComponent<Stats>().instantReload = data.instantReload;
-                character.GetComponent<Stats>().canParry = data.canParry;
-                character.GetComponent<Stats>().canDodge = data.canDodge;
-                character.GetComponent<Stats>().actionsLeft = data.actionsLeft;
-                character.GetComponent<Stats>().criticalCondition = data.criticalCondition;
-                character.GetComponent<Stats>().parryBonus = data.parryBonus;
-                character.GetComponent<Stats>().defensiveBonus = data.defensiveBonus;
-                character.GetComponent<Stats>().aimingBonus = data.aimingBonus;
+                // Wczytaj wartości z 'data' do ich odpowiednikow z komponentu Stats
+                foreach (var field in data.GetType().GetFields())
+                {
+                    var value = field.GetValue(data);
+                    var componentField = stats.GetType().GetField(field.Name);
+                    if (componentField != null && value != null)
+                    {
+                        componentField.SetValue(stats, value);
+                    }
+                }
 
-                character.GetComponent<Stats>().Weapon_S = data.Weapon_S;
-                character.GetComponent<Stats>().AttackRange = data.AttackRange;
-                character.GetComponent<Stats>().reloadTime = data.reloadTime;
-                character.GetComponent<Stats>().reloadLeft = data.reloadLeft;
-                character.GetComponent<Stats>().Ciezki = data.Ciezki;
-                character.GetComponent<Stats>().Druzgoczacy = data.Druzgoczacy;
-                character.GetComponent<Stats>().Parujacy = data.Parujacy;
-                character.GetComponent<Stats>().Powolny = data.Powolny;
-                character.GetComponent<Stats>().PrzebijajacyZbroje = data.PrzebijajacyZbroje;
-                character.GetComponent<Stats>().Szybki = data.Szybki;
-
-                character.GetComponent<Stats>().PZ_head = data.PZ_head;
-                character.GetComponent<Stats>().PZ_arms = data.PZ_arms;
-                character.GetComponent<Stats>().PZ_torso = data.PZ_torso;
-                character.GetComponent<Stats>().PZ_legs = data.PZ_legs;
-
-                character.GetComponent<Stats>().Spell_S = data.Spell_S;
-                character.GetComponent<Stats>().PowerRequired = data.PowerRequired;
-                character.GetComponent<Stats>().SpellRange = data.SpellRange;
-                character.GetComponent<Stats>().AreaSize = data.AreaSize;
-                character.GetComponent<Stats>().CastDuration = data.CastDuration;
-                character.GetComponent<Stats>().OffensiveSpell = data.OffensiveSpell;
-                character.GetComponent<Stats>().IgnoreArmor = data.IgnoreArmor;
-                character.GetComponent<Stats>().etherArmorActive = data.etherArmorActive;
-
-                Vector3 position;
-                position.x = data.position[0];
-                position.y = data.position[1];
-                position.z = data.position[2];
-
-                character.transform.position = position;
+                character.transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
 
                 RoundManager.roundNumber = data.NumberOfRounds;
             }
@@ -206,55 +234,17 @@ public class SaveSystem : MonoBehaviour
                 if (character.CompareTag("Enemy"))
                     CharacterManager.enemiesAmount--;
             }
-
         }
 
         GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=green>Wczytano stan gry.</color>", 3f);
         Debug.Log($"<color=green>Wczytano stan gry.</color>");
     }
+    #endregion
 
-
-    public static void SaveCharacterStats(Stats[] characters)
-    {
-        BinaryFormatter formatter = new BinaryFormatter();
-
-        // Utworzenie listy nazw postaci w 'characters'
-        List<string> charNames = new List<string>();
-        foreach (var character in characters)
-        {
-            charNames.Add(character.gameObject.name);
-        }
-
-        // Pobranie listy zapisanych plików
-        string[] files = Directory.GetFiles(Application.persistentDataPath, "*.fun");
-
-        // Sprawdzenie, czy w liście znajdują się pliki, których nazwa nie pasuje do nazw postaci w 'characters' i usunięcie ich
-        foreach (string file in files)
-        {
-            string fileName = Path.GetFileNameWithoutExtension(file);
-            if (!charNames.Contains(fileName))
-            {
-                File.Delete(file);
-            }
-        }
-
-        // Zapis wszystkich postaci w 'characters'
-        foreach (var character in characters)
-        {
-            string charName = character.gameObject.name;
-            string path = Application.persistentDataPath + "/" + charName + ".fun";
-
-            FileStream stream = new FileStream(path, FileMode.Create);
-            GameData data = new GameData(character);
-            formatter.Serialize(stream, data);
-            stream.Close();
-        }
-    }
-
-
+    #region Load character stats
     public static GameData LoadCharacterStats(string charName)
     {
-        string path = Application.persistentDataPath + "/" + charName + ".fun";
+        string path = Application.persistentDataPath + "/" + dropdownText + "/" + charName + ".fun";
         if (File.Exists(path))
         {
             BinaryFormatter formatter = new BinaryFormatter();
@@ -269,6 +259,42 @@ public class SaveSystem : MonoBehaviour
         {
             Debug.LogError($"Zapis gry dla gracza {charName} nie został znaleziony w " + path);
             return null;
+        }
+    }
+    #endregion
+
+    #region Delete selected save file
+    public void DeleteSaveFile()
+    {
+        if (savedFilesDropdown.GetComponent<TMP_Dropdown>().options.Count == 0)
+            return;
+
+        dropdownText = savedFilesDropdown.GetComponent<TMP_Dropdown>().options[savedFilesDropdown.value].text;
+
+        string path = Application.persistentDataPath + "/" + dropdownText;
+        Directory.Delete(path, true);
+
+        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"Zapis {dropdownText} został usunięty.", 3f);
+        Debug.Log($"Zapis {dropdownText} został usunięty.");
+
+        SetSavedFilesDropdown();
+    }
+    #endregion
+
+    public void CheckForEmptySavesDropdown(GameObject LoadGameConfirmPanel)
+    {
+        if (savedFilesDropdown.GetComponent<TMP_Dropdown>().options.Count == 0)
+        {
+            GameObject.Find("LoadGamePanel").SetActive(false);
+            if (LoadGameConfirmPanel.activeSelf)
+            {
+                LoadGameConfirmPanel.SetActive(false);
+            }
+
+            GameManager.PanelIsOpen = false;
+
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"Nie wybrano pliku.", 3f);
+            Debug.Log($"Nie wybrano pliku.");
         }
     }
 }

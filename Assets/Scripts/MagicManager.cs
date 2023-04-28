@@ -44,6 +44,7 @@ public class MagicManager : MonoBehaviour
     }
 
     // Rzut na poziom mocy
+    #region Roll for power level
     public int PowerLevelRoll()
     {
         // Zresetowanie poziomu mocy
@@ -111,6 +112,7 @@ public class MagicManager : MonoBehaviour
 
         return powerLevel;
     }
+    #endregion
 
     public void SetSpellToOffensive()
     {
@@ -122,6 +124,7 @@ public class MagicManager : MonoBehaviour
         Character.selectedCharacter.GetComponent<Stats>().OffensiveSpell = false;
     }
 
+    #region Healing spell
     public void HealingSpell(GameObject target)
     {
         GameObject character = Character.selectedCharacter;
@@ -147,7 +150,9 @@ public class MagicManager : MonoBehaviour
         Debug.Log($"<color=#00FF9A>{character.GetComponent<Stats>().Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>");
 
     }
+    #endregion
 
+    #region Get magic damage
     public void GetMagicDamage(GameObject target)
     {
         GameObject character = Character.selectedCharacter;
@@ -190,7 +195,7 @@ public class MagicManager : MonoBehaviour
             messageManager.ShowMessage($"<color=red> Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
             Debug.Log($"Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
         }
-        else if (damage > target.GetComponent<Stats>().Wt)
+        else if (character.GetComponent<Stats>().IgnoreArmor && damage > target.GetComponent<Stats>().Wt)
         {
             target.GetComponent<Stats>().tempHealth -= (damage - target.GetComponent<Stats>().Wt);
 
@@ -206,7 +211,9 @@ public class MagicManager : MonoBehaviour
             Debug.Log($"Atak {character.GetComponent<Stats>().Name} nie przebił się przez pancerz.");
         }   
     }
+    #endregion
 
+    #region Ether Armor spell mechanics
     public void EtherArmorSpell()
     {
         Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
@@ -251,4 +258,5 @@ public class MagicManager : MonoBehaviour
         messageManager.ShowMessage($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>", 6f);
         Debug.Log($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>");
     }
+    #endregion
 }

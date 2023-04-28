@@ -14,7 +14,7 @@ public class StatsEditor : MonoBehaviour
 
     [SerializeField] TMP_Dropdown rasaDropdown; // Dropdown z wyborem rasy
 
-
+    #region Panels visibility functions
     public void PanelVisibility(GameObject panel)
     {
         panel.SetActive(true);
@@ -59,7 +59,9 @@ public class StatsEditor : MonoBehaviour
             GameManager.PanelIsOpen = false;
         }
     }
+    #endregion
 
+    #region Load all attributes
     public void LoadAttributes()
     {
 
@@ -99,7 +101,9 @@ public class StatsEditor : MonoBehaviour
         }
  
     }
+    #endregion
 
+    #region Edit attribute
     public void EditAttribute(GameObject textInput)
     {
         GameObject character = Character.selectedCharacter;
@@ -146,7 +150,9 @@ public class StatsEditor : MonoBehaviour
         // Aktualizuje poziom postaci
         GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);
     }
+    #endregion
 
+    #region Set initiative
     public void SetInitiative()
     {
         GameObject character = Character.selectedCharacter;
@@ -154,8 +160,10 @@ public class StatsEditor : MonoBehaviour
         
         Debug.Log($"Inicjatywa zmieniony na {character.GetComponent<Stats>().Initiative}");
     }
+    #endregion
 
     // Kod odpowiadajacy za dropdown do wyboru rasy postaci
+    #region Set race dropdown
     void SetRaceDropdown()
     {
         GameObject character = Character.selectedCharacter;
@@ -191,7 +199,9 @@ public class StatsEditor : MonoBehaviour
             rasaDropdown.value = (int)character.GetComponent<Character>().rasa - 4;
         }
     }
+    #endregion
 
+    #region Change race
     public void ChangeRace()
     {
         GameObject character = Character.selectedCharacter;
@@ -211,4 +221,5 @@ public class StatsEditor : MonoBehaviour
 
         GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);
     }
+    #endregion
 }
