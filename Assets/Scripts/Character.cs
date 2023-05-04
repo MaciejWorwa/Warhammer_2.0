@@ -99,6 +99,7 @@ public class Character : MonoBehaviour
             {
                 transform.localScale = new Vector3(1f, 1f, 1f);
                 trSelect = null;
+                MovementManager.canMove = false;
 
                 if (selectedCharacter.CompareTag("Player"))
                     selectedCharacter.GetComponent<Renderer>().material.color = new Color(0, 255, 0);

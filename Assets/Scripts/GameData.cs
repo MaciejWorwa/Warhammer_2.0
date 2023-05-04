@@ -8,6 +8,8 @@ public class GameData
 {
     #region All fields
     public int NumberOfRounds;
+    public int gridWidth;
+    public int gridHeight;
 
     [Header("Imi�")]
     public string Name;
@@ -80,12 +82,46 @@ public class GameData
     [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru
 
     public float[] position;
+
+
+
+
+
+
+    public List<float[]> obstaclePositions;
+    public List<string> tags;
     #endregion
 
     // Przypisanie wszystkim polom wartości z konkretnej instancji klasy Stats, a także zapisanie numery rundy
     public GameData(Stats stats)
     {
         NumberOfRounds = RoundManager.roundNumber;
+
+        gridWidth = GridManager.width;
+        gridHeight = GridManager.height;
+
+
+       // INFORMACJE O PRZESZKODACH
+       string[] tagsToSave = {"Tree", "Rock"};
+
+        // Pobieramy wszystkie obiekty o wybranych tagach
+        List<GameObject> objectsToSave = new List<GameObject>();
+        foreach (string tag in tagsToSave)
+        {
+            GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag(tag);
+            objectsToSave.AddRange(objectsWithTag);
+        }
+
+        // Tworzymy listę pozycji i tagów obiektów
+        obstaclePositions = new List<float[]>();
+        tags = new List<string>();
+        foreach (GameObject obj in objectsToSave)
+        {
+            float[] positionArray = new float[3] { obj.transform.position.x, obj.transform.position.y, obj.transform.position.z };
+            obstaclePositions.Add(positionArray);
+            tags.Add(obj.tag);
+        }
+
 
         // Pobiera wszystkie pola (zmienne) z klasy Stats
         var fields = stats.GetType().GetFields();

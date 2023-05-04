@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class GridManager : MonoBehaviour
 {
-    public int width, height;
+    public static int width = 17;
+    public static int height = 8;
 
     [SerializeField] private Tile tilePrefab;
 
@@ -17,9 +19,35 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Slider sliderX;
     [SerializeField] private Slider sliderY;
 
+    [SerializeField] private GameObject rockPrefab;
+    [SerializeField] private GameObject treePrefab;
+
+    public static bool treeAdding;
+    public static bool rockAdding;
+    public static bool obstacleRemoving;
+
     void Start()
     {
+        treeAdding = false;
+        rockAdding = false;
+        obstacleRemoving = false;
+
+        //Debug.Log("height " + height);
+        //Debug.Log("width " + width);
+        //sliderY.value = height;
+        //sliderX.value = width;
+        //Debug.Log("sliderY.value " + sliderY.value);
+        //Debug.Log("sliderX.value " + sliderX.value);
+
         GenerateGrid();
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && obstacleRemoving)
+        {
+            RemoveObstacle();
+        }
     }
 
     public void ChangeGridSize()
@@ -28,17 +56,19 @@ public class GridManager : MonoBehaviour
         width = (int)sliderX.value; 
         height = (int)sliderY.value;
 
-        // Usuwa poprzednia siatke
-        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
-        foreach (var tile in tiles)
-            Destroy(tile);
-
         // Generuje now¹ siatkê ze zmienionymi wartoœciami
         GenerateGrid();
     }
 
-    void GenerateGrid()
+    public void GenerateGrid()
     {
+        // Usuwa poprzednia siatke
+        GameObject[] allTiles = GameObject.FindGameObjectsWithTag("Tile");
+        foreach (var tile in allTiles)
+        {
+            Destroy(tile);
+        }
+
         this.transform.position = new Vector3(0, 0, 0);
 
         tiles = new Dictionary<Vector3, Tile>();
@@ -68,4 +98,83 @@ public class GridManager : MonoBehaviour
         foreach (var tile in tiles)
             tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
     }
+
+
+    #region Adding and removing obstacles
+    public void AddingObstacle(GameObject button)
+    {
+        Color newColor = button.GetComponent<Image>().color;
+        newColor.a = 0.5f;
+        button.GetComponent<Image>().color = newColor;
+
+        if (button.name == "AddTreeButton")
+        {
+            treeAdding = true;
+            rockAdding = false;
+            newColor.a = 1f;
+            GameObject.Find("AddRockButton").GetComponent<Image>().color = newColor;
+
+        }
+        else if (button.name == "AddRockButton")
+        {
+            rockAdding = true;
+            treeAdding = false;
+            newColor.a = 1f;
+            GameObject.Find("AddTreeButton").GetComponent<Image>().color = newColor;
+        }
+
+        // Zresetowanie funkji i przycisku usuwania przeszkód
+        obstacleRemoving = false;
+        GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color = new Color(1f, 0.398f, 0.392f, 1f);
+    }
+
+    public void RemovingObstacle()
+    {
+        obstacleRemoving = true;
+        Color removeColor = GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color;
+        removeColor.a = 0.5f;
+        GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color = removeColor;
+
+        treeAdding = false;
+        rockAdding = false;
+        GameObject.Find("AddRockButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
+        GameObject.Find("AddTreeButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
+    }
+
+    public void AddObstacle(Vector3 position, string tag, bool loadGame)
+    {
+        position.z = 1;
+
+        if(loadGame)
+        {
+            if (tag == "Tree")
+                Instantiate(treePrefab, position, Quaternion.identity).AddComponent<Obstacle>();
+            else if (tag == "Rock")
+                Instantiate(rockPrefab, position, Quaternion.identity).AddComponent<Obstacle>();
+
+            return;
+        }
+
+
+        Collider2D collider = Physics2D.OverlapCircle(position, 0.1f);
+        if (collider != null && collider.gameObject.tag == "Tile")
+        {
+            if (tag == "Tree")
+                Instantiate(treePrefab, position, Quaternion.identity).AddComponent<Obstacle>();
+            else if (tag == "Rock")
+                Instantiate(rockPrefab, position, Quaternion.identity).AddComponent<Obstacle>(); 
+        }
+        else
+            Debug.Log("Nie moge tu postawic przeszkody.");
+    }
+
+    public void RemoveObstacle()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        if (hit.collider != null && (hit.collider.CompareTag("Tree") || hit.collider.CompareTag("Rock")))
+        {
+            Destroy(hit.collider.gameObject);
+        }
+    }
+    #endregion
 }

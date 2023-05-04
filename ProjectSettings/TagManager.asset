@@ -10,6 +10,8 @@ TagManager:
   - StatsButton
   - Panel
   - MainCanvas
+  - Tree
+  - Rock
   layers:
   - Default
   - TransparentFX

@@ -34,6 +34,13 @@ public class SaveSystem : MonoBehaviour
             allStats.Add(character.GetComponent<Stats>());
         }
 
+        if (characters.Length < 1)
+        {
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Zapis nieudany. Aby zapisać grę, musisz stworzyć chociaż jedną postać.</color>", 4f);
+            Debug.Log($"<color=red>Zapis nieudany. Aby zapisać grę, musisz stworzyć chociaż jedną postać.</color>");
+            return;
+        }
+
         SaveCharacterStats(allStats.ToArray());
 
         GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=green>Zapisano stan gry.</color>", 3f);
@@ -159,6 +166,17 @@ public class SaveSystem : MonoBehaviour
             }
         }
 
+        string[] tagsToSave = { "Tree", "Rock" };
+
+
+        // Usunięcie wszystkich obecnych przeszkód
+        GameObject[] rocks = GameObject.FindGameObjectsWithTag("Rock");
+        GameObject[] trees = GameObject.FindGameObjectsWithTag("Tree");
+        GameObject[] obstacles = rocks.Concat(trees).ToArray();
+
+        foreach (GameObject obstacle in obstacles)
+            Destroy(obstacle);
+
         // Opóźniam wczytanie statystyk, bo program nie jest w stanie zrobić tego natychmiastowo. Cały kod, który tu był przeniosłem do metody LoadWithDelay
         Invoke("LoadWithDelay", 0.01f);   
     }
@@ -167,6 +185,8 @@ public class SaveSystem : MonoBehaviour
     #region Load with delay
     void LoadWithDelay()
     {
+        GameData data = null;
+
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
@@ -203,7 +223,7 @@ public class SaveSystem : MonoBehaviour
             // Sprawdza, czy w pliku zapisu znajduje się dana postać. Jesli się znajduje to wczytuje jej staty i pozycje, a jak jej tam nie ma to ją usuwa.
             if (File.Exists(path))
             {
-                GameData data = LoadCharacterStats(character.name);
+                data = LoadCharacterStats(character.name);
 
                 character.GetComponent<Character>().rasa = (Character.Rasa)Array.IndexOf(Enum.GetNames(typeof(Character.Rasa)), data.Rasa);;
 
@@ -222,8 +242,6 @@ public class SaveSystem : MonoBehaviour
                 }
 
                 character.transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
-
-                RoundManager.roundNumber = data.NumberOfRounds;
             }
             else
             {
@@ -235,6 +253,24 @@ public class SaveSystem : MonoBehaviour
                     CharacterManager.enemiesAmount--;
             }
         }
+
+        RoundManager.roundNumber = data.NumberOfRounds;
+        GridManager.width = data.gridWidth;
+        GridManager.height = data.gridHeight;
+        GameObject.Find("Grid").GetComponent<GridManager>().GenerateGrid();
+
+        // Wczytanie przeszkód (skał i drzew)
+        if (data.obstaclePositions != null)
+        {
+            // Tworzymy obiekty na podstawie wczytanych danych
+            for (int i = 0; i < data.obstaclePositions.Count; i++)
+            {
+                Vector3 position = new Vector3(data.obstaclePositions[i][0], data.obstaclePositions[i][1], data.obstaclePositions[i][2]);
+
+                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(position, data.tags[i], true);
+            }
+        }
+
 
         GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=green>Wczytano stan gry.</color>", 3f);
         Debug.Log($"<color=green>Wczytano stan gry.</color>");

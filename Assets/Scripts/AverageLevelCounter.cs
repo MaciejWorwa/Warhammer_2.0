@@ -31,7 +31,7 @@ public class AverageLevelCounter : MonoBehaviour
         int maxLevel = 0;
         int minLevel = 0;
 
-        GameObject[] gracze = GameObject.FindGameObjectsWithTag("Character");
+        GameObject[] gracze = GameObject.FindGameObjectsWithTag("Player");
 
         foreach(var gracz in gracze)
         {

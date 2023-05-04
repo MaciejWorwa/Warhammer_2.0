@@ -24,7 +24,6 @@ public class CharacterManager : MonoBehaviour
     {
         playersAmount = 0;
         enemiesAmount = 0;
-        gridManager = GameObject.Find("Grid").GetComponent<GridManager>();
     }
 
     void Update()
@@ -58,10 +57,10 @@ public class CharacterManager : MonoBehaviour
     public void CreateNewCharacter(string tag, string characterName)
     {
         // Liczba dostępnych pól
-        int availableTiles = gridManager.width * gridManager.height; // wymiary planszy
+        int availableTiles = GridManager.width * GridManager.height; // wymiary planszy
 
-        bool xParzysty = (gridManager.width % 2 == 0) ? true : false; // zmienna potrzebna do prawidlowego generowania losowej pozycji postaci
-        bool yParzysty = (gridManager.height % 2 == 0) ? true : false; // zmienna potrzebna do prawidlowego generowania losowej pozycji postaci
+        bool xParzysty = (GridManager.width % 2 == 0) ? true : false; // zmienna potrzebna do prawidlowego generowania losowej pozycji postaci
+        bool yParzysty = (GridManager.height % 2 == 0) ? true : false; // zmienna potrzebna do prawidlowego generowania losowej pozycji postaci
 
         // Sprawdzenie dostępności pól
         int attempts = 0;
@@ -73,19 +72,19 @@ public class CharacterManager : MonoBehaviour
 
             // Generowanie losowej pozycji na mapie
             if (xParzysty)
-                x = Random.Range(-gridManager.width / 2, gridManager.width / 2);
+                x = Random.Range(-GridManager.width / 2, GridManager.width / 2);
             else
-                x = Random.Range(-gridManager.width / 2, gridManager.width / 2 + 1);
+                x = Random.Range(-GridManager.width / 2, GridManager.width / 2 + 1);
             if (yParzysty)
-                y = Random.Range(-gridManager.height / 2, gridManager.height / 2);
+                y = Random.Range(-GridManager.height / 2, GridManager.height / 2);
             else
-                y = Random.Range(-gridManager.height / 2, gridManager.height / 2 + 1);
+                y = Random.Range(-GridManager.height / 2, GridManager.height / 2 + 1);
 
             position = new Vector2(x, y);
 
-            if (gridManager.width == 1)
+            if (GridManager.width == 1)
                 position.x = 0;
-            if (gridManager.height == 1)
+            if (GridManager.height == 1)
                 position.y = 0;
 
             // Sprawdzenie czy dane pole jest wolne czy zajęte

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Tile : MonoBehaviour
 {
@@ -58,6 +59,21 @@ public class Tile : MonoBehaviour
 
     void OnMouseDown()
     {
+        // Jeżeli jesteśmy w kreatorze pola bitwy to funkcja OnMouseDown jest nieaktywna
+        if (SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            if (GridManager.treeAdding)
+            {
+                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Tree", false);
+            }
+            else if (GridManager.rockAdding)
+            {
+                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Rock", false);
+            }
+            return;
+        }
+
+
         MovementManager movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
 
         // Ustala jaka postac ma sie ruszyc
