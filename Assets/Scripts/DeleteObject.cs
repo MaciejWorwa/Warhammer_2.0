@@ -15,10 +15,18 @@ public class DeleteObject : MonoBehaviour
                 GameObject.Find("ActionsButtons/Canvas").SetActive(false);
 
             // Wylacza wszystkie panele dotyczace niszczonej postaci, jesli sa otwarte
-            GameObject.Find("StatsEditor").GetComponent<StatsEditor>().ShowGeneralPanel();
-            GameObject.Find("StatsEditor").GetComponent<StatsEditor>().HideGeneralPanel();
-            GameObject.Find("GameManager").GetComponent<GameManager>().HideRollPanel();
-            GameObject.Find("OptionsMenu").GetComponent<OptionsMenu>().HideOptionsPanel();
+            foreach (GameObject panel in GameObject.FindGameObjectsWithTag("Panel"))
+            {
+                if (panel.activeSelf)
+                {
+                    GameObject.Find("GameManager").GetComponent<GameManager>().ShowOrHidePanel(panel);
+                }
+            }
+
+            //GameObject.Find("StatsEditor").GetComponent<StatsEditor>().ShowGeneralPanel();
+            //GameObject.Find("StatsEditor").GetComponent<StatsEditor>().HideGeneralPanel();
+            //GameObject.Find("GameManager").GetComponent<GameManager>().HideRollPanel();
+            //GameObject.Find("OptionsMenu").GetComponent<OptionsMenu>().HideOptionsPanel();
         }
     }
 }

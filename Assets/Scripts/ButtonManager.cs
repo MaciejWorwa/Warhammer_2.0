@@ -137,4 +137,21 @@ public class ButtonManager : MonoBehaviour
         }
     }
     #endregion
+
+    #region Refresh weapon type buttons 
+    // Odswieza przycisk przycelowania dla kazdej wybranej postaci, w zaleznosci czy przycelowanie jest u niego aktywna, czy nie
+    public void RefreshWeaponTypeButtons(GameObject character)
+    {
+        if (character.GetComponent<Stats>().AttackRange > 1.5f)
+        {
+            GameObject.Find("distance_attack_button").GetComponent<Image>().color = new Color(0f, 1f, 0f, 0.5f);
+            GameObject.Find("melee_attack_button").GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+        }
+        else
+        {
+            GameObject.Find("melee_attack_button").GetComponent<Image>().color = new Color(0f, 1f, 0f, 0.5f);
+            GameObject.Find("distance_attack_button").GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+        }
+    }
+    #endregion
 }

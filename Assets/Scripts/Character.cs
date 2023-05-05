@@ -260,6 +260,9 @@ public class Character : MonoBehaviour
 
             selectedCharacter = this.gameObject;
 
+            // Aktualizacja wyświetlanych statystyk
+            GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();
+
             messageManager.ShowMessage($"Wybrałeś {selectedCharacter.GetComponent<Stats>().Name}", 3f);
             Debug.Log("Wybrałeś " + selectedCharacter.name);
 

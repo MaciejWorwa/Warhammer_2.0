@@ -60,7 +60,7 @@ public class Tile : MonoBehaviour
     void OnMouseDown()
     {
         // Jeżeli jesteśmy w kreatorze pola bitwy to funkcja OnMouseDown jest nieaktywna
-        if (SceneManager.GetActiveScene().buildIndex == 1)
+        if (SceneManager.GetActiveScene().buildIndex == 0)
         {
             if (GridManager.treeAdding)
             {
@@ -72,7 +72,6 @@ public class Tile : MonoBehaviour
             }
             return;
         }
-
 
         MovementManager movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
 

@@ -7,8 +7,8 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] GameObject mainMenuPanel;
-    [SerializeField] GameObject quitPanel;
-    [SerializeField] GameObject rollPanel;
+    //[SerializeField] GameObject quitPanel;
+    //[SerializeField] GameObject rollPanel;
     OptionsMenu optionsMenu;
     StatsEditor statsEditor;
 
@@ -20,9 +20,18 @@ public class GameManager : MonoBehaviour
         statsEditor = GameObject.Find("StatsEditor").GetComponent<StatsEditor>();
     }
 
-    public void ChangePanelIsOpenToFalse()
+    public void ShowOrHidePanel(GameObject panel)
     {
-        PanelIsOpen = false;
+        if(!panel.activeSelf)
+        {
+            panel.SetActive(true);
+            PanelIsOpen = true;
+        }
+        else
+        {
+            panel.SetActive(false);
+            PanelIsOpen = false;
+        }
     }
 
     public void RestartGame()
@@ -56,17 +65,40 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetKeyDown("escape"))
         {
-            if (!PanelIsOpen || mainMenuPanel.activeSelf)
-                ShowOrHideMainMenuPanel();
-            else if (statsEditor.generalPanel.activeSelf)
-                statsEditor.HideGeneralPanel();
-            else if (optionsMenu.optionsPanel.activeSelf)
+            //if (!PanelIsOpen || mainMenuPanel.activeSelf)
+            //    ShowOrHideMainMenuPanel();
+            //else if (statsEditor.generalPanel.activeSelf)
+            //    statsEditor.HideGeneralPanel();
+            //else if (optionsMenu.optionsPanel.activeSelf)
+            //{
+            //    optionsMenu.HideOptionsPanel();
+            //    ShowOrHideMainMenuPanel();
+            //}
+            //else if (rollPanel.activeSelf)
+            //    HideRollPanel();
+
+            GameObject[] panels = GameObject.FindGameObjectsWithTag("Panel");
+
+            foreach (GameObject panel in panels)
             {
-                optionsMenu.HideOptionsPanel();
-                ShowOrHideMainMenuPanel();
+                if (panel.activeSelf && panel != mainMenuPanel)
+                {
+                    ShowOrHidePanel(panel);
+                }
+
+                if(panel.transform.IsChildOf(GameObject.Find("Canvas").transform))
+                {
+                    ShowOrHideMainMenuPanel();
+                }
+
+                if (panel.transform.IsChildOf(GameObject.Find("SetStatsCanvas").transform) && panel.name != "RollPanel" && panel.name != "StatsPanel")
+                {
+                    statsEditor.ShowGeneralPanel();
+                }
             }
-            else if (rollPanel.activeSelf)
-                HideRollPanel();
+
+            if (panels.Length == 0)
+                ShowOrHideMainMenuPanel();
         }
     }
 
@@ -84,39 +116,39 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ShowOrHideQuitGamePanel()
-    {
-        if (!quitPanel.activeSelf)
-            quitPanel.SetActive(true);
-        else
-            quitPanel.SetActive(false);
-    }
+    //public void ShowOrHideQuitGamePanel()
+    //{
+    //    if (!quitPanel.activeSelf)
+    //        quitPanel.SetActive(true);
+    //    else
+    //        quitPanel.SetActive(false);
+    //}
 
     public void QuitGame()
     {
         Application.Quit();
     }
 
-    public void ShowRollPanel()
-    {
-        if (!rollPanel.activeSelf)
-        {
-            PanelIsOpen = true;
-            rollPanel.SetActive(true);
-        }
-        else
-        {
-            PanelIsOpen = false;
-            rollPanel.SetActive(false);
-        }
-    }
+    //public void ShowRollPanel()
+    //{
+    //    if (!rollPanel.activeSelf)
+    //    {
+    //        PanelIsOpen = true;
+    //        rollPanel.SetActive(true);
+    //    }
+    //    else
+    //    {
+    //        PanelIsOpen = false;
+    //        rollPanel.SetActive(false);
+    //    }
+    //}
 
-    public void HideRollPanel()
-    {
-        if (rollPanel.activeSelf)
-        {
-            rollPanel.SetActive(false);
-            PanelIsOpen = false;
-        }
-    }
+    //public void HideRollPanel()
+    //{
+    //    if (rollPanel.activeSelf)
+    //    {
+    //        rollPanel.SetActive(false);
+    //        PanelIsOpen = false;
+    //    }
+    //}
 }

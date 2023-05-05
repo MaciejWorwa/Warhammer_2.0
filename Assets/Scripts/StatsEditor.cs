@@ -67,6 +67,11 @@ public class StatsEditor : MonoBehaviour
 
         GameObject character = Character.selectedCharacter;
 
+        // Zmiana wysietlanego w panelu imienia na imie wybranej postaci
+        charNameText.text = character.GetComponent<Stats>().Name;
+
+        SetRaceDropdown();
+
         // Wyszukuje wszystkie pola tekstowe i przyciski do ustalania statystyk postaci wewnatrz gry
         GameObject[] inputFields = GameObject.FindGameObjectsWithTag("StatsButton");
 
@@ -217,9 +222,37 @@ public class StatsEditor : MonoBehaviour
 
         character.GetComponent<Stats>().SetBaseStatsByRace(character.GetComponent<Character>().rasa);
 
+        LoadAttributes();
+
         Debug.Log($"Rasa zmieniona na {character.GetComponent<Character>().rasa}. Statystyki postaci zostały zresetowane.");
 
-        GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);
+        GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);      
+    }
+    #endregion
+
+    #region Change weapon
+    public void ChangeWeapon(GameObject button)
+    {
+        Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
+
+        button.GetComponent<Image>().color = new Color(0f, 1f, 0f, 0.5f);
+
+        if (button.name == "melee_attack_button")
+        {
+            charStats.AttackRange = 1.5f;
+            charStats.Weapon_S = charStats.S;
+            GameObject.Find("distance_attack_button").GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+        }
+        if (button.name == "distance_attack_button")
+        {
+            charStats.AttackRange = 15f;
+            charStats.Weapon_S = 3;
+            GameObject.Find("melee_attack_button").GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+        }
+
+        // Odświeżenie buttonów akcji
+        GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
+        GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, true);
     }
     #endregion
 }

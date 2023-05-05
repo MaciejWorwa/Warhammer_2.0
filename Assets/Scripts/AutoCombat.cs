@@ -55,6 +55,8 @@ public class AutoCombat : MonoBehaviour
 
         foreach (GameObject character in characters)
         {
+            Debug.Log($"----------------------- {character.GetComponent<Stats>().Name} -----------------------");
+
             // Jeśli postać jest w stanie krytycznym to nie wykonuje akcji
             if (character.GetComponent<Stats>().tempHealth < 0)
                 return;

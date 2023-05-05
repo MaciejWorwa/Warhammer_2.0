@@ -19,6 +19,9 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private GameObject setStatsButton;
     [SerializeField] private GameObject destroyButton;
     [SerializeField] private GameObject rollButton;
+    [SerializeField] private GameObject statsDisplayPanel;
+
+    private bool attributesLoaded;
 
     void Start()
     {
@@ -34,12 +37,22 @@ public class CharacterManager : MonoBehaviour
             destroyButton.SetActive(false);
             setStatsButton.SetActive(false);
             rollButton.SetActive(false);
+            statsDisplayPanel.SetActive(false);
+            attributesLoaded = false;
+
         }
         else
         {
             destroyButton.SetActive(true);
             setStatsButton.SetActive(true);
             rollButton.SetActive(true);
+            statsDisplayPanel.SetActive(true);
+            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().RefreshWeaponTypeButtons(Character.selectedCharacter);
+            if (!attributesLoaded)
+            {
+                GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();               
+                attributesLoaded = true;
+            }
         }
     }
 
