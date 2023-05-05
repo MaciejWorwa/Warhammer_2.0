@@ -24,7 +24,17 @@ public class RoundManager : MonoBehaviour
     public void NextRound()
     {
         if(AutoCombat.AutoCombatOn)
+        {
             autoCombat.AutomaticActions();
+
+            // Ponowne usunięcie postaci, które są w stanie krytycznym, dlatego że wewnątrz AutoCombatu z jakiegoś powodu nie zawsze to działa dobrze
+            Stats[] characters = FindObjectsOfType<Stats>();
+            foreach (var character in characters)
+            {
+                if (character.GetComponent<Stats>().tempHealth < 0)
+                    Destroy(character.gameObject);
+            }
+        }
 
         roundNumber++;
 

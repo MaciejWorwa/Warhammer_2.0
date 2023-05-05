@@ -576,10 +576,19 @@ public class AttackManager : MonoBehaviour
             // jesli w jednym miejscu wystepuje wiecej niz jeden collider to oznacza, ze pole jest zajete przez postac, wtedy nie dodajemy tego collidera do listy adjacentTiles
             Collider2D[] collider = Physics2D.OverlapCircleAll(target.transform.position + direction, 0.1f);
 
-            if (collider != null && collider.Length == 1 && collider[0].CompareTag("Tile"))
+            if (collider != null && collider.Length == 1 && collider[0].CompareTag("Tile") && movementManager.tilesInMovementRange.Contains(collider[0].gameObject))
             {
                 adjacentTiles.Add(collider[0].gameObject);
             }
+        }
+
+        if (adjacentTiles.Count == 0)
+        {
+            messageManager.ShowMessage($"<color=red>Cel ataku stoi poza zasięgiem szarży.</color>", 3f);
+            Debug.Log($"Cel ataku stoi poza zasięgiem szarży.");
+            movementManager.SetCharge();
+
+            return;
         }
 
         // Zamienia liste na tablice, zeby pozniej mozna bylo ja posortowac
@@ -589,9 +598,10 @@ public class AttackManager : MonoBehaviour
         Array.Sort(adjacentTilesArray, (x, y) => Vector3.Distance(x.transform.position, attacker.transform.position).CompareTo(Vector3.Distance(y.transform.position, attacker.transform.position)));
 
         // Sprawdza dystans do pola docelowego
-        float distanceBetweenOpponents = (Mathf.Abs(attacker.transform.position.x - adjacentTilesArray[0].transform.position.x)) + (Mathf.Abs(attacker.transform.position.y - adjacentTilesArray[0].transform.position.y));
+        Vector3 targetTilePos = new Vector3(adjacentTilesArray[0].transform.position.x, adjacentTilesArray[0].transform.position.y, 0);
+        List<Vector3> path = movementManager.FindPath(attacker.transform.position, targetTilePos, attacker.GetComponent<Stats>().Sz * 2);
 
-        if (distanceBetweenOpponents >= 3 && distanceBetweenOpponents <= attacker.GetComponent<Stats>().Sz * 2) // Jesli jest w zasiegu szarzy
+        if (path.Count >= 3 && path.Count <= attacker.GetComponent<Stats>().Sz * 2) // Jesli jest w zasiegu szarzy
         {
             //Wykonanie szarzy
             if (adjacentTilesArray != null)
@@ -599,8 +609,9 @@ public class AttackManager : MonoBehaviour
                 attacker.GetComponent<Stats>().tempSz = attacker.GetComponent<Stats>().Sz * 2;
 
                 MovementManager.canMove = true;
-                GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], attacker);
+                movementManager.MoveSelectedCharacter(adjacentTilesArray[0], attacker);
                 Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)
+
 
                 MovementManager.Charge = true;
                 Attack(attacker, target); // Wykonywany jest jeden atak z bonusem +10, bo to szarza
@@ -611,16 +622,10 @@ public class AttackManager : MonoBehaviour
                 MovementManager.canMove = false;
             }
         }
-        else if (distanceBetweenOpponents < 3) // Jesli jest zbyt blisko na szarze
+        else if (path.Count < 3) // Jesli jest zbyt blisko na szarze
         {
             messageManager.ShowMessage($"<color=red>Zbyt mała odległość na wykonanie szarży.</color>", 3f);
             Debug.Log("Zbyt mała odległość na wykonanie szarży");
-            movementManager.SetCharge();
-        }
-        else
-        {
-            messageManager.ShowMessage($"<color=red>Cel ataku stoi poza zasięgiem szarży.</color>", 3f);
-            Debug.Log($"Cel ataku stoi poza zasięgiem szarży.");
             movementManager.SetCharge();
         }
     }

@@ -12,7 +12,7 @@ public class MovementManager : MonoBehaviour
     public static bool Run; //bieg
 
     // Lista wszystkich pol w zasiegu ruchu postaci
-    private List<GameObject> tilesInMovementRange = new List<GameObject>();
+    [HideInInspector] public List<GameObject> tilesInMovementRange = new List<GameObject>();
 
     private GridManager grid;
 
@@ -101,10 +101,11 @@ public class MovementManager : MonoBehaviour
         }
     }
 
+    #region Move function
     public void MoveSelectedCharacter(GameObject selectedTile, GameObject character)
     {
         // Sprawdza, czy akcja wykonywania ruchu jest aktywna
-        if(canMove)
+        if (canMove)
         {
             // Sprawdza zasieg ruchu postaci
             int movementRange = character.GetComponent<Stats>().tempSz;
@@ -115,63 +116,27 @@ public class MovementManager : MonoBehaviour
             // Pozycja pola wybranego jako cel ruchu
             Vector3 selectedTilePos = new Vector3(selectedTile.transform.position.x, selectedTile.transform.position.y, 0);
 
-            // Odleglosc od postaci do wybranego pola
-            float distanceFromCharacterToSelectedTile = (Mathf.Abs(startCharPos.x - selectedTilePos.x)) + (Mathf.Abs(startCharPos.y - selectedTilePos.y));
+            // Znajdź najkrótszą ścieżkę do celu
+            List<Vector3> path = FindPath(startCharPos, selectedTilePos, movementRange);
 
             // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci. Warunek ten nie jest konieczny w przypadku automatycznej walki, dlatego dochodzi drugi warunek.
-            if (distanceFromCharacterToSelectedTile <= movementRange || AutoCombat.AutoCombatOn)
+            if (path.Count > 0 && path.Count <= movementRange|| AutoCombat.AutoCombatOn && path.Count > 0)
             {
-                // Sprawdza, czy ruch spowoduje atak okazyjny
-                CheckForOpportunityAttack(character, selectedTilePos);
-
-                // Obecna pozycja postaci, aktualizowana po przejsciu kazdego pola. Poczatkowo przyjmuje wartosc pozycji startowej.
-                Vector3 tempCharPos = startCharPos;
-
-                // wektor w prawo, lewo, góra, dół
-                Vector3[] directions = { Vector3.right, Vector3.left, Vector3.up, Vector3.down };
-
-                // lista pol przylegajacych do postaci
-                List<GameObject> adjacentTiles = new List<GameObject>();
-
                 // Wykonuje pojedynczy ruch tyle razy ile wynosi zasieg ruchu postaci
                 for (int i = 0; i < movementRange; i++)
                 {
-                    // Aktualizuje zmienne po kazdym pojedynczym ruchu
-                    tempCharPos = character.transform.position;
-                    distanceFromCharacterToSelectedTile = (Mathf.Abs(tempCharPos.x - selectedTilePos.x)) + (Mathf.Abs(tempCharPos.y - selectedTilePos.y));
 
-                    // Wykonuje ponizsze akcje tylko jezeli jeszcze nie osiagnal pola docelowego
-                    if (distanceFromCharacterToSelectedTile < 1) break;
+                    if (character.transform.position == selectedTilePos)
+                        break;
 
-                    adjacentTiles.Clear();
+                    // Sprawdza, czy ruch spowoduje atak okazyjny
+                    CheckForOpportunityAttack(character, selectedTilePos);
 
-                    // Szuka pol w każdym kierunku
-                    foreach (Vector3 direction in directions)
-                    {
-                        // znajdź kolider z tagiem "Tile" przylegajacy do postaci na ktorym nie stoi inna postac (gdy stoi to collider wykryje najpierw obiekt postaci i nie wykryje 'tile')
-                        Collider2D collider = Physics2D.OverlapCircle(character.transform.position + direction, 0.1f);
-                        if (collider != null && collider.gameObject.tag == "Tile")
-                            adjacentTiles.Add(collider.gameObject);
-                    }
-
-                    // Zamienia liste na tablice, zeby pozniej mozna bylo ja posortowac
-                    GameObject[] adjacentTilesArray = adjacentTiles.ToArray();
-
-                    // Sortuje przylegajace do postaci pola wg odleglosci od pola docelowego. Te ktore sa najblizej znajduja sie na poczatku tablicy
-                    Array.Sort(adjacentTilesArray, (x, y) => Vector3.Distance(x.transform.position, selectedTilePos).CompareTo(Vector3.Distance(y.transform.position, selectedTilePos)));
-
-                    // Pojedynczy ruch gracza na przylegajace do niego pole, ktore znajduje sie najblizej pola docelego
-                    if (adjacentTilesArray.Length > 0)
-                        character.transform.position = new Vector3(adjacentTilesArray[0].transform.position.x, adjacentTilesArray[0].transform.position.y, 0);
-                }  
-                
-                // Jezeli postaci nie uda sie dotrzec na wybrane miejsce docelowe to jego pozycja jest resetowana do tej sprzed rozpoczenia ruchu.
-                // Warunek ten jest wylaczony w przypadku automatycznej walki, zeby mogla dzialac poprawnie
-                if(character.transform.position != selectedTilePos && !AutoCombat.AutoCombatOn)
-                {
-                    character.transform.position = startCharPos;
-                    messageManager.ShowMessage("<color=red>Wybrane pole jest poza zasięgiem ruchu postaci.</color>", 4f);
-                    Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
+                    // Aktualizuje pozycję postaci po każdym ruchu
+                    // tempCharPos = character.transform.position;
+                    Vector3 nextPos = path[i];
+                    nextPos.z = 0f;
+                    character.transform.position = nextPos;
                 }
             }
             else
@@ -184,7 +149,7 @@ public class MovementManager : MonoBehaviour
             grid.ResetTileColors();
 
             // Przywraca widocznosc przyciskow akcji postaci po wykonaniu ruchu i ewentualnie resetuje bieg oraz szarze
-            if(!AutoCombat.AutoCombatOn)
+            if (!AutoCombat.AutoCombatOn)
             {
                 GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(character, true);
             }
@@ -194,6 +159,127 @@ public class MovementManager : MonoBehaviour
     }
 
 
+    // Funkcja obliczająca odległość pomiędzy dwoma punktami na płaszczyźnie XY
+    private int CalculateDistance(Vector3 a, Vector3 b)
+    {
+        return (int)(Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y));
+    }
+
+    public List<Vector3> FindPath(Vector3 start, Vector3 goal, int movementRange)
+    {
+        // Tworzy listę otwartych węzłów
+        List<Node> openNodes = new List<Node>();
+
+        // Dodaje węzeł początkowy do listy otwartych węzłów
+        Node startNode = new Node
+        {
+            Position = start,
+            G = 0,
+            H = CalculateDistance(start, goal),
+            F = 0 + CalculateDistance(start, goal),
+            Parent = default
+        };
+        openNodes.Add(startNode);
+
+        // Tworzy listę zamkniętych węzłów
+        List<Vector3> closedNodes = new List<Vector3>();
+
+        while (openNodes.Count > 0)
+        {
+            // Znajduje węzeł z najmniejszym kosztem F i usuwa go z listy otwartych węzłów
+            Node current = openNodes.OrderBy(n => n.F).First();
+            openNodes.Remove(current);
+
+            // Dodaje bieżący węzeł do listy zamkniętych węzłów
+            closedNodes.Add(current.Position);
+
+            // Sprawdza, czy bieżący węzeł jest węzłem docelowym
+            if (current.Position == goal)
+            {
+                // Tworzy listę punktów i dodaje do niej węzły od węzła docelowego do początkowego
+                List<Vector3> path = new List<Vector3>();
+                Node node = current;
+
+                while (node.Position != start)
+                {
+                    path.Add(new Vector3(node.Position.x, node.Position.y, 0));
+                    node = node.Parent;
+                }
+
+                // Odwraca kolejność punktów w liście, aby uzyskać ścieżkę od początkowego do docelowego
+                path.Reverse();
+
+                return path;
+            }
+
+            // Pobiera sąsiadów bieżącego węzła
+            List<Node> neighbors = new List<Node>();
+            neighbors.Add(new Node { Position = current.Position + Vector3.up });
+            neighbors.Add(new Node { Position = current.Position + Vector3.down });
+            neighbors.Add(new Node { Position = current.Position + Vector3.left });
+            neighbors.Add(new Node { Position = current.Position + Vector3.right });
+
+            // Przetwarza każdego sąsiada
+            foreach (Node neighbor in neighbors)
+            {
+                // Sprawdza, czy sąsiad jest w liście zamkniętych węzłów lub poza zasięgiem ruchu postaci
+                if (closedNodes.Contains(neighbor.Position) || CalculateDistance(current.Position, neighbor.Position) > movementRange)
+                {
+                    continue; // przerywa tą iterację i przechodzi do kolejnej bez wykonywania w obecnej iteracji kodu, który jest poniżej. Natomiast 'break' przerywa całą pętle i kolejne iteracje nie wystąpią
+                }
+
+                // Sprawdza, czy na miejscu sąsiada występuje inny collider niż tile
+                Collider2D collider = Physics2D.OverlapCircle(neighbor.Position, 0.1f);
+
+                if (collider != null)
+                {
+                    bool isTile = false;
+
+                    if (collider.gameObject.CompareTag("Tile"))
+                        isTile = true;
+
+                    if (isTile)
+                    {
+                        // Oblicza koszt G dla sąsiada
+                        int gCost = current.G + 1;
+
+                        // Sprawdza, czy sąsiad jest już na liście otwartych węzłów
+                        Node existingNode = openNodes.Find(n => n.Position == neighbor.Position);
+
+                        if (existingNode != null)
+                        {
+                            // Jeśli koszt G dla bieżącego węzła jest mniejszy niż dla istniejącego węzła, to aktualizuje go
+                            if (gCost < existingNode.G)
+                            {
+                                existingNode.G = gCost;
+                                existingNode.F = existingNode.G + existingNode.H;
+                                existingNode.Parent = current;
+                            }
+                        }
+                        else
+                        {
+                            // Jeśli sąsiad nie jest jeszcze na liście otwartych węzłów, to dodaje go
+                            Node newNode = new Node
+                            {
+                                Position = neighbor.Position,
+                                G = gCost,
+                                H = CalculateDistance(neighbor.Position, goal),
+                                F = gCost + CalculateDistance(neighbor.Position, goal),
+                                Parent = current
+                            };
+                            openNodes.Add(newNode);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Jeśli nie udało się znaleźć ścieżki, to zwraca pustą listę
+        return new List<Vector3>();
+    }
+    #endregion
+
+    #region Check for opportunity attack
     // Sprawdza czy ruch powoduje atak okazyjny
     public void CheckForOpportunityAttack(GameObject movingCharacter, Vector3 selectedTilePosition)
     {
@@ -240,10 +326,14 @@ public class MovementManager : MonoBehaviour
             }
         }
     }
+    #endregion
 
+    #region Highlight movement range
     // Zmienia kolor wszystkich pol w zasiegu ruchu postaci
     public void HighlightTilesInMovementRange(GameObject character)
     {
+        tilesInMovementRange.Clear();
+
         // Sprawdza zasieg ruchu postaci
         int movementRange = character.GetComponent<Stats>().tempSz;
 
@@ -291,8 +381,17 @@ public class MovementManager : MonoBehaviour
             if (tile.GetComponent<Tile>()._renderer.material.color != tile.GetComponent<Tile>().rangeColor)
                 tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().rangeColor;
         }
-
-        tilesInMovementRange.Clear();
     }
+    #endregion
+}
+
+
+public class Node
+{
+    public Vector3 Position; // Pozycja węzła na siatce
+    public int G; // Koszt dotarcia do węzła
+    public int H; // Szacowany koszt dotarcia z węzła do celu
+    public int F; // Całkowity koszt (G + H)
+    public Node Parent; // Węzeł nadrzędny w ścieżce
 }
 
