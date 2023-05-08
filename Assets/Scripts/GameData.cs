@@ -48,6 +48,7 @@ public class GameData
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac mo�e parowa� atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac mo�e unika� ataku
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
+    [HideInInspector] public int attacksLeft; // ilość ataków pozostałych do wykonania w danej rundzie
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy �ycie postaci jest poni�ej 0
     [HideInInspector] public int parryBonus; // sumaryczna premia do WW przy parowaniu
     [HideInInspector] public int defensiveBonus; // premia za pozycje obronna

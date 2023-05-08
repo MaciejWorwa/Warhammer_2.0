@@ -154,6 +154,9 @@ public class StatsEditor : MonoBehaviour
 
         // Aktualizuje poziom postaci
         GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(character);
+
+        if (character.GetComponent<Stats>().A > 1)
+            character.GetComponent<Stats>().attacksLeft = character.GetComponent<Stats>().A;
     }
     #endregion
 

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using System;
 
 public class CharacterManager : MonoBehaviour
 {
@@ -9,6 +11,11 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private GameObject enemyObject;
     GameObject newCharacter;
     private Vector2 position;
+
+    public static bool characterAdding; // bool aktywny podczas wybierania pola na którym chcemy stworzyć postać
+    public static bool randomPositionMode; // bool określający, czy postać ma się tworzyć w losowej pozycji
+    public static string characterTag; // określa, czy mamy do czynienia z Playerem, czy z Enemy
+
 
     public static int playersAmount; // liczba wszystkich bohaterow graczy
     public static int enemiesAmount; // liczba wszystkich wrogów graczy
@@ -27,6 +34,8 @@ public class CharacterManager : MonoBehaviour
     {
         playersAmount = 0;
         enemiesAmount = 0;
+        randomPositionMode = false;
+        characterAdding = false;
     }
 
     void Update()
@@ -53,21 +62,67 @@ public class CharacterManager : MonoBehaviour
                 GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();               
                 attributesLoaded = true;
             }
+
+            if(Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0)
+            {
+                Stats[] allStatsArray = FindObjectsOfType<Stats>();
+                Array.Sort(allStatsArray, (x, y) => y.Initiative.CompareTo(x.Initiative));
+
+                // Konwersja tablicy na listę
+                List<Stats> allStatsList = new List<Stats>(allStatsArray);
+                
+                // Usunięcie elementów z listy
+                for (int i = allStatsList.Count - 1; i >= 0; i--)
+                {
+                    if (allStatsList[i].actionsLeft == 0)
+                        allStatsList.RemoveAt(i);
+                }
+
+                if (allStatsList.Count < 1)
+                {
+                    Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
+                    GameObject.Find("RoundManager").GetComponent<RoundManager>().NextRound();
+                    return;
+                }
+
+                GameObject nextCharacter = allStatsList[0].gameObject;
+
+                Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
+                Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(nextCharacter);
+            }
         }
     }
 
     #region Create new character functions
-    public void CreatePlayer(string characterName = "")
+
+    public void SetRandomPositionMode(GameObject button)
     {
-        CreateNewCharacter("Player", characterName);
+        if(randomPositionMode)
+        {
+            button.GetComponent<Image>().color = new Color(235f / 255f, 207f / 255f, 0, 1f);
+            randomPositionMode = false;
+        }
+        else
+        {
+            button.GetComponent<Image>().color = new Color(235f / 255f, 207f / 255f, 0, 0.5f);
+            randomPositionMode = true;
+        }
+    }
+    public void SelectFieldForNewCharacter(string tag)
+    {
+        characterAdding = true;
+        characterTag = tag;
+
+        if(randomPositionMode)
+        {
+            CreateNewCharacter(characterTag, "", Vector2.zero);
+            return;
+        }
+
+        Debug.Log("Wybierz pole na którym chcesz postawić postać.");
     }
 
-    public void CreateEnemy(string characterName = "")
-    {
-        CreateNewCharacter("Enemy", characterName);
-    }
-
-    public void CreateNewCharacter(string tag, string characterName)
+    public void CreateNewCharacter(string characterTag, string characterName, Vector2 position)
     {
         // Liczba dostępnych pól
         int availableTiles = GridManager.width * GridManager.height; // wymiary planszy
@@ -80,25 +135,29 @@ public class CharacterManager : MonoBehaviour
         Collider2D searchForColliders;
         do
         {
-            int x;
-            int y;
+            if(randomPositionMode)
+            {
+                int x;
+                int y;
 
-            // Generowanie losowej pozycji na mapie
-            if (xParzysty)
-                x = Random.Range(-GridManager.width / 2, GridManager.width / 2);
-            else
-                x = Random.Range(-GridManager.width / 2, GridManager.width / 2 + 1);
-            if (yParzysty)
-                y = Random.Range(-GridManager.height / 2, GridManager.height / 2);
-            else
-                y = Random.Range(-GridManager.height / 2, GridManager.height / 2 + 1);
+                // Generowanie losowej pozycji na mapie
+                if (xParzysty)
+                    x = UnityEngine.Random.Range(-GridManager.width / 2, GridManager.width / 2);
+                else
+                    x = UnityEngine.Random.Range(-GridManager.width / 2, GridManager.width / 2 + 1);
+                if (yParzysty)
+                    y = UnityEngine.Random.Range(-GridManager.height / 2, GridManager.height / 2);
+                else
+                    y = UnityEngine.Random.Range(-GridManager.height / 2, GridManager.height / 2 + 1);
 
-            position = new Vector2(x, y);
+                position = new Vector2(x, y);
 
-            if (GridManager.width == 1)
-                position.x = 0;
-            if (GridManager.height == 1)
-                position.y = 0;
+                if (GridManager.width == 1)
+                    position.x = 0;
+                if (GridManager.height == 1)
+                    position.y = 0;
+            }
+
 
             // Sprawdzenie czy dane pole jest wolne czy zajęte
             searchForColliders = Physics2D.OverlapCircle(position, 0.1f);
@@ -121,27 +180,26 @@ public class CharacterManager : MonoBehaviour
         }
         while (searchForColliders != null && searchForColliders.tag != "Tile");
 
-        
-        if (tag == "Player")
+        if (characterTag == "Player")
         {        
             //tworzy nową postać w losowej pozycji i nadaje mu odpowiednia nazwe
             newCharacter = Instantiate(playerObject, position, Quaternion.identity);
 
             playersAmount++;
-            if( characterName == "")
+            if( characterName.Length < 1)
                 newCharacter.name = ("Player " + playersAmount);
             else
                 newCharacter.name = characterName;
 
             newCharacter.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
         }
-        else if (tag == "Enemy")
+        else if (characterTag == "Enemy")
         {
             //tworzy nową postać w losowej pozycji i nadaje mu odpowiednia nazwe
             newCharacter = Instantiate(enemyObject, position, Quaternion.identity);
 
             enemiesAmount++;
-            if( characterName == "")
+            if( characterName.Length < 1)
                 newCharacter.name = ("Enemy " + enemiesAmount);
             else
                 newCharacter.name = characterName;
@@ -150,7 +208,8 @@ public class CharacterManager : MonoBehaviour
         }
 
         newCharacter.GetComponent<Character>();
-        
+        characterAdding = false;
+
         // Wywoluje ustawienie poziomu postaci (opoznienie jest po to, aby inne operacje zdazyly sie wykonac)
         Invoke("SetCharacterLevel", 0.05f);
     }

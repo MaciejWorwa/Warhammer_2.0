@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System;
 
 public class RoundManager : MonoBehaviour
 {
@@ -47,6 +48,11 @@ public class RoundManager : MonoBehaviour
             obj.GetComponent<Stats>().ResetActionsNumber();
         }
 
+        // Zaznaczenie postaci z najwyższą inicjatywą
+        Array.Sort(allObjectsWithStats, (x, y) => y.Initiative.CompareTo(x.Initiative));
+        Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(allObjectsWithStats[0].gameObject);
+
+        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=#FFE100>RUNDA {roundNumber}</color>", 3f);
         Debug.Log($"======================= RUNDA {roundNumber} =======================");
     }
 }

@@ -61,9 +61,20 @@ public class AttackManager : MonoBehaviour
     public void Reload()
     {
         GameObject character = Character.selectedCharacter;
-
+        
         if (character.GetComponent<Stats>().reloadLeft > 0)
+        {
+            if (character.GetComponent<Stats>().actionsLeft > 0)
+                character.GetComponent<Stats>().TakeAction();
+            else
+            {
+                messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                return;
+            }
+
             character.GetComponent<Stats>().reloadLeft--;
+        }
         if (character.GetComponent<Stats>().reloadLeft == 0)
         {
             messageManager.ShowMessage($"Broń <color=#00FF9A>{character.GetComponent<Stats>().Name}</color> załadowana.", 3f);
@@ -73,7 +84,7 @@ public class AttackManager : MonoBehaviour
         {
             messageManager.ShowMessage($"Ładowanie broni <color=#00FF9A>{character.GetComponent<Stats>().Name}</color>. Pozostała/y {character.GetComponent<Stats>().reloadLeft} akcja/e.", 4f);
             Debug.Log($"Ładowanie broni {character.GetComponent<Stats>().Name}. Pozostała/y {character.GetComponent<Stats>().reloadLeft} akcja/e aby móc strzelić.");
-        }        
+        }      
     }
     #endregion
 
@@ -82,11 +93,34 @@ public class AttackManager : MonoBehaviour
     {
         do
         {
-            //uwzględnienie bonusu do WW zwiazanego z szarżą
+            //uwzględnienie bonusu do WW zwiazanego z szarżą i wykonanie akcji
             if (MovementManager.Charge)
-                chargeBonus = 10;
+            {            
+                chargeBonus = 10;                
+            }
             else
+            {   
                 chargeBonus = 0;
+                if (attacker.GetComponent<Stats>().A == 1 && attacker.GetComponent<Stats>().actionsLeft > 0 && attacker.GetComponent<Stats>().attacksLeft > 0 || attacker.GetComponent<Stats>().A > 1 && attacker.GetComponent<Stats>().actionsLeft == 1)
+                {
+                    attacker.GetComponent<Stats>().attacksLeft --;
+                    attacker.GetComponent<Stats>().TakeAction();
+                }
+                else if (attacker.GetComponent<Stats>().attacksLeft >= 1 && attacker.GetComponent<Stats>().actionsLeft == 2 || attacker.GetComponent<Stats>().actionsLeft == -1)
+                {
+                    attacker.GetComponent<Stats>().actionsLeft = -1; // daje to, żeby po wykonaniu np. dwóch ataków z trzech dostępnych postać nie mogła zrobić innej akcji niż dokończenie ataku wielokrotnego
+
+                    attacker.GetComponent<Stats>().attacksLeft --;
+                    if(attacker.GetComponent<Stats>().attacksLeft == 0)
+                        attacker.GetComponent<Stats>().TakeDoubleAction();
+                }
+                else
+                {
+                    messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                    Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                    return;
+                }
+            }
 
             // Ustala bonus do trafienia (za szarżę i przycelowanie)
             attackBonus = attacker.GetComponent<Stats>().aimingBonus + chargeBonus;
@@ -406,6 +440,15 @@ public class AttackManager : MonoBehaviour
 
         if (character.GetComponent<Stats>().defensiveBonus == 0)
         {
+            if (character.GetComponent<Stats>().actionsLeft == 2)
+                character.GetComponent<Stats>().TakeDoubleAction();
+            else
+            {
+                messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                return;
+            }
+
             messageManager.ShowMessage("Pozycja obronna", 3f);
             Debug.Log("Pozycja obronna");
 
@@ -427,6 +470,15 @@ public class AttackManager : MonoBehaviour
 
         if (character.GetComponent<Stats>().aimingBonus == 0)
         {
+            if (character.GetComponent<Stats>().actionsLeft > 0)
+                character.GetComponent<Stats>().TakeAction();
+            else
+            {
+                messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                return;
+            }
+
             messageManager.ShowMessage("Przycelowanie", 3f);
             Debug.Log("Przycelowanie");
             character.GetComponent<Stats>().aimingBonus = 10;
@@ -435,6 +487,7 @@ public class AttackManager : MonoBehaviour
         }
         else
         {
+            character.GetComponent<Stats>().actionsLeft ++;
             character.GetComponent<Stats>().aimingBonus = 0;
             button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
         }
@@ -563,6 +616,14 @@ public class AttackManager : MonoBehaviour
     #region Charge attack function
     public void ChargeAttack(GameObject attacker, GameObject target)
     {
+
+        if(attacker.GetComponent<Stats>().actionsLeft < 2)
+        {
+            messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+            Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+            return;
+        }
+
         // wektor we wszystkie osiem kierunkow dookola pola z postacia bedaca celem ataku
         Vector3[] directions = { Vector3.right, Vector3.left, Vector3.up, Vector3.down, new Vector3(1, 1, 0), new Vector3(-1, -1, 0), new Vector3(-1, 1, 0), new Vector3(1, -1, 0) };
 

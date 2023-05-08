@@ -122,6 +122,30 @@ public class MovementManager : MonoBehaviour
             // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci. Warunek ten nie jest konieczny w przypadku automatycznej walki, dlatego dochodzi drugi warunek.
             if (path.Count > 0 && path.Count <= movementRange|| AutoCombat.AutoCombatOn && path.Count > 0)
             {
+
+                if(Run || Charge)
+                {
+                    if(character.GetComponent<Stats>().actionsLeft == 2)
+                        character.GetComponent<Stats>().TakeDoubleAction();
+                    else
+                    {
+                        messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                        Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                        return;
+                    }
+                }
+                else if (character.GetComponent<Stats>().actionsLeft > 0)
+                    character.GetComponent<Stats>().TakeAction();
+                else
+                {
+                    messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                    Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                    return;
+                }
+
+                // Sprawdza, czy ruch spowoduje atak okazyjny
+                CheckForOpportunityAttack(character, selectedTilePos);
+
                 // Wykonuje pojedynczy ruch tyle razy ile wynosi zasieg ruchu postaci
                 for (int i = 0; i < movementRange; i++)
                 {
@@ -129,15 +153,13 @@ public class MovementManager : MonoBehaviour
                     if (character.transform.position == selectedTilePos)
                         break;
 
-                    // Sprawdza, czy ruch spowoduje atak okazyjny
-                    CheckForOpportunityAttack(character, selectedTilePos);
-
                     // Aktualizuje pozycję postaci po każdym ruchu
                     // tempCharPos = character.transform.position;
                     Vector3 nextPos = path[i];
                     nextPos.z = 0f;
                     character.transform.position = nextPos;
                 }
+
             }
             else
             {

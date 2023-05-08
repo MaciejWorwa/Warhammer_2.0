@@ -42,6 +42,7 @@ public class Stats : MonoBehaviour
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
+    [HideInInspector] public int attacksLeft; // ilość ataków pozostałych do wykonania w danej rundzie
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy życie postaci jest poniżej 0
     [HideInInspector] public int parryBonus; // sumaryczna premia do WW przy parowaniu
     [HideInInspector] public int defensiveBonus; // premia za pozycje obronna
@@ -70,7 +71,7 @@ public class Stats : MonoBehaviour
     public int PowerRequired = 6; // wymagany poziom mocy zaklęcia ofensywnego
     public double SpellRange = 8; // zasięg zaklęcia
     public double AreaSize = 1; // wielkość obszaru objętego działaniem zaklęcia
-    public int CastDuration; // czas rzucania zaklęcia
+    public int CastDuration = 1; // czas rzucania zaklęcia
     [HideInInspector] public bool OffensiveSpell; // określa, czy zaklęcie jest ofensywne (może byc rzucane tylko na przeciwników)
     public bool IgnoreArmor; // Określa, czy zaklęcie ofensywne ignoruje pancerz
     [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru
@@ -247,6 +248,7 @@ public class Stats : MonoBehaviour
         Wt = Mathf.RoundToInt(Odp / 10);
         tempHealth = maxHealth;
         tempSz = Sz;
+        attacksLeft = A;
     }
     #endregion
 
@@ -274,6 +276,7 @@ public class Stats : MonoBehaviour
     public void ResetActionsNumber()
     {
         actionsLeft = 2;
+        attacksLeft = A;
         //Debug.Log($"Nowa runda. {this.gameObject.name} pozostały {actionsLeft} akcje.");
     }
 
@@ -285,7 +288,7 @@ public class Stats : MonoBehaviour
 
     public void TakeDoubleAction() // wykonanie akcji podwójnej
     {
-        actionsLeft -= 2;
+        actionsLeft = 0;
         Debug.Log($"{this.gameObject.name} wykonał akcję podwójną. Pozostało {actionsLeft} akcji w tej rundzie.");
     }
     #endregion

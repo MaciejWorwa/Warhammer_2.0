@@ -27,6 +27,15 @@ public class MagicManager : MonoBehaviour
     {
         wizard = Character.selectedCharacter;
 
+        if (wizard.GetComponent<Stats>().actionsLeft > 0)
+            wizard.GetComponent<Stats>().TakeAction();
+        else
+        {
+            messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+            Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+            return;
+        }
+
         int rollResult = Random.Range(1, 101);
 
         if (wizard.GetComponent<Stats>().SW >= rollResult)
@@ -129,6 +138,15 @@ public class MagicManager : MonoBehaviour
     {
         GameObject character = Character.selectedCharacter;
 
+        if (character.GetComponent<Stats>().actionsLeft >= character.GetComponent<Stats>().CastDuration)
+            character.GetComponent<Stats>().TakeAction();
+        else
+        {
+            messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+            Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+            return;
+        }
+
         int powerLevel = PowerLevelRoll();
 
         if(powerLevel < character.GetComponent<Stats>().PowerRequired)
@@ -156,6 +174,15 @@ public class MagicManager : MonoBehaviour
     public void GetMagicDamage(GameObject target)
     {
         GameObject character = Character.selectedCharacter;
+
+        if (character.GetComponent<Stats>().actionsLeft >= character.GetComponent<Stats>().CastDuration)
+            character.GetComponent<Stats>().TakeAction();
+        else
+        {
+            messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+            Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+            return;
+        }
 
         double range = character.GetComponent<Stats>().SpellRange;
 
@@ -217,6 +244,15 @@ public class MagicManager : MonoBehaviour
     public void EtherArmorSpell()
     {
         Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
+
+        if (charStats.actionsLeft > 0)
+            charStats.TakeAction();
+        else
+        {
+            messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+            Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+            return;
+        }
 
         if (charStats.etherArmorActive == true)
         {

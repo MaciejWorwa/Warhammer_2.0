@@ -149,6 +149,8 @@ public class SaveSystem : MonoBehaviour
         // Pobranie listy zapisanych plików
         string[] files = Directory.GetFiles(Application.persistentDataPath + "/" + dropdownText, "*.fun");
 
+        CharacterManager.randomPositionMode = true;
+
         // Wczytuje każdy plik o nazwie istniejącej w liście nazw obecnie istniejących na polu bitwy postaci
         foreach (string file in files)
         {
@@ -157,14 +159,16 @@ public class SaveSystem : MonoBehaviour
             {
                 if (fileName.StartsWith("P")) // Sprawdza, czy ten string zaczyna się o litery 'P'. W ten sposób wykryje Playera.
                 {
-                    GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter("Player", fileName);
+                    GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter("Player", fileName, Vector2.zero);
                 }
                 if (fileName.StartsWith("E")) // Sprawdza, czy ten string zaczyna się o litery 'E'. w ten sposób wykryje Enemy.
                 {
-                    GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter("Enemy", fileName);
+                    GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter("Enemy", fileName, Vector2.zero);
                 }
             }
         }
+
+        CharacterManager.randomPositionMode = false;
 
         string[] tagsToSave = { "Tree", "Rock" };
 

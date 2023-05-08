@@ -73,6 +73,13 @@ public class Tile : MonoBehaviour
             return;
         }
 
+        if (CharacterManager.characterAdding && SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter(CharacterManager.characterTag, "", new Vector2 (this.transform.position.x, this.transform.position.y));
+            CharacterManager.characterAdding = false;
+            return;
+        }
+
         MovementManager movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
 
         // Ustala jaka postac ma sie ruszyc
