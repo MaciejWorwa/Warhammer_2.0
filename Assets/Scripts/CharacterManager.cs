@@ -63,7 +63,7 @@ public class CharacterManager : MonoBehaviour
                 attributesLoaded = true;
             }
 
-            if(Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0)
+            if(Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode)
             {
                 Stats[] allStatsArray = FindObjectsOfType<Stats>();
                 Array.Sort(allStatsArray, (x, y) => y.Initiative.CompareTo(x.Initiative));

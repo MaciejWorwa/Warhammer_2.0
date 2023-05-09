@@ -120,7 +120,7 @@ public class MovementManager : MonoBehaviour
             List<Vector3> path = FindPath(startCharPos, selectedTilePos, movementRange);
 
             // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci. Warunek ten nie jest konieczny w przypadku automatycznej walki, dlatego dochodzi drugi warunek.
-            if (path.Count > 0 && path.Count <= movementRange|| AutoCombat.AutoCombatOn && path.Count > 0)
+            if (path.Count > 0 && path.Count <= movementRange|| GameManager.AutoMode && path.Count > 0)
             {
 
                 if(Run || Charge)
@@ -171,7 +171,7 @@ public class MovementManager : MonoBehaviour
             grid.ResetTileColors();
 
             // Przywraca widocznosc przyciskow akcji postaci po wykonaniu ruchu i ewentualnie resetuje bieg oraz szarze
-            if (!AutoCombat.AutoCombatOn)
+            if (!GameManager.AutoMode)
             {
                 GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(character, true);
             }

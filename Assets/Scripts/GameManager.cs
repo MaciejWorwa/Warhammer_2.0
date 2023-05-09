@@ -7,18 +7,61 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] GameObject mainMenuPanel;
-    //[SerializeField] GameObject quitPanel;
-    //[SerializeField] GameObject rollPanel;
     OptionsMenu optionsMenu;
     StatsEditor statsEditor;
+    MessageManager messageManager;
 
     public static bool PanelIsOpen = false;
+    public static bool StandardMode;
+    public static bool ManualMode;
+    public static bool AutoMode;
 
     void Start()
     {
         optionsMenu = GameObject.Find("OptionsMenu").GetComponent<OptionsMenu>();
         statsEditor = GameObject.Find("StatsEditor").GetComponent<StatsEditor>();
+
+        StandardMode = true;
+        ManualMode = false;
+        AutoMode = false;
+
+        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
     }
+
+    #region Change game mode
+    public void StandardModeOn()
+    {
+        StandardMode = true;
+        ManualMode = false;
+        AutoMode = false;
+
+        messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb standardowy.</color>", 3f);
+        Debug.Log($"Został włączony tryb standardowy.");
+    }
+
+
+    public void ManualModeOn()
+    {
+        ManualMode = true;
+        StandardMode = false;
+        AutoMode = false;
+
+        messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb manualny.</color>", 3f);
+        Debug.Log($"Został włączony tryb manualny.");
+    }
+
+
+    public void AutoModeOn()
+    {
+        AutoMode = true;
+        StandardMode = false;
+        ManualMode = false;
+
+        messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb automatyczny.</color>", 3f);
+        Debug.Log($"Został włączony tryb automatyczny.");
+    }
+    #endregion
 
     public void ShowOrHidePanel(GameObject panel)
     {
@@ -34,49 +77,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void RestartGame()
-    {
-        // To niby restartuje scenę, ale nie da się póniej z niewiadomych przyczyn zaznaczac postaci
-        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    //public void RestartGame()
+    //{
+    //    // To niby restartuje scenę, ale nie da się póniej z niewiadomych przyczyn zaznaczac postaci
+    //    //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
-        /* Wiec tymczasowo robimy tak:*/
+    //    /* Wiec tymczasowo robimy tak:*/
 
-        RoundManager.roundNumber = 1;
+    //    RoundManager.roundNumber = 1;
 
-        if (Character.trSelect != null)
-            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
+    //    if (Character.trSelect != null)
+    //        GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
          
-        List<Stats> allStats = new List<Stats>();
+    //    List<Stats> allStats = new List<Stats>();
 
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+    //    GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+    //    GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-        GameObject[] characters = enemies.Concat(players).ToArray();
+    //    GameObject[] characters = enemies.Concat(players).ToArray();
 
-        foreach (var character in characters)
-            Destroy(character);
+    //    foreach (var character in characters)
+    //        Destroy(character);
 
-        CharacterManager.playersAmount = 0;
-        CharacterManager.enemiesAmount = 0;
-    }
+    //    CharacterManager.playersAmount = 0;
+    //    CharacterManager.enemiesAmount = 0;
+    //}
 
     // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown("escape"))
         {
-            //if (!PanelIsOpen || mainMenuPanel.activeSelf)
-            //    ShowOrHideMainMenuPanel();
-            //else if (statsEditor.generalPanel.activeSelf)
-            //    statsEditor.HideGeneralPanel();
-            //else if (optionsMenu.optionsPanel.activeSelf)
-            //{
-            //    optionsMenu.HideOptionsPanel();
-            //    ShowOrHideMainMenuPanel();
-            //}
-            //else if (rollPanel.activeSelf)
-            //    HideRollPanel();
-
             GameObject[] panels = GameObject.FindGameObjectsWithTag("Panel");
 
             foreach (GameObject panel in panels)
@@ -116,39 +147,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //public void ShowOrHideQuitGamePanel()
-    //{
-    //    if (!quitPanel.activeSelf)
-    //        quitPanel.SetActive(true);
-    //    else
-    //        quitPanel.SetActive(false);
-    //}
-
     public void QuitGame()
     {
         Application.Quit();
     }
-
-    //public void ShowRollPanel()
-    //{
-    //    if (!rollPanel.activeSelf)
-    //    {
-    //        PanelIsOpen = true;
-    //        rollPanel.SetActive(true);
-    //    }
-    //    else
-    //    {
-    //        PanelIsOpen = false;
-    //        rollPanel.SetActive(false);
-    //    }
-    //}
-
-    //public void HideRollPanel()
-    //{
-    //    if (rollPanel.activeSelf)
-    //    {
-    //        rollPanel.SetActive(false);
-    //        PanelIsOpen = false;
-    //    }
-    //}
 }

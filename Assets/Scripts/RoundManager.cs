@@ -24,7 +24,7 @@ public class RoundManager : MonoBehaviour
 
     public void NextRound()
     {
-        if(AutoCombat.AutoCombatOn)
+        if(GameManager.AutoMode)
         {
             autoCombat.AutomaticActions();
 
@@ -50,7 +50,8 @@ public class RoundManager : MonoBehaviour
 
         // Zaznaczenie postaci z najwyższą inicjatywą
         Array.Sort(allObjectsWithStats, (x, y) => y.Initiative.CompareTo(x.Initiative));
-        Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(allObjectsWithStats[0].gameObject);
+        if(allObjectsWithStats.Length > 0 && Character.selectedCharacter != null)
+            Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(allObjectsWithStats[0].gameObject);
 
         GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=#FFE100>RUNDA {roundNumber}</color>", 3f);
         Debug.Log($"======================= RUNDA {roundNumber} =======================");

@@ -13,8 +13,6 @@ public class AutoCombat : MonoBehaviour
 
     public MovementManager movementManager;
 
-    public static bool AutoCombatOn = false;
-
     private MessageManager messageManager;
 
     void Start()
@@ -23,22 +21,6 @@ public class AutoCombat : MonoBehaviour
 
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
         messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
-    }
-
-    public void SetAutoCombat()
-    {
-        if (AutoCombatOn)
-        {
-            AutoCombatOn = false;
-            messageManager.ShowMessage($"<color=#00FF9A>Walka automatyczna została wyłączona.</color>", 3f);
-            Debug.Log($"Walka automatyczna została wyłączona.");
-        }
-        else
-        {
-            AutoCombatOn = true;
-            messageManager.ShowMessage($"<color=#00FF9A>Walka automatyczna została aktywowana.</color>", 3f);
-            Debug.Log($"Walka automatyczna została aktywowana.");
-        }
     }
 
     // Wykonuje automatyczne akcje za kazda postac
@@ -130,13 +112,13 @@ public class AutoCombat : MonoBehaviour
                 {
                     //Wykonanie szarzy
                     if (adjacentTilesArray.Length > 0)
-                    {
-                        MovementManager.Charge = true;
+                    {                        
                         character.GetComponent<Stats>().tempSz = character.GetComponent<Stats>().Sz * 2;
 
                         GameObject.Find("MovementManager").GetComponent<MovementManager>().MoveSelectedCharacter(adjacentTilesArray[0], character);
                         Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)
 
+                        MovementManager.Charge = true;
                         AutomaticAttack(character, closestOpponent, 1); // Wykonywany jest jeden atak z bonusem +10, bo to szarza
 
                         // Zresetowanie szarzy

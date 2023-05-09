@@ -277,17 +277,22 @@ public class Stats : MonoBehaviour
     {
         actionsLeft = 2;
         attacksLeft = A;
-        //Debug.Log($"Nowa runda. {this.gameObject.name} pozostały {actionsLeft} akcje.");
     }
 
     public void TakeAction() // wykonanie akcji
     {
+        if (!GameManager.StandardMode)
+            return;
+
         actionsLeft--;
         Debug.Log($"{this.gameObject.name} wykonał akcję pojedynczą. Pozostała {actionsLeft} akcja w tej rundzie.");
     }
 
     public void TakeDoubleAction() // wykonanie akcji podwójnej
     {
+        if (!GameManager.StandardMode)
+            return;
+
         actionsLeft = 0;
         Debug.Log($"{this.gameObject.name} wykonał akcję podwójną. Pozostało {actionsLeft} akcji w tej rundzie.");
     }
