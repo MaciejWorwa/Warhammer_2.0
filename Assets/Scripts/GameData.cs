@@ -48,6 +48,7 @@ public class GameData
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
     [HideInInspector] public bool isScary; // informacja o tym, że postać jest Straszna
+    [HideInInspector] public bool isScared; // informacja o tym, że postać jest przestraszona
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
     [HideInInspector] public int attacksLeft; // ilość ataków pozostałych do wykonania w danej rundzie
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy życie postaci jest poniżej 0
@@ -85,11 +86,6 @@ public class GameData
 
     public float[] position;
 
-
-
-
-
-
     public List<float[]> obstaclePositions;
     public List<string> tags;
     #endregion
@@ -101,7 +97,6 @@ public class GameData
 
         gridWidth = GridManager.width;
         gridHeight = GridManager.height;
-
 
        // INFORMACJE O PRZESZKODACH
        string[] tagsToSave = {"Tree", "Rock"};

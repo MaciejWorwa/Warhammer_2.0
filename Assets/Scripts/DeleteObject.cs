@@ -22,11 +22,6 @@ public class DeleteObject : MonoBehaviour
                     GameObject.Find("GameManager").GetComponent<GameManager>().ShowOrHidePanel(panel);
                 }
             }
-
-            //GameObject.Find("StatsEditor").GetComponent<StatsEditor>().ShowGeneralPanel();
-            //GameObject.Find("StatsEditor").GetComponent<StatsEditor>().HideGeneralPanel();
-            //GameObject.Find("GameManager").GetComponent<GameManager>().HideRollPanel();
-            //GameObject.Find("OptionsMenu").GetComponent<OptionsMenu>().HideOptionsPanel();
         }
     }
 }

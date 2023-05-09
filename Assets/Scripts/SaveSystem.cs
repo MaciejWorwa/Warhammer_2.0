@@ -168,7 +168,11 @@ public class SaveSystem : MonoBehaviour
             }
         }
 
+        // Zresetowanie statycznych bool'i
         CharacterManager.randomPositionMode = false;
+        MovementManager.canMove = false;
+        AttackManager.targetSelecting = false;
+        MagicManager.targetSelecting = false;
 
         string[] tagsToSave = { "Tree", "Rock" };
 

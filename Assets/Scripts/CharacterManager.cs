@@ -31,7 +31,6 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private GameObject statsDisplayPanel;
 
     private bool attributesLoaded;
-    List<GameObject> playersWithoutFear;
 
     void Start()
     {
@@ -39,7 +38,6 @@ public class CharacterManager : MonoBehaviour
         enemiesAmount = 0;
         randomPositionMode = false;
         characterAdding = false;
-        playersWithoutFear = new List<GameObject>();
     }
 
     void Update()
@@ -269,16 +267,17 @@ public class CharacterManager : MonoBehaviour
         {
             int rollResult = UnityEngine.Random.Range(1, 101);
 
-            if (rollResult > player.GetComponent<Stats>().SW && !playersWithoutFear.Contains(player))
+            if (rollResult > player.GetComponent<Stats>().SW && player.GetComponent<Stats>().isScared)
             {
                 player.GetComponent<Stats>().actionsLeft = 0;
+                player.GetComponent<Stats>().isScared = true;
 
                 GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>{player.GetComponent<Stats>().Name} nie zdał testu strachu. Wynik rzutu: {rollResult}</color>", 5f);
                 Debug.Log($"{player.GetComponent<Stats>().Name} nie zdał testu strachu. Wynik rzutu: {rollResult}");
             }
             else
             {
-                playersWithoutFear.Add(player);
+                player.GetComponent<Stats>().isScared = false;
             }
         }
     }

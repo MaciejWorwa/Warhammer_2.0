@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,14 +16,17 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        statsEditor = GameObject.Find("StatsEditor").GetComponent<StatsEditor>();
 
         StandardMode = true;
         ManualMode = false;
         AutoMode = false;
 
-        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
-        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+        if(SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            statsEditor = GameObject.Find("StatsEditor").GetComponent<StatsEditor>();
+            // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
+            messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+        }
     }
 
     #region Change game mode
@@ -75,7 +79,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown("escape"))
+        if (Input.GetKeyDown("escape") && SceneManager.GetActiveScene().buildIndex == 1)
         {
             GameObject[] panels = GameObject.FindGameObjectsWithTag("Panel");
 
@@ -99,6 +103,10 @@ public class GameManager : MonoBehaviour
 
             if (panels.Length == 0)
                 ShowOrHideMainMenuPanel();
+        }
+        else if (Input.GetKeyDown("escape") && SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            ShowOrHideMainMenuPanel();
         }
     }
 

@@ -7,7 +7,7 @@ using System;
 
 public class MovementManager : MonoBehaviour
 {
-    public static bool canMove = false; // okresla czy postac moze wykonac ruch
+    public static bool canMove; // okresla czy postac moze wykonac ruch
     public static bool Charge; // szarza
     public static bool Run; //bieg
 
@@ -20,6 +20,7 @@ public class MovementManager : MonoBehaviour
 
     void Start()
     {
+        canMove = false;
         grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry

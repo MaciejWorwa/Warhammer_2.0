@@ -16,21 +16,26 @@ public class RoundManager : MonoBehaviour
 
     void Start()
     {
-        if (roundNumber == 0)
-            nextRoundButtonText.text = "Start";
         roundNumber = 0;
         autoCombat = autoCombat.gameObject.GetComponent<AutoCombat>();
     }
 
     void Update()
     {
-        roundNumberDisplay.text = "Runda: " + roundNumber;
+        if (roundNumber == 0)
+        {
+            roundNumberDisplay.text = "Gotów?";
+            nextRoundButtonText.text = "Start";
+        }
+        else
+        {
+            roundNumberDisplay.text = "Runda: " + roundNumber;
+            nextRoundButtonText.text = "Next";
+        }
     }
 
     public void NextRound()
     {
-        nextRoundButtonText.text = "Next";
-
         if (GameManager.AutoMode)
         {
             autoCombat.AutomaticActions();

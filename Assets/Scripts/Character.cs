@@ -106,7 +106,7 @@ public class Character : MonoBehaviour
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // PRAWY PRZYCISK MYSZY == Zaatakuj klikniętą postać
-        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen) // wciśnięcie prawego przycisku myszy
+        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen && trSelect != null) // wciśnięcie prawego przycisku myszy
         {
             // Sprawdza, czy atakujacym nie jest sojusznik
             if (selectedCharacter.tag == this.gameObject.tag)

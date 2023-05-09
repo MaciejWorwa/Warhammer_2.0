@@ -41,7 +41,8 @@ public class Stats : MonoBehaviour
     public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
-    public bool isScary; // informacja o tym, że postać jest Straszna
+    [HideInInspector] public bool isScary; // informacja o tym, że postać jest Straszna
+    [HideInInspector] public bool isScared = true; // informacja o tym, że postać jest przestraszona
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
     [HideInInspector] public int attacksLeft; // ilość ataków pozostałych do wykonania w danej rundzie
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy życie postaci jest poniżej 0
