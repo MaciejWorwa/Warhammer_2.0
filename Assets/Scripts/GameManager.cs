@@ -1,13 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using UnityEngine.SceneManagement;
-using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] GameObject mainMenuPanel;
-    OptionsMenu optionsMenu;
     StatsEditor statsEditor;
     MessageManager messageManager;
 
@@ -18,7 +15,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        optionsMenu = GameObject.Find("OptionsMenu").GetComponent<OptionsMenu>();
         statsEditor = GameObject.Find("StatsEditor").GetComponent<StatsEditor>();
 
         StandardMode = true;
@@ -77,33 +73,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //public void RestartGame()
-    //{
-    //    // To niby restartuje scenę, ale nie da się póniej z niewiadomych przyczyn zaznaczac postaci
-    //    //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-
-    //    /* Wiec tymczasowo robimy tak:*/
-
-    //    RoundManager.roundNumber = 1;
-
-    //    if (Character.trSelect != null)
-    //        GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
-         
-    //    List<Stats> allStats = new List<Stats>();
-
-    //    GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-    //    GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
-    //    GameObject[] characters = enemies.Concat(players).ToArray();
-
-    //    foreach (var character in characters)
-    //        Destroy(character);
-
-    //    CharacterManager.playersAmount = 0;
-    //    CharacterManager.enemiesAmount = 0;
-    //}
-
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown("escape"))

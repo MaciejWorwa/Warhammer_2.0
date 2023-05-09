@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System;
+using UnityEngine.TextCore.Text;
+using System.Linq;
 
 public class RoundManager : MonoBehaviour
 {
@@ -10,10 +12,13 @@ public class RoundManager : MonoBehaviour
     public AutoCombat autoCombat;
 
     [SerializeField] private TMP_Text roundNumberDisplay;
+    [SerializeField] private TMP_Text nextRoundButtonText;
 
     void Start()
     {
-        roundNumber = 1;
+        if (roundNumber == 0)
+            nextRoundButtonText.text = "Start";
+        roundNumber = 0;
         autoCombat = autoCombat.gameObject.GetComponent<AutoCombat>();
     }
 
@@ -24,7 +29,9 @@ public class RoundManager : MonoBehaviour
 
     public void NextRound()
     {
-        if(GameManager.AutoMode)
+        nextRoundButtonText.text = "Next";
+
+        if (GameManager.AutoMode)
         {
             autoCombat.AutomaticActions();
 
@@ -41,19 +48,31 @@ public class RoundManager : MonoBehaviour
 
         Stats[] allObjectsWithStats = FindObjectsOfType<Stats>();
 
+        // Ilość Enemies z cechą Straszny
+        bool scaryEnemyExist = false;
+
         //przywracanie parowania i/lub uników każdej postaci wraz z nową rundą
         foreach (Stats obj in allObjectsWithStats)
         {
             obj.GetComponent<Stats>().ResetParryAndDodge();
             obj.GetComponent<Stats>().ResetActionsNumber();
+
+            if (obj.isScary)
+                scaryEnemyExist = true;
         }
 
-        // Zaznaczenie postaci z najwyższą inicjatywą
-        Array.Sort(allObjectsWithStats, (x, y) => y.Initiative.CompareTo(x.Initiative));
-        if(allObjectsWithStats.Length > 0 && Character.selectedCharacter != null)
-            Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(allObjectsWithStats[0].gameObject);
+        if(allObjectsWithStats.Length > 0)
+            GameObject.Find("CharacterManager").GetComponent<CharacterManager>().SelectCharacterWithBiggestInitiative(scaryEnemyExist, allObjectsWithStats);
 
         GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=#FFE100>RUNDA {roundNumber}</color>", 3f);
         Debug.Log($"======================= RUNDA {roundNumber} =======================");
     }
+
+    public void EndSelectedCharacterTurn()
+    {
+        Character.selectedCharacter.GetComponent<Stats>().actionsLeft = 0;
+    }
+
+
+
 }

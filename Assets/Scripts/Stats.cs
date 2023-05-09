@@ -35,12 +35,13 @@ public class Stats : MonoBehaviour
     public int tempHealth;
     public int PP;
 
-    [Header("Inicjatywa, parowanie, uniki")]
+    [Header("Inicjatywa, zdolności, umiejętności, inne")]
     public int Initiative; // inicjatywa
     public int Dodge; // informacja o tym, czy postać posiada zdolność uniku
     public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
+    public bool isScary; // informacja o tym, że postać jest Straszna
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
     [HideInInspector] public int attacksLeft; // ilość ataków pozostałych do wykonania w danej rundzie
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy życie postaci jest poniżej 0
@@ -224,6 +225,7 @@ public class Stats : MonoBehaviour
             AttackRange = 1.5;
             Druzgoczacy = true;
             PrzebijajacyZbroje = true;
+            isScary = true;
         }
         else if (rasa == Character.Rasa.Troll)
         {
@@ -241,6 +243,7 @@ public class Stats : MonoBehaviour
             Sz = 6;
 
             AttackRange = 1.5;
+            isScary = true;
         }
 
         Initiative = Zr + Random.Range(1, 11);

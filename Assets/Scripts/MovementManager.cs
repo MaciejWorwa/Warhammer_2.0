@@ -359,6 +359,9 @@ public class MovementManager : MonoBehaviour
         // Sprawdza zasieg ruchu postaci
         int movementRange = character.GetComponent<Stats>().tempSz;
 
+        if (movementRange == 0)
+            return;
+
         // Wrzucajac do listy postac, dodajemy punkt poczatkowy, ktory jest potrzebny do pozniejszej petli wyszukujacej dostepne pozycje
         tilesInMovementRange.Add(character);
 

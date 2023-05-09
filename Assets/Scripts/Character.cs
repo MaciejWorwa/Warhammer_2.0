@@ -19,8 +19,6 @@ public class Character : MonoBehaviour
 
     private ButtonManager buttonManager;
 
-    private float attackDistance;
-
     [HideInInspector] public AttackManager attackManager;
 
     private MessageManager messageManager;
@@ -90,7 +88,15 @@ public class Character : MonoBehaviour
     #region Select or deselect character method
     public void OnMouseDown()
     {
-       SelectOrDeselectCharacter(this.gameObject);
+        if (this.gameObject.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode && trSelect == null)
+        {
+            messageManager.ShowMessage($"<color=red>Wybrana postać nie może wykonać więcej akcji w tej rundzie.</color>", 4f);
+            Debug.Log("Wybrana postać nie może wykonać więcej akcji w tej rundzie.");
+
+            return;
+        }
+
+        SelectOrDeselectCharacter(this.gameObject);
     }
     #endregion
 
@@ -134,6 +140,14 @@ public class Character : MonoBehaviour
         // ŚRODKOWY PRZYCISK MYSZY == Wybierz klikniętą postać, nie musisz odznaczać obecnie wybranej
         else if (Input.GetMouseButtonDown(2) && !GameManager.PanelIsOpen) // wcisniecie srodkowego przycisku myszy
         {
+            if (this.gameObject.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode)
+            {
+                messageManager.ShowMessage($"<color=red>Wybrana postać nie może wykonać więcej akcji w tej rundzie.</color>", 4f);
+                Debug.Log("Wybrana postać nie może wykonać więcej akcji w tej rundzie.");
+
+                return;
+            }
+
             // Zresetowanie zmiany koloru i wielkosci poprzednio wybranej posataci
             if (selectedCharacter != null)
             {
@@ -155,9 +169,6 @@ public class Character : MonoBehaviour
             // Aktualizacja wyświetlanych statystyk
             GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();
 
-            messageManager.ShowMessage($"Wybrałeś {selectedCharacter.GetComponent<Stats>().Name}", 3f);
-            Debug.Log("Wybrałeś " + selectedCharacter.name);
-
             if (selectedCharacter.CompareTag("Player"))
                 selectedCharacter.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0.64f);
             else if (selectedCharacter.CompareTag("Enemy"))
@@ -174,7 +185,7 @@ public class Character : MonoBehaviour
             GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
 
             // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
-            grid.ResetTileColors();
+            grid.ResetTileColors();       
         }
     }
 
@@ -224,7 +235,6 @@ public class Character : MonoBehaviour
 
             // Ukrywa przyciski zaklęć, jeśli są aktywne
             buttonManager.HideSpellButtons();
-
         }
 
         // Jezeli jest aktywny tryb wybierania celu ataku, przekazuje informacje o kliknietej postaci i wywoluje funkcje Attack traktujac wybraną postać jako atakujacego, a klikniętą jako atakowanego.

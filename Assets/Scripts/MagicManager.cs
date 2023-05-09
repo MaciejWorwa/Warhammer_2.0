@@ -207,7 +207,7 @@ public class MagicManager : MonoBehaviour
         double areaSize = character.GetComponent<Stats>().AreaSize;
         int castDuration = character.GetComponent<Stats>().CastDuration;
 
-        int armor = GameObject.Find("AttackManager").GetComponent<AttackManager>().CheckAttackLocalization(target);
+        int armor = GameObject.Find("AttackManager").GetComponent<AttackManager>().CheckAttackLocalization(target.GetComponent<Stats>());
 
         messageManager.ShowMessage($"<color=#00FF9A>{character.GetComponent<Stats>().Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
         Debug.Log($"{character.GetComponent<Stats>().Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");

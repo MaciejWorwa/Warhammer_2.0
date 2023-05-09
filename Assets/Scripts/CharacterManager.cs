@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Linq;
 
 public class CharacterManager : MonoBehaviour
 {
@@ -26,9 +27,11 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private GameObject setStatsButton;
     [SerializeField] private GameObject destroyButton;
     [SerializeField] private GameObject rollButton;
+    [SerializeField] private GameObject endTurnButton;
     [SerializeField] private GameObject statsDisplayPanel;
 
     private bool attributesLoaded;
+    List<GameObject> playersWithoutFear;
 
     void Start()
     {
@@ -36,6 +39,7 @@ public class CharacterManager : MonoBehaviour
         enemiesAmount = 0;
         randomPositionMode = false;
         characterAdding = false;
+        playersWithoutFear = new List<GameObject>();
     }
 
     void Update()
@@ -46,15 +50,17 @@ public class CharacterManager : MonoBehaviour
             destroyButton.SetActive(false);
             setStatsButton.SetActive(false);
             rollButton.SetActive(false);
+            endTurnButton.SetActive(false);
             statsDisplayPanel.SetActive(false);
             attributesLoaded = false;
 
         }
-        else
+        else if (Character.selectedCharacter != null)
         {
             destroyButton.SetActive(true);
             setStatsButton.SetActive(true);
             rollButton.SetActive(true);
+            endTurnButton.SetActive(true);
             statsDisplayPanel.SetActive(true);
             GameObject.Find("ButtonManager").GetComponent<ButtonManager>().RefreshWeaponTypeButtons(Character.selectedCharacter);
             if (!attributesLoaded)
@@ -89,6 +95,10 @@ public class CharacterManager : MonoBehaviour
 
                 Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
                 Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(nextCharacter);
+
+                // Aktualizacja wyświetlanych statystyk
+                Character.selectedCharacter = nextCharacter;
+                GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();
             }
         }
     }
@@ -217,6 +227,60 @@ public class CharacterManager : MonoBehaviour
     void SetCharacterLevel()
     {
         GameObject.Find("ExpManager").GetComponent<ExpManager>().SetCharacterLevel(newCharacter);
+    }
+    #endregion
+
+    #region Select character with biggest initiative when new round starts
+    public void SelectCharacterWithBiggestInitiative(bool scaryEnemyExist, Stats[] allObjectsWithStats)
+    {
+        // Rzut na strach dla wszystkich postaci graczy
+        if (scaryEnemyExist)
+            RollSW();
+
+        Array.Sort(allObjectsWithStats, (x, y) => y.Initiative.CompareTo(x.Initiative));
+
+        // Odznaczenie aktualnie zaznaczonej postaci
+        foreach (var stats in allObjectsWithStats)
+        {
+            if (stats.gameObject.transform.localScale.x != 1f && Character.selectedCharacter != null)
+            {
+                Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(stats.gameObject);
+            }
+        }
+
+        // Zaznaczenie postaci z najwyższą inicjatywą
+        if (allObjectsWithStats.Length > 0 && allObjectsWithStats[0].gameObject.transform.localScale.x == 1f)
+        {
+            Character.selectedCharacter = allObjectsWithStats[0].gameObject;
+            Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
+        }
+
+        // Aktualizacja wyświetlanych statystyk
+        GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();
+    }
+    #endregion
+
+    #region Roll for players fear
+    public void RollSW()
+    {
+        GameObject[] allPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (var player in allPlayers)
+        {
+            int rollResult = UnityEngine.Random.Range(1, 101);
+
+            if (rollResult > player.GetComponent<Stats>().SW && !playersWithoutFear.Contains(player))
+            {
+                player.GetComponent<Stats>().actionsLeft = 0;
+
+                GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>{player.GetComponent<Stats>().Name} nie zdał testu strachu. Wynik rzutu: {rollResult}</color>", 5f);
+                Debug.Log($"{player.GetComponent<Stats>().Name} nie zdał testu strachu. Wynik rzutu: {rollResult}");
+            }
+            else
+            {
+                playersWithoutFear.Add(player);
+            }
+        }
     }
     #endregion
 }

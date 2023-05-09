@@ -91,42 +91,22 @@ public class AttackManager : MonoBehaviour
     #region Attack function
     public void Attack(GameObject attacker, GameObject target)
     {
+        Stats attackerStats = attacker.GetComponent<Stats>();
+        Stats targetStats = target.GetComponent<Stats>();
+
         do
         {
-            //uwzględnienie bonusu do WW zwiazanego z szarżą i wykonanie akcji
-            if (MovementManager.Charge)
-            {            
+            //uwzględnienie bonusu do WW zwiazanego z szarżą
+            if (MovementManager.Charge)          
                 chargeBonus = 10;                
-            }
-            else
-            {   
-                chargeBonus = 0;
-                if (attacker.GetComponent<Stats>().A == 1 && attacker.GetComponent<Stats>().actionsLeft > 0 && attacker.GetComponent<Stats>().attacksLeft > 0 || attacker.GetComponent<Stats>().A > 1 && attacker.GetComponent<Stats>().actionsLeft == 1)
-                {
-                    attacker.GetComponent<Stats>().attacksLeft --;
-                    attacker.GetComponent<Stats>().TakeAction();
-                }
-                else if (attacker.GetComponent<Stats>().attacksLeft >= 1 && attacker.GetComponent<Stats>().actionsLeft == 2 || attacker.GetComponent<Stats>().actionsLeft == -1)
-                {
-                    attacker.GetComponent<Stats>().actionsLeft = -1; // daje to, żeby po wykonaniu np. dwóch ataków z trzech dostępnych postać nie mogła zrobić innej akcji niż dokończenie ataku wielokrotnego
-
-                    attacker.GetComponent<Stats>().attacksLeft --;
-                    if(attacker.GetComponent<Stats>().attacksLeft == 0)
-                        attacker.GetComponent<Stats>().TakeDoubleAction();
-                }
-                else
-                {
-                    messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
-                    Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
-                    return;
-                }
-            }
+            else 
+                chargeBonus = 0;            
 
             // Ustala bonus do trafienia (za szarżę i przycelowanie)
-            attackBonus = attacker.GetComponent<Stats>().aimingBonus + chargeBonus;
+            attackBonus = attackerStats.aimingBonus + chargeBonus;
 
             // Sprawdza, czy atakowany posiada bonus za przyjecie pozycji obronnej
-            defensiveBonus = target.GetComponent<Stats>().defensiveBonus;
+            defensiveBonus = targetStats.defensiveBonus;
 
             // liczy dystans pomiedzy walczacymi
             if (attacker != null && target != null)
@@ -137,7 +117,7 @@ public class AttackManager : MonoBehaviour
                 attackDistance = 1.5f;
 
             // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego
-            if (attackDistance <= attacker.GetComponent<Stats>().AttackRange)
+            if (attackDistance <= attackerStats.AttackRange)
             {
                 int wynik = UnityEngine.Random.Range(1, 101);
                 bool hit = false;
@@ -146,27 +126,27 @@ public class AttackManager : MonoBehaviour
                 if (attackDistance > 1.5f)
                 {
                     // sprawdza czy bron jest naladowana
-                    if (attacker.GetComponent<Stats>().reloadLeft == 0)
+                    if (attackerStats.reloadLeft == 0)
                     {
-                        hit = wynik <= attacker.GetComponent<Stats>().US + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
+                        hit = wynik <= attackerStats.US + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                         if (attackBonus > 0 || defensiveBonus > 0)
                         {
-                            messageManager.ShowMessage($"<color=#00FF9A>{attacker.GetComponent<Stats>().Name}</color> Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
-                            Debug.Log($"{attacker.GetComponent<Stats>().Name} Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}");
+                            messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
+                            Debug.Log($"{attackerStats.Name} Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}");
                         }
                         else
                         {
-                            messageManager.ShowMessage($"<color=#00FF9A>{attacker.GetComponent<Stats>().Name}</color> Rzut na US: {wynik}", 6f);
-                            Debug.Log($"{attacker.GetComponent<Stats>().Name} Rzut na US: {wynik}");
+                            messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik}", 6f);
+                            Debug.Log($"{attackerStats.Name} Rzut na US: {wynik}");
                         }
 
                         // resetuje naladowanie broni po wykonaniu strzalu
-                        attacker.GetComponent<Stats>().reloadLeft = attacker.GetComponent<Stats>().reloadTime;
+                        attackerStats.reloadLeft = attackerStats.reloadTime;
 
                         // uwzglednia zdolnosc blyskawicznego przeladowania
-                        if (attacker.GetComponent<Stats>().instantReload == true)
-                            attacker.GetComponent<Stats>().reloadLeft--;
+                        if (attackerStats.instantReload == true)
+                            attackerStats.reloadLeft--;
                     }
                     else
                     {
@@ -178,17 +158,17 @@ public class AttackManager : MonoBehaviour
                 // sprawdza czy atak jest atakiem w zwarciu
                 if (attackDistance <= 1.5f)
                 {
-                    hit = wynik <= attacker.GetComponent<Stats>().WW + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
+                    hit = wynik <= attackerStats.WW + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                     if (attackBonus > 0 || defensiveBonus > 0)
                     {
-                        messageManager.ShowMessage($"<color=#00FF9A>{attacker.GetComponent<Stats>().Name}</color> Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
-                        Debug.Log($"{attacker.GetComponent<Stats>().Name} Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}");
+                        messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
+                        Debug.Log($"{attackerStats.Name} Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}");
                     }
                     else
                     {
-                        messageManager.ShowMessage($"<color=#00FF9A>{attacker.GetComponent<Stats>().Name}</color> Rzut na WW: {wynik}", 6f);
-                        Debug.Log($"{attacker.GetComponent<Stats>().Name} Rzut na WW: {wynik}");
+                        messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na WW: {wynik}", 6f);
+                        Debug.Log($"{attackerStats.Name} Rzut na WW: {wynik}");
                     }
                 }
 
@@ -196,40 +176,40 @@ public class AttackManager : MonoBehaviour
                 if (hit && attackDistance <= 1.5f)
                 {
                     //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
-                    if (target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus > (target.GetComponent<Stats>().Zr + (target.GetComponent<Stats>().Dodge * 10) - 10))
+                    if (targetStats.WW + targetStats.parryBonus > (targetStats.Zr + (targetStats.Dodge * 10) - 10))
                     {
-                        if (target.GetComponent<Stats>().canParry)
-                            ParryAttack(attacker, target);
-                        else if (target.GetComponent<Stats>().canDodge)
-                            DodgeAttack(target);
+                        if (targetStats.canParry)
+                            ParryAttack(attackerStats, targetStats);
+                        else if (targetStats.canDodge)
+                            DodgeAttack(targetStats);
                     }
                     else
                     {
-                        if (target.GetComponent<Stats>().canDodge)
-                            DodgeAttack(target);
-                        else if (target.GetComponent<Stats>().canParry)
-                            ParryAttack(attacker, target);
+                        if (targetStats.canDodge)
+                            DodgeAttack(targetStats);
+                        else if (targetStats.canParry)
+                            ParryAttack(attackerStats, targetStats);
                     }
                 }
 
                 // zresetowanie bonusu za celowanie, jeśli jest aktywny
-                if (attacker.GetComponent<Stats>().aimingBonus != 0)
-                    attacker.GetComponent<Stats>().aimingBonus = 0;
+                if (attackerStats.aimingBonus != 0)
+                    attackerStats.aimingBonus = 0;
                 // Zresetowanie bonusu do trafienia
                 attackBonus = 0;
 
                 if (hit && targetDefended != true)
                 {
-                    int armor = CheckAttackLocalization(target);
+                    int armor = CheckAttackLocalization(targetStats);
                     int damage;
                     int rollResult;
 
                     // mechanika broni przebijajacej zbroje
-                    if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
+                    if (attackerStats.PrzebijajacyZbroje && armor >= 1)
                         armor--;
 
                     // mechanika bronii druzgoczacej
-                    if (attacker.GetComponent<Stats>().Druzgoczacy)
+                    if (attackerStats.Druzgoczacy)
                     {
                         int roll1 = UnityEngine.Random.Range(1, 11);
                         int roll2 = UnityEngine.Random.Range(1, 11);
@@ -241,8 +221,8 @@ public class AttackManager : MonoBehaviour
                         rollResult = UnityEngine.Random.Range(1, 11);
 
                     // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
-                    if (attacker.GetComponent<Stats>().Ciezki)
-                        attacker.GetComponent<Stats>().Druzgoczacy = false;
+                    if (attackerStats.Ciezki)
+                        attackerStats.Druzgoczacy = false;
 
                     // mechanika furii ulryka
                     if (rollResult == 10)
@@ -252,7 +232,7 @@ public class AttackManager : MonoBehaviour
 
                         if (attackDistance <= 1.5f)
                         {
-                            if (attacker.GetComponent<Stats>().WW >= confirmRoll)
+                            if (attackerStats.WW >= confirmRoll)
                             {
                                 additionalDamage = UnityEngine.Random.Range(1, 11);
                                 rollResult = rollResult + additionalDamage;
@@ -268,7 +248,7 @@ public class AttackManager : MonoBehaviour
                         }
                         else if (attackDistance > 1.5f)
                         {
-                            if (attacker.GetComponent<Stats>().US >= confirmRoll)
+                            if (attackerStats.US >= confirmRoll)
                             {
                                 additionalDamage = UnityEngine.Random.Range(1, 11);
                                 rollResult = rollResult + additionalDamage;
@@ -293,40 +273,69 @@ public class AttackManager : MonoBehaviour
                     }
 
                     if (attackDistance <= 1.5f)
-                        damage = rollResult + attacker.GetComponent<Stats>().S;
+                        damage = rollResult + attackerStats.S;
                     else
-                        damage = rollResult + attacker.GetComponent<Stats>().Weapon_S;
+                        damage = rollResult + attackerStats.Weapon_S;
 
-                    messageManager.ShowMessage($"<color=#00FF9A>{attacker.GetComponent<Stats>().Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
-                    Debug.Log($"{attacker.GetComponent<Stats>().Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
+                    messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
+                    Debug.Log($"{attackerStats.Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
 
-                    if (damage > (target.GetComponent<Stats>().Wt + armor))
+                    if (damage > (targetStats.Wt + armor))
                     {
-                        target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
+                        targetStats.tempHealth -= (damage - (targetStats.Wt + armor));
 
-                        messageManager.ShowMessage(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.", 8f);
-                        Debug.Log(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.");
+                        messageManager.ShowMessage(targetStats.Name + " znegował " + (targetStats.Wt + armor) + " obrażeń.", 8f);
+                        Debug.Log(targetStats.Name + " znegował " + (targetStats.Wt + armor) + " obrażeń.");
 
-                        messageManager.ShowMessage($"<color=red> Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
-                        Debug.Log($"Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
+                        messageManager.ShowMessage($"<color=red> Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}</color>", 8f);
+                        Debug.Log($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}");
 
-                        if (target.GetComponent<Stats>().criticalCondition == false && target.GetComponent<Stats>().tempHealth < 0)
+                        if (targetStats.criticalCondition == false && targetStats.tempHealth < 0)
                         {
                             GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
                         }
                     }
                     else
                     {
-                        messageManager.ShowMessage($"Atak <color=red>{attacker.GetComponent<Stats>().Name}</color> nie przebił się przez pancerz.", 6f);
-                        Debug.Log($"Atak {attacker.GetComponent<Stats>().Name} nie przebił się przez pancerz.");
+                        messageManager.ShowMessage($"Atak <color=red>{attackerStats.Name}</color> nie przebił się przez pancerz.", 6f);
+                        Debug.Log($"Atak {attackerStats.Name} nie przebił się przez pancerz.");
                     }
                 }
                 else
                 {
-                    messageManager.ShowMessage($"Atak <color=red>{attacker.GetComponent<Stats>().Name}</color> chybił.", 6f);
-                    Debug.Log($"Atak {attacker.GetComponent<Stats>().Name} chybił.");
+                    messageManager.ShowMessage($"Atak <color=red>{attackerStats.Name}</color> chybił.", 6f);
+                    Debug.Log($"Atak {attackerStats.Name} chybił.");
                 }
                 targetDefended = false; // przestawienie boola na false, żeby przy kolejnym ataku znowu musiał się bronić, a nie był obroniony na starcie
+
+
+
+                // WYKONANIE AKCJI               
+                bool canTakeAction = attackerStats.A == 1 && attackerStats.actionsLeft > 0 && attackerStats.attacksLeft > 0 || attackerStats.A > 1 && attackerStats.actionsLeft == 1;
+                bool canTakeDoubleAction = attackerStats.attacksLeft >= 1 && attackerStats.actionsLeft == 2 || attackerStats.actionsLeft == -1;
+
+                if (!MovementManager.Charge && attackDistance <= 1.5f || attackDistance > 1.5f)
+                {
+                    if (canTakeAction)
+                    {
+                        attackerStats.attacksLeft--;
+                        attackerStats.TakeAction();
+                    }
+                    else if (canTakeDoubleAction)
+                    {
+                        attackerStats.actionsLeft = -1;
+
+                        attackerStats.attacksLeft--;
+                        if (attackerStats.attacksLeft == 0)
+                            attackerStats.TakeDoubleAction();
+                    }
+                    else
+                    {
+                        messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                        Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                        return;
+                    }
+                }
             }
             else
             {
@@ -339,7 +348,7 @@ public class AttackManager : MonoBehaviour
     #endregion
 
     #region Check for attack localization function
-    public int CheckAttackLocalization(GameObject target)
+    public int CheckAttackLocalization(Stats targetStats)
     {
         int attackLocalization = UnityEngine.Random.Range(1, 101);
         int armor = 0;
@@ -349,32 +358,32 @@ public class AttackManager : MonoBehaviour
             case int n when (n >= 1 && n <= 15):
                 messageManager.ShowMessage("Trafienie w głowę", 6f);
                 Debug.Log("Trafienie w głowę");
-                armor = target.GetComponent<Stats>().PZ_head;
+                armor = targetStats.PZ_head;
                 break;
             case int n when (n >= 16 && n <= 35):
                 messageManager.ShowMessage("Trafienie w prawą rękę", 6f);
                 Debug.Log("Trafienie w prawą rękę");
-                armor = target.GetComponent<Stats>().PZ_arms;
+                armor = targetStats.PZ_arms;
                 break;
             case int n when (n >= 36 && n <= 55):
                 messageManager.ShowMessage("Trafienie w lewą rękę", 6f);
                 Debug.Log("Trafienie w lewą rękę");
-                armor = target.GetComponent<Stats>().PZ_arms;
+                armor = targetStats.PZ_arms;
                 break;
             case int n when (n >= 56 && n <= 80):
                 messageManager.ShowMessage("Trafienie w korpus", 6f);
                 Debug.Log("Trafienie w korpus");
-                armor = target.GetComponent<Stats>().PZ_torso;
+                armor = targetStats.PZ_torso;
                 break;
             case int n when (n >= 81 && n <= 90):
                 messageManager.ShowMessage("Trafienie w prawą nogę", 6f);
                 Debug.Log("Trafienie w prawą nogę");
-                armor = target.GetComponent<Stats>().PZ_legs;
+                armor = targetStats.PZ_legs;
                 break;
             case int n when (n >= 91 && n <= 100):
                 messageManager.ShowMessage("Trafienie w lewą nogę", 6f);
                 Debug.Log("Trafienie w lewą nogę");
-                armor = target.GetComponent<Stats>().PZ_legs;
+                armor = targetStats.PZ_legs;
                 break;
         }
         return armor;
@@ -383,50 +392,50 @@ public class AttackManager : MonoBehaviour
     #endregion
 
     #region Parry and dodge
-    private void ParryAttack(GameObject attacker, GameObject target)
+    private void ParryAttack(Stats attackerStats, Stats targetStats)
     {
         // sprawdza, czy atakowany ma jakieś bonusy do parowania
-        if (target.GetComponent<Stats>().Parujacy)
-            target.GetComponent<Stats>().parryBonus += 10;
-        if (attacker.GetComponent<Stats>().Powolny)
-            target.GetComponent<Stats>().parryBonus += 10;
-        if (attacker.GetComponent<Stats>().Szybki)
-            target.GetComponent<Stats>().parryBonus -= 10;
+        if (targetStats.Parujacy)
+            targetStats.parryBonus += 10;
+        if (attackerStats.Powolny)
+            targetStats.parryBonus += 10;
+        if (attackerStats.Szybki)
+            targetStats.parryBonus -= 10;
 
-        target.GetComponent<Stats>().canParry = false;
+        targetStats.canParry = false;
         int wynik = UnityEngine.Random.Range(1, 101);
 
-        if (target.GetComponent<Stats>().parryBonus != 0)
+        if (targetStats.parryBonus != 0)
         {
-            messageManager.ShowMessage($"{target.GetComponent<Stats>().Name} Rzut na parowanie: {wynik} Bonus do parowania: {target.GetComponent<Stats>().parryBonus}", 5f);
-            Debug.Log($"{target.GetComponent<Stats>().Name} Rzut na parowanie: {wynik} Bonus do parowania: {target.GetComponent<Stats>().parryBonus}");
+            messageManager.ShowMessage($"{targetStats.Name} Rzut na parowanie: {wynik} Bonus do parowania: {targetStats.parryBonus}", 5f);
+            Debug.Log($"{targetStats.Name} Rzut na parowanie: {wynik} Bonus do parowania: {targetStats.parryBonus}");
         }
         else
         {
-            messageManager.ShowMessage($"{target.GetComponent<Stats>().Name} Rzut na parowanie: {wynik}", 5f);
-            Debug.Log($"{target.GetComponent<Stats>().Name} Rzut na parowanie: {wynik}");
+            messageManager.ShowMessage($"{targetStats.Name} Rzut na parowanie: {wynik}", 5f);
+            Debug.Log($"{targetStats.Name} Rzut na parowanie: {wynik}");
         }
 
-        if (wynik <= target.GetComponent<Stats>().WW + target.GetComponent<Stats>().parryBonus)
+        if (wynik <= targetStats.WW + targetStats.parryBonus)
             targetDefended = true;
         else
             targetDefended = false;
 
         // zresetowanie bonusu do parowania
-        target.GetComponent<Stats>().parryBonus = 0;
+        targetStats.parryBonus = 0;
     }
 
-    private void DodgeAttack(GameObject target)
+    private void DodgeAttack(Stats targetStats)
     {
-        target.GetComponent<Stats>().canDodge = false;
+        targetStats.canDodge = false;
         int wynik = UnityEngine.Random.Range(1, 101);
 
-        messageManager.ShowMessage($"{target.GetComponent<Stats>().Name} Rzut na unik: {wynik}", 5f);
-        Debug.Log($"{target.GetComponent<Stats>().Name} Rzut na unik: {wynik}");
+        messageManager.ShowMessage($"{targetStats.Name} Rzut na unik: {wynik}", 5f);
+        Debug.Log($"{targetStats.Name} Rzut na unik: {wynik}");
 
-        wynik -= (target.GetComponent<Stats>().Dodge * 10) - 10;
+        wynik -= (targetStats.Dodge * 10) - 10;
 
-        if (wynik <= target.GetComponent<Stats>().Zr)
+        if (wynik <= targetStats.Zr)
             targetDefended = true;
         else
             targetDefended = false;
@@ -498,26 +507,29 @@ public class AttackManager : MonoBehaviour
     // Wykonanie ataku okazyjnego
     public void OpportunityAttack(GameObject attacker, GameObject target)
     {
+        Stats attackerStats = attacker.GetComponent<Stats>();
+        Stats targetStats = target.GetComponent<Stats>();
+
         int wynik = UnityEngine.Random.Range(1, 101);
         bool hit = false;
 
-        messageManager.ShowMessage($"Ruch spowodował atak okazyjny. Rzut na WW <color=red>{attacker.GetComponent<Stats>().Name}</color>: {wynik}", 6f);
-        Debug.Log($"Ruch spowodował atak okazyjny. Rzut na WW {attacker.GetComponent<Stats>().Name}: {wynik}");
+        messageManager.ShowMessage($"Ruch spowodował atak okazyjny. Rzut na WW <color=red>{attackerStats.Name}</color>: {wynik}", 6f);
+        Debug.Log($"Ruch spowodował atak okazyjny. Rzut na WW {attackerStats.Name}: {wynik}");
 
-        hit = wynik <= attacker.GetComponent<Stats>().WW;  // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
+        hit = wynik <= attackerStats.WW;  // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
         if (hit)
         {
-            int armor = CheckAttackLocalization(target);
+            int armor = CheckAttackLocalization(targetStats);
             int damage;
             int rollResult;
 
             // mechanika broni przebijajacej zbroje
-            if (attacker.GetComponent<Stats>().PrzebijajacyZbroje && armor >= 1)
+            if (attackerStats.PrzebijajacyZbroje && armor >= 1)
                 armor--;
 
             // mechanika bronii druzgoczacej
-            if (attacker.GetComponent<Stats>().Druzgoczacy)
+            if (attackerStats.Druzgoczacy)
             {
                 int roll1 = UnityEngine.Random.Range(1, 11);
                 int roll2 = UnityEngine.Random.Range(1, 11);
@@ -529,8 +541,8 @@ public class AttackManager : MonoBehaviour
                 rollResult = UnityEngine.Random.Range(1, 11);
 
             // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
-            if (attacker.GetComponent<Stats>().Ciezki)
-                attacker.GetComponent<Stats>().Druzgoczacy = false;
+            if (attackerStats.Ciezki)
+                attackerStats.Druzgoczacy = false;
 
             // mechanika furii ulryka
             if (rollResult == 10)
@@ -540,7 +552,7 @@ public class AttackManager : MonoBehaviour
 
                 if (attackDistance <= 1.5f)
                 {
-                    if (attacker.GetComponent<Stats>().WW >= confirmRoll)
+                    if (attackerStats.WW >= confirmRoll)
                     {
                         additionalDamage = UnityEngine.Random.Range(1, 11);
                         rollResult = rollResult + additionalDamage;
@@ -556,7 +568,7 @@ public class AttackManager : MonoBehaviour
                 }
                 else if (attackDistance > 1.5f)
                 {
-                    if (attacker.GetComponent<Stats>().US >= confirmRoll)
+                    if (attackerStats.US >= confirmRoll)
                     {
                         additionalDamage = UnityEngine.Random.Range(1, 11);
                         rollResult = rollResult + additionalDamage;
@@ -580,35 +592,35 @@ public class AttackManager : MonoBehaviour
                 }
             }
 
-            damage = rollResult + attacker.GetComponent<Stats>().S;
+            damage = rollResult + attackerStats.S;
 
-            messageManager.ShowMessage($"<color=#00FF9A>{attacker.GetComponent<Stats>().Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
-            Debug.Log($"{attacker.GetComponent<Stats>().Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
+            messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
+            Debug.Log($"{attackerStats.Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
 
-            if (damage > (target.GetComponent<Stats>().Wt + armor))
+            if (damage > (targetStats.Wt + armor))
             {
-                target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
+                targetStats.tempHealth -= (damage - (targetStats.Wt + armor));
 
-                messageManager.ShowMessage(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.", 8f);
-                Debug.Log(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.");
-                messageManager.ShowMessage($"<color=red> Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
-                Debug.Log($"Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
+                messageManager.ShowMessage(targetStats.Name + " znegował " + (targetStats.Wt + armor) + " obrażeń.", 8f);
+                Debug.Log(targetStats.Name + " znegował " + (targetStats.Wt + armor) + " obrażeń.");
+                messageManager.ShowMessage($"<color=red> Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}</color>", 8f);
+                Debug.Log($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}");
 
-                if (target.GetComponent<Stats>().criticalCondition == false && target.GetComponent<Stats>().tempHealth < 0)
+                if (targetStats.criticalCondition == false && targetStats.tempHealth < 0)
                 {
                     GameObject.Find("ExpManager").GetComponent<ExpManager>().GainExp(attacker, target); // dodanie expa za pokonanie przeciwnika
                 }
             }
             else
             {
-                messageManager.ShowMessage($"Atak <color=red>{attacker.GetComponent<Stats>().Name}</color> nie przebił się przez pancerz.", 6f);
-                Debug.Log($"Atak {attacker.GetComponent<Stats>().Name} nie przebił się przez pancerz.");
+                messageManager.ShowMessage($"Atak <color=red>{attackerStats.Name}</color> nie przebił się przez pancerz.", 6f);
+                Debug.Log($"Atak {attackerStats.Name} nie przebił się przez pancerz.");
             }
         }
         else
         {
-            messageManager.ShowMessage($"Atak <color=red>{attacker.GetComponent<Stats>().Name}</color> chybił.", 6f);
-            Debug.Log($"Atak {attacker.GetComponent<Stats>().Name} chybił.");
+            messageManager.ShowMessage($"Atak <color=red>{attackerStats.Name}</color> chybił.", 6f);
+            Debug.Log($"Atak {attackerStats.Name} chybił.");
         }
     }
     #endregion
@@ -616,8 +628,9 @@ public class AttackManager : MonoBehaviour
     #region Charge attack function
     public void ChargeAttack(GameObject attacker, GameObject target)
     {
+        Stats attackerStats = attacker.GetComponent<Stats>();
 
-        if(attacker.GetComponent<Stats>().actionsLeft < 2)
+        if (attackerStats.actionsLeft < 2)
         {
             messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
             Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
@@ -660,14 +673,14 @@ public class AttackManager : MonoBehaviour
 
         // Sprawdza dystans do pola docelowego
         Vector3 targetTilePos = new Vector3(adjacentTilesArray[0].transform.position.x, adjacentTilesArray[0].transform.position.y, 0);
-        List<Vector3> path = movementManager.FindPath(attacker.transform.position, targetTilePos, attacker.GetComponent<Stats>().Sz * 2);
+        List<Vector3> path = movementManager.FindPath(attacker.transform.position, targetTilePos, attackerStats.Sz * 2);
 
-        if (path.Count >= 3 && path.Count <= attacker.GetComponent<Stats>().Sz * 2) // Jesli jest w zasiegu szarzy
+        if (path.Count >= 3 && path.Count <= attackerStats.Sz * 2) // Jesli jest w zasiegu szarzy
         {
             //Wykonanie szarzy
             if (adjacentTilesArray != null)
             {
-                attacker.GetComponent<Stats>().tempSz = attacker.GetComponent<Stats>().Sz * 2;
+                attackerStats.tempSz = attackerStats.Sz * 2;
 
                 MovementManager.canMove = true;
                 movementManager.MoveSelectedCharacter(adjacentTilesArray[0], attacker);
@@ -678,7 +691,7 @@ public class AttackManager : MonoBehaviour
                 Attack(attacker, target); // Wykonywany jest jeden atak z bonusem +10, bo to szarza
 
                 // Zresetowanie szarzy
-                attacker.GetComponent<Stats>().tempSz = attacker.GetComponent<Stats>().Sz;
+                attackerStats.tempSz = attackerStats.Sz;
                 movementManager.SetCharge();
                 MovementManager.canMove = false;
             }

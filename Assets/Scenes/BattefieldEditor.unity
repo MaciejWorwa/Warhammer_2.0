@@ -1356,6 +1356,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb364f3d85b0594479f54c8dd9029dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  szerokosc: 0
+  wysokosc: 0
   tilePrefab: {fileID: 1779788511079860091, guid: 0f90327bc14dbb94dbfd7d42c38704de, type: 3}
   sliderX: {fileID: 1465618444}
   sliderY: {fileID: 262794880}

@@ -1,14 +1,15 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class GridManager : MonoBehaviour
 {
     public static int width = 17;
     public static int height = 8;
+
+    public int szerokosc;
+    public int wysokosc;
 
     [SerializeField] private Tile tilePrefab;
 
@@ -32,13 +33,6 @@ public class GridManager : MonoBehaviour
         rockAdding = false;
         obstacleRemoving = false;
 
-        //Debug.Log("height " + height);
-        //Debug.Log("width " + width);
-        //sliderY.value = height;
-        //sliderX.value = width;
-        //Debug.Log("sliderY.value " + sliderY.value);
-        //Debug.Log("sliderX.value " + sliderX.value);
-
         GenerateGrid();
     }
 
@@ -56,8 +50,14 @@ public class GridManager : MonoBehaviour
         width = (int)sliderX.value; 
         height = (int)sliderY.value;
 
+        szerokosc = width;
+        wysokosc = height;
+
         // Generuje now¹ siatkê ze zmienionymi wartoœciami
         GenerateGrid();
+
+        // Usuwa przeszkody poza obszarem siatki
+        RemoveObstacle();
     }
 
     public void GenerateGrid()
@@ -170,10 +170,31 @@ public class GridManager : MonoBehaviour
 
     public void RemoveObstacle()
     {
+        // Usuwa klikniêt¹ przeszkodê
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         if (hit.collider != null && (hit.collider.CompareTag("Tree") || hit.collider.CompareTag("Rock")))
         {
             Destroy(hit.collider.gameObject);
+        }
+
+        // Usuwa wszystkie przeszkody poza siatk¹ bitewn¹
+        Obstacle[] obstacles = FindObjectsOfType<Obstacle>();
+        for (int i = 0; i < obstacles.Length; i++)
+        {
+            int rightBound = width / 2;
+            int topBound = height / 2;
+
+            if (height % 2 == 0)
+                topBound--;
+            if (width % 2 == 0)
+                rightBound--;
+
+            Vector3 pos = obstacles[i].transform.position;
+
+            if (Mathf.Abs(pos.x) > width / 2 || Mathf.Abs(pos.y) > height / 2 || pos.y > topBound || pos.x > rightBound)
+            {
+                Destroy(obstacles[i].gameObject);
+            }
         }
     }
     #endregion
