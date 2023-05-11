@@ -21,10 +21,15 @@ public class Character : MonoBehaviour
 
     [HideInInspector] public AttackManager attackManager;
 
+    private CharacterManager characterManager;
+
     private MessageManager messageManager;
 
     void Start()
     {
+        // Odniesienie do menadżera postaci
+        characterManager = GameObject.Find("CharacterManager").GetComponent<CharacterManager>(); 
+
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
         messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
 
@@ -81,7 +86,7 @@ public class Character : MonoBehaviour
  
         if (charStats.tempHealth < 0 && charStats.criticalCondition == false)
         {
-            charStats.GetCriticalHit();
+            characterManager.GetCriticalHit(this.gameObject.GetComponent<Stats>());
         }
     }
 

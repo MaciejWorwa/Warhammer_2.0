@@ -37,12 +37,17 @@ public class Stats : MonoBehaviour
 
     [Header("Inicjatywa, zdolności, umiejętności, inne")]
     public int Initiative; // inicjatywa
-    public int Dodge; // informacja o tym, czy postać posiada zdolność uniku
-    public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
+    [HideInInspector] public int Dodge; // poziom umiejętności uniku
+    [HideInInspector] public int ChannelingMagic; // poziom umiejętności splatania magii
+    [HideInInspector] public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
     [HideInInspector] public bool isScary; // informacja o tym, że postać jest Straszna
     [HideInInspector] public bool isScared = true; // informacja o tym, że postać jest przestraszona
+    [HideInInspector] public bool Brave; // informacja o tym, czy postać posiada zdolność Odwaga
+    [HideInInspector] public bool MagicSense; // informacja o tym, czy postać posiada zdolność Zmysł Magii (+10 splatanie)
+    [HideInInspector] public bool StrongBlow; // informacja o tym, czy postać posiada zdolność Silny Cios (+1 obr.)
+    [HideInInspector] public bool PrecisionShot; // informacja o tym, czy postać posiada zdolność Strzał Precyzyjny (+1 obr.)
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
     [HideInInspector] public int attacksLeft; // ilość ataków pozostałych do wykonania w danej rundzie
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy życie postaci jest poniżej 0
@@ -51,8 +56,11 @@ public class Stats : MonoBehaviour
     [HideInInspector] public int aimingBonus; // premia za przycelowanie
 
     [Header("Broń")]
-    public int Weapon_S; // Siła broni dystansowej
+    public bool distanceFight;
+    public int Weapon_S; // Siła broni
+    public int DistanceWeapon_S; // Siła broni dystansowej
     public double AttackRange;
+    public double DistanceAttackRange = 15;
     public int reloadTime = 1;
     public int reloadLeft;
     public bool Ciezki;
@@ -72,8 +80,9 @@ public class Stats : MonoBehaviour
     public int Spell_S = 3; // siła zaklęcia
     public int PowerRequired = 6; // wymagany poziom mocy zaklęcia ofensywnego
     public double SpellRange = 8; // zasięg zaklęcia
-    public double AreaSize = 1; // wielkość obszaru objętego działaniem zaklęcia
+    public int AreaSize; // wielkość obszaru objętego działaniem zaklęcia
     public int CastDuration = 1; // czas rzucania zaklęcia
+    public int CastDurationLeft;
     [HideInInspector] public bool OffensiveSpell; // określa, czy zaklęcie jest ofensywne (może byc rzucane tylko na przeciwników)
     public bool IgnoreArmor; // Określa, czy zaklęcie ofensywne ignoruje pancerz
     [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru
@@ -138,13 +147,18 @@ public class Stats : MonoBehaviour
         else if (rollPP >= 8)
             PP = 3;
 
-        // ustawienie bazowego zasiegu broni (bron do walki w zwarciu lub łuk) i sily broni (dystansowa)
-        Weapon_S = 3;
+        // ustawienie bazowego zasiegu broni (bron do walki w zwarciu lub łuk)   
         int rollWeaponType = Random.Range(1, 11);
         if (rollWeaponType <= 7)
+        {
+            distanceFight = false;
             AttackRange = 1.5;
+        }
         else
-            AttackRange = 15;
+        {
+            distanceFight = true;
+            AttackRange = DistanceAttackRange;
+        }
 
         if (rasa == Character.Rasa.Elf)
         {
@@ -164,6 +178,7 @@ public class Stats : MonoBehaviour
             Sz = 3;
             if(PP != 3)
                 PP--;
+            Brave = true;
         }
         else if (rasa == Character.Rasa.Niziołek)
         {
@@ -253,52 +268,9 @@ public class Stats : MonoBehaviour
         tempHealth = maxHealth;
         tempSz = Sz;
         attacksLeft = A;
-    }
-    #endregion
-
-    #region Reset parry and dodge function
-    public void ResetParryAndDodge()
-    {
-        canParry = true;
-        if (Dodge > 0) //sprawdzenie czy postac posiada zdolnosc Unik
-            canDodge = true;
-    }
-    #endregion
-
-    #region Get critical hit function
-    public void GetCriticalHit()
-    {
-        int criticalValue = Random.Range(1, 101);
-
-        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Żywotność spadła poniżej 0.</color> Wynik rzutu na obrażenia krytyczne: <color=red>{criticalValue}</color>", 6f);
-        Debug.Log("Żywotność spadła poniżej 0. Wynik rzutu na obrażenia krytyczne: " + criticalValue);
-        criticalCondition = true;
-    }
-    #endregion
-
-    #region Zarzadzanie akcjami postaci
-    public void ResetActionsNumber()
-    {
-        actionsLeft = 2;
-        attacksLeft = A;
-    }
-
-    public void TakeAction() // wykonanie akcji
-    {
-        if (!GameManager.StandardMode)
-            return;
-
-        actionsLeft--;
-        Debug.Log($"{this.gameObject.name} wykonał akcję pojedynczą. Pozostała {actionsLeft} akcja w tej rundzie.");
-    }
-
-    public void TakeDoubleAction() // wykonanie akcji podwójnej
-    {
-        if (!GameManager.StandardMode)
-            return;
-
-        actionsLeft = 0;
-        Debug.Log($"{this.gameObject.name} wykonał akcję podwójną. Pozostało {actionsLeft} akcji w tej rundzie.");
+        CastDurationLeft = CastDuration;
+        Weapon_S = S;
+        DistanceWeapon_S = 3;
     }
     #endregion
 }

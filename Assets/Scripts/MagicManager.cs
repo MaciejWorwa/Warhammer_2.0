@@ -7,9 +7,9 @@ using System.Linq;
 public class MagicManager : MonoBehaviour
 {
     private int powerLevelBonus;
-    private GameObject wizard;
 
     private MessageManager messageManager;
+    private CharacterManager characterManager;
 
     public static bool targetSelecting;
     public static GameObject target;
@@ -20,16 +20,26 @@ public class MagicManager : MonoBehaviour
     {
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
         messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+
+        characterManager = GameObject.Find("CharacterManager").GetComponent<CharacterManager>();
     }
 
     // Splatanie magii
     public void ChannelingMagic()
     {
-        wizard = Character.selectedCharacter;
+        GameObject character = Character.selectedCharacter;
+        Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
 
-        if (wizard.GetComponent<Stats>().actionsLeft > 0)
-            wizard.GetComponent<Stats>().TakeAction();
-        else
+        if(charStats.ChannelingMagic == 0)
+        {
+            messageManager.ShowMessage($"<color=red>Postać nie potrafi splatać magii.</color>", 3f);
+            Debug.Log($"Postać nie potrafi splatać magii.");
+            return;
+        }
+
+        if (charStats.actionsLeft > 0)
+            characterManager.TakeAction(charStats);
+        else if (GameManager.StandardMode)
         {
             messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
             Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
@@ -37,10 +47,15 @@ public class MagicManager : MonoBehaviour
         }
 
         int rollResult = Random.Range(1, 101);
+        int bonus = 0;
+        if (charStats.MagicSense == true)
+            bonus = 10;
+        for (int i = 0; i < charStats.ChannelingMagic; i++)
+            bonus += i * 10;
 
-        if (wizard.GetComponent<Stats>().SW >= rollResult)
+        if (charStats.SW + bonus >= rollResult)
         {
-            powerLevelBonus += wizard.GetComponent<Stats>().Mag;
+            powerLevelBonus += charStats.Mag;
             messageManager.ShowMessage($"Wynik rzutu: {rollResult}. Splatanie magii zakończone sukcesem.", 4f);
             Debug.Log($"Wynik rzutu: {rollResult}. Splatanie magii zakończone sukcesem.");
         }
@@ -60,14 +75,15 @@ public class MagicManager : MonoBehaviour
         int powerLevel = 0;
 
         // Ustalenie kto rzuca zaklęcie
-        wizard = Character.selectedCharacter;
+        GameObject character = Character.selectedCharacter;
+        Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
 
         // Lista i słownik wszystkich wyników rzutów, potrzebne do sprawdzenia wystąpienia manifestacji chaosu
         List<int> allRollResults = new List<int>();
         Dictionary<int, int> doubletCount = new Dictionary<int, int>();
 
         // Rzuty na poziom mocy w zależności od wartości Magii
-        for (int i = 0; i < wizard.GetComponent<Stats>().Mag; i++)
+        for (int i = 0; i < charStats.Mag; i++)
         {
             int rollResult = Random.Range(1, 11);
             allRollResults.Add(rollResult);
@@ -137,26 +153,46 @@ public class MagicManager : MonoBehaviour
     public void HealingSpell(GameObject target)
     {
         GameObject character = Character.selectedCharacter;
+        Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
 
-        if (character.GetComponent<Stats>().actionsLeft >= character.GetComponent<Stats>().CastDuration)
-            character.GetComponent<Stats>().TakeAction();
-        else
+        if (charStats.CastDurationLeft == 1 && charStats.actionsLeft > 0 || charStats.CastDurationLeft > 1 && charStats.actionsLeft == 1)
+        {
+            characterManager.TakeAction(charStats);
+            charStats.CastDurationLeft--;
+        }
+        else if (charStats.CastDurationLeft > 1 && charStats.actionsLeft == 2)
+        {
+            characterManager.TakeDoubleAction(charStats);
+            charStats.CastDurationLeft -= 2;
+        }
+        else if (GameManager.StandardMode && charStats.actionsLeft == 0)
         {
             messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
             Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
             return;
         }
 
+        // Jeżeli nie skończył rzucać zaklęcia w tej rundzie to akcja jest przerywana
+        if (charStats.CastDurationLeft > 0 && GameManager.StandardMode)
+        {
+            messageManager.ShowMessage($"Pozostała/y {charStats.CastDurationLeft} akcja/e aby rzucić zaklęcie.", 4f);
+            Debug.Log($"Pozostała/y {charStats.CastDurationLeft} akcja/e aby rzucić zaklęcie.");
+            return;
+        }
+
+        // Zresetowanie czasu rzucania zaklęcia
+        charStats.CastDurationLeft = charStats.CastDuration;
+
         int powerLevel = PowerLevelRoll();
 
-        if(powerLevel < character.GetComponent<Stats>().PowerRequired)
+        if(powerLevel < charStats.PowerRequired)
         {
             messageManager.ShowMessage($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>", 6f);
             Debug.Log($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>");
             return;
         }
         else
-            powerLevel = (Random.Range(1,11) + character.GetComponent<Stats>().Mag);
+            powerLevel = (Random.Range(1,11) + charStats.Mag);
         
         // Leczy punkty życia 
         target.GetComponent<Stats>().tempHealth += powerLevel;
@@ -164,8 +200,8 @@ public class MagicManager : MonoBehaviour
         if (target.GetComponent<Stats>().tempHealth > target.GetComponent<Stats>().maxHealth)
             target.GetComponent<Stats>().tempHealth = target.GetComponent<Stats>().maxHealth;
 
-        messageManager.ShowMessage($"<color=#00FF9A>{character.GetComponent<Stats>().Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>", 6f);
-        Debug.Log($"<color=#00FF9A>{character.GetComponent<Stats>().Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>");
+        messageManager.ShowMessage($"<color=#00FF9A>{charStats.Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>", 6f);
+        Debug.Log($"<color=#00FF9A>{charStats.Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>");
 
     }
     #endregion
@@ -174,69 +210,113 @@ public class MagicManager : MonoBehaviour
     public void GetMagicDamage(GameObject target)
     {
         GameObject character = Character.selectedCharacter;
+        Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
+        string targetName = target.GetComponent<Stats>().Name;
 
-        if (character.GetComponent<Stats>().actionsLeft >= character.GetComponent<Stats>().CastDuration)
-            character.GetComponent<Stats>().TakeAction();
-        else
+        if (charStats.CastDurationLeft == 1 && charStats.actionsLeft > 0 || charStats.CastDurationLeft > 1 && charStats.actionsLeft == 1)
+        {
+            characterManager.TakeAction(charStats);
+            charStats.CastDurationLeft--;
+        }
+        else if (charStats.CastDurationLeft > 1 && charStats.actionsLeft == 2)
+        {
+            characterManager.TakeDoubleAction(charStats);
+            charStats.CastDurationLeft -= 2;
+        }
+        else if (GameManager.StandardMode && charStats.actionsLeft == 0)
         {
             messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
             Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
             return;
         }
 
-        double range = character.GetComponent<Stats>().SpellRange;
+        // Jeżeli nie skończył rzucać zaklęcia w tej rundzie to akcja jest przerywana
+        if (charStats.CastDurationLeft > 0 && GameManager.StandardMode)
+        {
+            messageManager.ShowMessage($"Pozostała/y {charStats.CastDurationLeft} akcja/e aby rzucić zaklęcie.", 4f);
+            Debug.Log($"Pozostała/y {charStats.CastDurationLeft} akcja/e aby rzucić zaklęcie.");
+            return;
+        }
 
-        if(range < Vector3.Distance(character.transform.position, target.transform.position))
+        double range = charStats.SpellRange;
+
+        if (range < Vector3.Distance(character.transform.position, target.transform.position))
         {
             messageManager.ShowMessage($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>", 3f);
             Debug.Log($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>");
             return;
         }
 
+        // Zresetowanie czasu rzucania zaklęcia
+        charStats.CastDurationLeft = charStats.CastDuration;
+
         int powerLevel = PowerLevelRoll();
 
-        if(powerLevel < character.GetComponent<Stats>().PowerRequired)
+        if (powerLevel < charStats.PowerRequired)
         {
             messageManager.ShowMessage($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>", 6f);
             Debug.Log($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>");
             return;
         }
 
-        int rollResult = Random.Range(1,11);
-        int damage = character.GetComponent<Stats>().Spell_S + rollResult;
-        double areaSize = character.GetComponent<Stats>().AreaSize;
-        int castDuration = character.GetComponent<Stats>().CastDuration;
+        int rollResult = Random.Range(1, 11);
+        int damage = charStats.Spell_S + rollResult;
+        double areaSize = charStats.AreaSize;
 
         int armor = GameObject.Find("AttackManager").GetComponent<AttackManager>().CheckAttackLocalization(target.GetComponent<Stats>());
 
-        messageManager.ShowMessage($"<color=#00FF9A>{character.GetComponent<Stats>().Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
-        Debug.Log($"{character.GetComponent<Stats>().Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
+        messageManager.ShowMessage($"<color=#00FF9A>{charStats.Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
+        Debug.Log($"{charStats.Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
+     
 
-        if(!character.GetComponent<Stats>().IgnoreArmor && damage > (target.GetComponent<Stats>().Wt + armor))
+        if (areaSize > 0)
         {
-            target.GetComponent<Stats>().tempHealth -= (damage - (target.GetComponent<Stats>().Wt + armor));
+            Collider2D[] allTargets = Physics2D.OverlapCircleAll(target.transform.position, (float)areaSize);
 
-            messageManager.ShowMessage(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.", 8f);
-            Debug.Log(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt + armor) + " obrażeń.");
+            foreach (var tar in allTargets)
+            {
+                if (tar.gameObject.CompareTag("Player") || tar.gameObject.CompareTag("Enemy"))
+                {
+                    Stats targetStats = tar.gameObject.GetComponent<Stats>();
+                    int damageReduction = targetStats.Wt + (charStats.IgnoreArmor ? 0 : armor);
 
-            messageManager.ShowMessage($"<color=red> Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
-            Debug.Log($"Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
-        }
-        else if (character.GetComponent<Stats>().IgnoreArmor && damage > target.GetComponent<Stats>().Wt)
-        {
-            target.GetComponent<Stats>().tempHealth -= (damage - target.GetComponent<Stats>().Wt);
+                    if (damage > damageReduction)
+                    {
+                        targetStats.tempHealth -= (damage - damageReduction);
+                        messageManager.ShowMessage($"{targetStats.Name} znegował {damageReduction} obrażeń.", 8f);
+                        Debug.Log($"{targetStats.Name} znegował {damageReduction} obrażeń.");
+                    }
+                    else
+                    {
+                        messageManager.ShowMessage($"Atak {charStats.Name} nie przebił się przez pancerz.", 6f);
+                        Debug.Log($"Atak {charStats.Name} nie przebił się przez pancerz.");
+                    }
 
-            messageManager.ShowMessage(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt) + " obrażeń.", 8f);
-            Debug.Log(target.GetComponent<Stats>().Name + " znegował " + (target.GetComponent<Stats>().Wt) + " obrażeń.");
-
-            messageManager.ShowMessage($"<color=red> Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}</color>", 8f);
-            Debug.Log($"Punkty życia {target.GetComponent<Stats>().Name}: {target.GetComponent<Stats>().tempHealth}/{target.GetComponent<Stats>().maxHealth}");
+                    messageManager.ShowMessage($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}", 8f);
+                    Debug.Log($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}");
+                }
+            }
         }
         else
         {
-            messageManager.ShowMessage($"Atak <color=red>{character.GetComponent<Stats>().Name}</color> nie przebił się przez pancerz.", 6f);
-            Debug.Log($"Atak {character.GetComponent<Stats>().Name} nie przebił się przez pancerz.");
-        }   
+            Stats targetStats = target.GetComponent<Stats>();
+            int damageReduction = targetStats.Wt + (charStats.IgnoreArmor ? 0 : armor);
+
+            if (damage > damageReduction)
+            {
+                targetStats.tempHealth -= (damage - damageReduction);
+                messageManager.ShowMessage($"{targetName} znegował {damageReduction} obrażeń.", 8f);
+                Debug.Log($"{targetName} znegował {damageReduction} obrażeń.");
+            }
+            else
+            {
+                messageManager.ShowMessage($"Atak {charStats.Name} nie przebił się przez pancerz.", 6f);
+                Debug.Log($"Atak {charStats.Name} nie przebił się przez pancerz.");
+            }
+
+            messageManager.ShowMessage($"Punkty życia {targetName}: {targetStats.tempHealth}/{targetStats.maxHealth}", 8f);
+            Debug.Log($"Punkty życia {targetName}: {targetStats.tempHealth}/{targetStats.maxHealth}");
+        }
     }
     #endregion
 
@@ -246,8 +326,8 @@ public class MagicManager : MonoBehaviour
         Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
 
         if (charStats.actionsLeft > 0)
-            charStats.TakeAction();
-        else
+            characterManager.TakeAction(charStats);
+        else if (GameManager.StandardMode)
         {
             messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
             Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");

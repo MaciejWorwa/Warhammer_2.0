@@ -18,6 +18,7 @@ public class AttackManager : MonoBehaviour
 
     private GameObject[] aimButtons; // przyciski celowania zarowno bohatera gracza jak i wroga
 
+    private CharacterManager characterManager;
     private MessageManager messageManager;
     private MovementManager movementManager;
 
@@ -30,6 +31,9 @@ public class AttackManager : MonoBehaviour
 
         // Odniesienie do Menadzera Ruchu
         movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
+
+        // Odniesienie do menadżera postaci
+        characterManager = GameObject.Find("CharacterManager").GetComponent<CharacterManager>();
     }
 
     #region Selecting target function
@@ -65,8 +69,8 @@ public class AttackManager : MonoBehaviour
         if (character.GetComponent<Stats>().reloadLeft > 0)
         {
             if (character.GetComponent<Stats>().actionsLeft > 0)
-                character.GetComponent<Stats>().TakeAction();
-            else
+                characterManager.TakeAction(character.GetComponent<Stats>());
+            else if (GameManager.StandardMode)
             {
                 messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
                 Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
@@ -125,9 +129,25 @@ public class AttackManager : MonoBehaviour
                 // sprawdza czy atak jest atakiem dystansowym
                 if (attackDistance > 1.5f)
                 {
+                    attackerStats.distanceFight = true;
+
                     // sprawdza czy bron jest naladowana
                     if (attackerStats.reloadLeft == 0)
                     {
+                        // Sprawdza, czy na linii strzału znajduje się przeszkoda
+                        RaycastHit2D[] raycastHits = Physics2D.RaycastAll(attacker.transform.position, target.transform.position - attacker.transform.position, attackDistance);
+
+                        foreach(var raycastHit in raycastHits)
+                        {
+                            if (raycastHit.collider != null && raycastHit.collider.CompareTag("Tree"))
+                            {
+                                messageManager.ShowMessage($"<color=red>Na linii strzału znajduje się przeszkoda.</color>", 3f);
+                                Debug.Log("Na linii strzału znajduje się przeszkoda.");
+                                return;
+                            }
+                        }
+
+
                         hit = wynik <= attackerStats.US + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                         if (attackBonus > 0 || defensiveBonus > 0)
@@ -158,6 +178,8 @@ public class AttackManager : MonoBehaviour
                 // sprawdza czy atak jest atakiem w zwarciu
                 if (attackDistance <= 1.5f)
                 {
+                    attackerStats.distanceFight = false;
+
                     hit = wynik <= attackerStats.WW + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
                     if (attackBonus > 0 || defensiveBonus > 0)
@@ -273,9 +295,9 @@ public class AttackManager : MonoBehaviour
                     }
 
                     if (attackDistance <= 1.5f)
-                        damage = rollResult + attackerStats.S;
+                        damage = attackerStats.StrongBlow ? rollResult + attackerStats.Weapon_S + 1 : rollResult + attackerStats.Weapon_S;
                     else
-                        damage = rollResult + attackerStats.Weapon_S;
+                        damage = attackerStats.PrecisionShot ? rollResult + attackerStats.DistanceWeapon_S + 1 : rollResult + attackerStats.DistanceWeapon_S;
 
                     messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
                     Debug.Log($"{attackerStats.Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
@@ -319,7 +341,7 @@ public class AttackManager : MonoBehaviour
                     if (canTakeAction)
                     {
                         attackerStats.attacksLeft--;
-                        attackerStats.TakeAction();
+                        characterManager.TakeAction(attackerStats);
                     }
                     else if (canTakeDoubleAction)
                     {
@@ -327,9 +349,9 @@ public class AttackManager : MonoBehaviour
 
                         attackerStats.attacksLeft--;
                         if (attackerStats.attacksLeft == 0)
-                            attackerStats.TakeDoubleAction();
+                            characterManager.TakeDoubleAction(attackerStats);
                     }
-                    else
+                    else if (GameManager.StandardMode)
                     {
                         messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
                         Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
@@ -450,8 +472,8 @@ public class AttackManager : MonoBehaviour
         if (character.GetComponent<Stats>().defensiveBonus == 0)
         {
             if (character.GetComponent<Stats>().actionsLeft == 2)
-                character.GetComponent<Stats>().TakeDoubleAction();
-            else
+                characterManager.TakeDoubleAction(character.GetComponent<Stats>());
+            else if (GameManager.StandardMode)
             {
                 messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
                 Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
@@ -480,8 +502,8 @@ public class AttackManager : MonoBehaviour
         if (character.GetComponent<Stats>().aimingBonus == 0)
         {
             if (character.GetComponent<Stats>().actionsLeft > 0)
-                character.GetComponent<Stats>().TakeAction();
-            else
+                characterManager.TakeAction(character.GetComponent<Stats>());
+            else if (GameManager.StandardMode)
             {
                 messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
                 Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
@@ -630,7 +652,7 @@ public class AttackManager : MonoBehaviour
     {
         Stats attackerStats = attacker.GetComponent<Stats>();
 
-        if (attackerStats.actionsLeft < 2)
+        if (attackerStats.actionsLeft < 2 && GameManager.StandardMode)
         {
             messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
             Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");

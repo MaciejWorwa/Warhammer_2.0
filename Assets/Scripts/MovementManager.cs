@@ -16,6 +16,7 @@ public class MovementManager : MonoBehaviour
 
     private GridManager grid;
 
+    private CharacterManager characterManager;
     private MessageManager messageManager;
 
     void Start()
@@ -25,6 +26,9 @@ public class MovementManager : MonoBehaviour
 
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
         messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+
+        // Odniesienie do menadżera postaci
+        characterManager = GameObject.Find("CharacterManager").GetComponent<CharacterManager>();
     }
 
     public void ResetChargeAndRun()
@@ -127,8 +131,8 @@ public class MovementManager : MonoBehaviour
                 if(Run || Charge)
                 {
                     if(character.GetComponent<Stats>().actionsLeft == 2)
-                        character.GetComponent<Stats>().TakeDoubleAction();
-                    else
+                        characterManager.TakeDoubleAction(character.GetComponent<Stats>());
+                    else if (GameManager.StandardMode)
                     {
                         messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
                         Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
@@ -136,8 +140,8 @@ public class MovementManager : MonoBehaviour
                     }
                 }
                 else if (character.GetComponent<Stats>().actionsLeft > 0)
-                    character.GetComponent<Stats>().TakeAction();
-                else
+                    characterManager.TakeAction(character.GetComponent<Stats>());
+                else if (GameManager.StandardMode)
                 {
                     messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
                     Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");

@@ -325,6 +325,7 @@ public class SaveSystem : MonoBehaviour
     }
     #endregion
 
+    #region Check for empty saves dropdown
     public void CheckForEmptySavesDropdown(GameObject LoadGameConfirmPanel)
     {
         if (savedFilesDropdown.GetComponent<TMP_Dropdown>().options.Count == 0)
@@ -341,4 +342,5 @@ public class SaveSystem : MonoBehaviour
             Debug.Log($"Nie wybrano pliku.");
         }
     }
+    #endregion
 }

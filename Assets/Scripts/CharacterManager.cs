@@ -127,11 +127,23 @@ public class CharacterManager : MonoBehaviour
             return;
         }
 
+        // Zmniejszenie przezroczystosci przycisku tworzenia postaci
+        if (tag == "Player")
+            GameObject.Find("CreatePlayerButton").GetComponent<Image>().color = new Color(1 / 2.55f, 1f, 1 / 2.55f, 0.5f);
+        else if (tag == "Enemy")
+            GameObject.Find("CreateEnemyButton").GetComponent<Image>().color = new Color(1f, 1 / 2.55f, 1 / 2.55f, 0.5f);
+
         Debug.Log("Wybierz pole na którym chcesz postawić postać.");
     }
 
     public void CreateNewCharacter(string characterTag, string characterName, Vector2 position)
     {
+        // Zresetowanie koloru przycisku tworzenia postaci
+        if (characterTag == "Player")
+            GameObject.Find("CreatePlayerButton").GetComponent<Image>().color = new Color(1 / 2.55f, 1f, 1 / 2.55f, 1f);
+        else if (characterTag == "Enemy")
+            GameObject.Find("CreateEnemyButton").GetComponent<Image>().color = new Color(1f, 1 / 2.55f, 1 / 2.55f, 1f);
+
         // Liczba dostępnych pól
         int availableTiles = GridManager.width * GridManager.height; // wymiary planszy
 
@@ -265,9 +277,16 @@ public class CharacterManager : MonoBehaviour
 
         foreach (var player in allPlayers)
         {
-            int rollResult = UnityEngine.Random.Range(1, 101);
+             
+            if (!player.GetComponent<Stats>().isScared)
+                continue;
 
-            if (rollResult > player.GetComponent<Stats>().SW && player.GetComponent<Stats>().isScared)
+            int rollResult = UnityEngine.Random.Range(1, 101);
+            int bonus = 0;
+            if (player.GetComponent<Stats>().Brave == true)
+                bonus = 10;
+
+            if (rollResult > (player.GetComponent<Stats>().SW + bonus))
             {
                 player.GetComponent<Stats>().actionsLeft = 0;
                 player.GetComponent<Stats>().isScared = true;
@@ -275,11 +294,60 @@ public class CharacterManager : MonoBehaviour
                 GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>{player.GetComponent<Stats>().Name} nie zdał testu strachu. Wynik rzutu: {rollResult}</color>", 5f);
                 Debug.Log($"{player.GetComponent<Stats>().Name} nie zdał testu strachu. Wynik rzutu: {rollResult}");
             }
-            else
+            else if (rollResult <= (player.GetComponent<Stats>().SW + bonus))
             {
                 player.GetComponent<Stats>().isScared = false;
+                GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=green>{player.GetComponent<Stats>().Name} zdał test strachu. Wynik rzutu: {rollResult}</color>", 5f);
+                Debug.Log($"{player.GetComponent<Stats>().Name} zdał test strachu. Wynik rzutu: {rollResult}");
             }
         }
+    }
+    #endregion
+
+    #region Get critical hit function
+    public void GetCriticalHit(Stats character)
+    {
+        character.criticalCondition = true;
+
+        int criticalValue = UnityEngine.Random.Range(1, 101);
+
+        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Żywotność spadła poniżej 0.</color> Wynik rzutu na obrażenia krytyczne: <color=red>{criticalValue}</color>", 6f);
+        Debug.Log("Żywotność spadła poniżej 0. Wynik rzutu na obrażenia krytyczne: " + criticalValue);    
+    }
+    #endregion
+
+    #region Reset parry and dodge function
+    public void ResetParryAndDodge(Stats charStats)
+    {
+        charStats.canParry = true;
+        if (charStats.Dodge > 0) //sprawdzenie czy postac posiada zdolnosc Unik
+            charStats.canDodge = true;
+    }
+    #endregion
+
+    #region Zarzadzanie akcjami postaci
+    public void ResetActionsNumber(Stats charStats)
+    {
+        charStats.actionsLeft = 2;
+        charStats.attacksLeft = charStats.A;
+    }
+
+    public void TakeAction(Stats charStats) // wykonanie akcji
+    {
+        if (!GameManager.StandardMode)
+            return;
+
+        charStats.actionsLeft--;
+        Debug.Log($"{charStats.gameObject.name} wykonał akcję pojedynczą. Pozostała {charStats.actionsLeft} akcja w tej rundzie.");
+    }
+
+    public void TakeDoubleAction(Stats charStats) // wykonanie akcji podwójnej
+    {
+        if (!GameManager.StandardMode)
+            return;
+
+        charStats.actionsLeft = 0;
+        Debug.Log($"{charStats.gameObject.name} wykonał akcję podwójną. Pozostało {charStats.actionsLeft} akcji w tej rundzie.");
     }
     #endregion
 }

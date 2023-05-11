@@ -143,7 +143,7 @@ public class GridManager : MonoBehaviour
 
     public void AddObstacle(Vector3 position, string tag, bool loadGame)
     {
-        position.z = 1;
+        position.z = 0;
 
         if(loadGame)
         {
@@ -155,7 +155,6 @@ public class GridManager : MonoBehaviour
             return;
         }
 
-
         Collider2D collider = Physics2D.OverlapCircle(position, 0.1f);
         if (collider != null && collider.gameObject.tag == "Tile")
         {
@@ -165,7 +164,7 @@ public class GridManager : MonoBehaviour
                 Instantiate(rockPrefab, position, Quaternion.identity).AddComponent<Obstacle>(); 
         }
         else
-            Debug.Log("Nie moge tu postawic przeszkody.");
+            Debug.Log("W tym miejscu nie mo¿na postawiæ przeszkody.");
     }
 
     public void RemoveObstacle()

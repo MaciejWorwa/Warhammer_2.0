@@ -62,8 +62,25 @@ public class AutoCombat : MonoBehaviour
 
             float distance = Vector3.Distance(closestOpponent.transform.position, character.transform.position);
 
+            bool canShoot = true; // określa, czy postać może wykonać atak dystansowy (nie ma wysokich przeszkód między walczącymi)
+
+            // W przypadku ataku dystansowego sprawdza, czy na linii strzału znajduje się przeszkoda
+            if (distance > 1.5f)
+            {
+                RaycastHit2D[] raycastHits = Physics2D.RaycastAll(character.transform.position, closestOpponent.transform.position - character.transform.position, distance);
+
+                foreach (var raycastHit in raycastHits)
+                {
+                    if (raycastHit.collider != null && raycastHit.collider.CompareTag("Tree"))
+                    {
+                        canShoot = false;
+                        break;
+                    }
+                }
+            }
+
             // Jesli rywal jest w zasiegu ataku to wykonuje atak
-            if (character.GetComponent<Stats>().AttackRange >= distance)
+            if (character.GetComponent<Stats>().AttackRange >= distance && canShoot)
             {
                 // Przekazuje informacje o atakujacym i ilosci atakow, ktore moze wykonac w jednej rundzie
                 AutomaticAttack(character, closestOpponent, character.GetComponent<Stats>().A);
@@ -147,7 +164,7 @@ public class AutoCombat : MonoBehaviour
         if(distance > 1.5f)
         {
             // Jezeli postać ma błyskawiczne przeładowanie i czas ładowania to akcja to wykonuje tyle strzałów ile wynosi ilość ataków postaci
-            if(character.GetComponent<Stats>().reloadTime == 1 && character.GetComponent<Stats>().instantReload == true)
+            if (character.GetComponent<Stats>().reloadTime == 1 && character.GetComponent<Stats>().instantReload == true)
             {
                 for (int i = 0; i < attacksAmount; i++)
                 {

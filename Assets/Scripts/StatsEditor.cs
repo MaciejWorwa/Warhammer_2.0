@@ -124,14 +124,16 @@ public class StatsEditor : MonoBehaviour
                         (int.TryParse(textInput.GetComponent<TMP_InputField>().text, out int tempValue) ? tempValue : 0) :
                         (int)textInput.GetComponent<Slider>().value;
 
-            if (value <= 0)
+            if (value <= 0 && textInput.name != "Weapon_S" && textInput.name != "DistanceWeapon_S" && textInput.name != "Dodge" && textInput.name != "ChannelingMagic")
             {
                 value = 0;
-                if(textInput.name != "A" && textInput.name != "tempHealth")
+                if(textInput.name != "A" && textInput.name != "tempHealth" && textInput.name != "AreaSize")
                     textInput.GetComponent<TMP_InputField>().text = "0";
                 else if (textInput.name == "A")
                     textInput.GetComponent<TMP_InputField>().text = "1";
             }
+            if(textInput.name == "CastDuration")
+                character.GetComponent<Stats>().CastDurationLeft = value;
 
             field.SetValue(character.GetComponent<Stats>(), value);
             Debug.Log($"Atrybut {field.Name} zmieniony na {value}");
@@ -166,6 +168,8 @@ public class StatsEditor : MonoBehaviour
 
         if (character.GetComponent<Stats>().A > 1)
             character.GetComponent<Stats>().attacksLeft = character.GetComponent<Stats>().A;
+
+        LoadAttributes();
     }
     #endregion
 
@@ -251,20 +255,22 @@ public class StatsEditor : MonoBehaviour
 
         if (button.name == "melee_attack_button")
         {
+            charStats.distanceFight = false;
             charStats.AttackRange = 1.5f;
-            charStats.Weapon_S = charStats.S;
             GameObject.Find("distance_attack_button").GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
         }
         if (button.name == "distance_attack_button")
         {
-            charStats.AttackRange = 15f;
-            charStats.Weapon_S = 3;
+            charStats.distanceFight = true;
+            charStats.AttackRange = charStats.DistanceAttackRange;
             GameObject.Find("melee_attack_button").GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
         }
 
         // Odświeżenie buttonów akcji
         GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
         GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, true);
+
+        LoadAttributes();
     }
     #endregion
 }

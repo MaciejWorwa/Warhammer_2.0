@@ -45,7 +45,7 @@ namespace DebugStuff
             //if (!Application.isEditor) //Do not display in editor ( or you can use the UNITY_EDITOR macro to also disable the rest)
             if (!doShow) { return; }
             {
-                float consoleWidth = Screen.width * 0.45f; // szerokość okna konsoli
+                float consoleWidth = Screen.width * 0.55f; // szerokość okna konsoli
                 float consoleHeight = Screen.height * (slider.value / 10f); // wysokość okna konsoli
                 float consolePosX = (Screen.width - consoleWidth) / 2f; // pozycja X okna konsoli
                 float consolePosY = Screen.height - consoleHeight; // pozycja Y okna konsoli

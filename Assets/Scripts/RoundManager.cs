@@ -14,10 +14,15 @@ public class RoundManager : MonoBehaviour
     [SerializeField] private TMP_Text roundNumberDisplay;
     [SerializeField] private TMP_Text nextRoundButtonText;
 
+    private CharacterManager characterManager;
+
     void Start()
     {
         roundNumber = 0;
         autoCombat = autoCombat.gameObject.GetComponent<AutoCombat>();
+
+        // Odniesienie do menadżera postaci
+        characterManager = GameObject.Find("CharacterManager").GetComponent<CharacterManager>();
     }
 
     void Update()
@@ -59,8 +64,8 @@ public class RoundManager : MonoBehaviour
         //przywracanie parowania i/lub uników każdej postaci wraz z nową rundą
         foreach (Stats obj in allObjectsWithStats)
         {
-            obj.GetComponent<Stats>().ResetParryAndDodge();
-            obj.GetComponent<Stats>().ResetActionsNumber();
+            characterManager.ResetParryAndDodge(obj.GetComponent<Stats>());
+            characterManager.ResetActionsNumber(obj.GetComponent<Stats>());
 
             if (obj.isScary)
                 scaryEnemyExist = true;
@@ -77,7 +82,4 @@ public class RoundManager : MonoBehaviour
     {
         Character.selectedCharacter.GetComponent<Stats>().actionsLeft = 0;
     }
-
-
-
 }

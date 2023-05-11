@@ -43,12 +43,17 @@ public class GameData
 
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
-    public int Dodge; // informacja o tym, czy postać posiada zdolność uniku
+    [HideInInspector] public int Dodge; // poziom umiejętności uniku
+    [HideInInspector] public int ChannelingMagic; // poziom umiejętności splatania magii
     public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
     [HideInInspector] public bool isScary; // informacja o tym, że postać jest Straszna
     [HideInInspector] public bool isScared; // informacja o tym, że postać jest przestraszona
+    [HideInInspector] public bool Brave; // informacja o tym, czy postać posiada zdolność Odwaga
+    [HideInInspector] public bool MagicSense; // informacja o tym, czy postać posiada zdolność Zmysł Magii
+    [HideInInspector] public bool StrongBlow; // informacja o tym, czy postać posiada zdolność Silny Cios (+1 obr.)
+    [HideInInspector] public bool PrecisionShot; // informacja o tym, czy postać posiada zdolność Strzał Precyzyjny (+1 obr.)
     [HideInInspector] public int actionsLeft = 2; // akcje do wykorzystania w aktualnej rundzie walki
     [HideInInspector] public int attacksLeft; // ilość ataków pozostałych do wykonania w danej rundzie
     [HideInInspector] public bool criticalCondition = false; // sprawdza czy życie postaci jest poniżej 0
@@ -56,9 +61,12 @@ public class GameData
     [HideInInspector] public int defensiveBonus; // premia za pozycje obronna
     [HideInInspector] public int aimingBonus; // premia za przycelowanie
 
-    [Header("Bro�")]
-    public int Weapon_S;
+    [Header("Broń")]
+    public bool distanceFight;
+    public int Weapon_S; // Siła broni
+    public int DistanceWeapon_S; // Siła broni dystansowej
     public double AttackRange;
+    public double DistanceAttackRange = 15;
     public int reloadTime = 1;
     public int reloadLeft;
     public bool Ciezki;
@@ -78,8 +86,9 @@ public class GameData
     public int Spell_S;
     public int PowerRequired;
     public double SpellRange;
-    public double AreaSize;
+    public int AreaSize;
     public int CastDuration;
+    public int CastDurationLeft;
     public bool OffensiveSpell;
     public bool IgnoreArmor;
     [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru

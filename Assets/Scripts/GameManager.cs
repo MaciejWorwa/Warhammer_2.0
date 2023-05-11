@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,12 +15,17 @@ public class GameManager : MonoBehaviour
     public static bool ManualMode;
     public static bool AutoMode;
 
+    public static float MusicVolume = 1;
+
     void Start()
     {
-
+        Camera.main.GetComponent<AudioSource>().volume = MusicVolume;
         StandardMode = true;
         ManualMode = false;
         AutoMode = false;
+
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+            GameObject.Find("SliderVolume").GetComponent<Slider>().value = MusicVolume;
 
         if(SceneManager.GetActiveScene().buildIndex == 1)
         {
@@ -127,5 +133,16 @@ public class GameManager : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    public void SetSliderValue(Slider slider)
+    {
+        slider.value = MusicVolume;
+    }
+
+    public void ChangeMusicVolume(Slider slider)
+    {
+        MusicVolume = slider.value;
+        Camera.main.GetComponent<AudioSource>().volume = slider.value;
     }
 }
