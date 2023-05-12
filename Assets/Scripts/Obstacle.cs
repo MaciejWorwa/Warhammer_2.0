@@ -6,6 +6,6 @@ public class Obstacle : MonoBehaviour
 {
     void Awake()
     {
-        DontDestroyOnLoad(this.gameObject); // nie niszczyæ podczas zmiany sceny
+        DontDestroyOnLoad(this.gameObject); // nie niszczyÄ‡ podczas zmiany sceny
     }
 }

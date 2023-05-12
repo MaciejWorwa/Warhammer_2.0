@@ -251,6 +251,15 @@ public class StatsEditor : MonoBehaviour
     {
         Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
 
+        if (charStats.actionsLeft > 0 && !charStats.QuickDraw)
+            GameObject.Find("CharacterManager").GetComponent<CharacterManager>().TakeAction(charStats);
+        else if (GameManager.StandardMode && !charStats.QuickDraw)
+        {
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+            Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+            return;
+        }
+
         button.GetComponent<Image>().color = new Color(0f, 1f, 0f, 0.5f);
 
         if (button.name == "melee_attack_button")

@@ -26,7 +26,7 @@ public class MessageManager : MonoBehaviour
         TMP_Text message = Instantiate(messagePrefab, messagePrefab.transform.position, Quaternion.identity);
         allMessages.Add(message);
 
-        // Ustala pozycje nowo powstalej wiadomosci i przypisuje ja do glownego Canvasa oraz ustawia go jako dziecko z indexem 0, ¿eby by³ wartw¹ na samym dole
+        // Ustala pozycje nowo powstalej wiadomosci i przypisuje ja do glownego Canvasa oraz ustawia go jako dziecko z indexem 0, Å¼eby byÅ‚ wartwÄ… na samym dole
         message.gameObject.transform.SetParent(GameObject.FindGameObjectWithTag("MainCanvas").transform.transform);
         message.gameObject.transform.SetSiblingIndex(0);
 

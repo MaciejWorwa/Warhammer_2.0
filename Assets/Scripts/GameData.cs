@@ -11,7 +11,7 @@ public class GameData
     public int gridWidth;
     public int gridHeight;
 
-    [Header("Imi�")]
+    [Header("Imię")]
     public string Name;
 
     [Header("Rasa")]
@@ -20,7 +20,7 @@ public class GameData
     public int Level;
     public int Exp;
 
-    [Header("Cechy pierwszorz�dowe")]
+    [Header("Cechy pierwszorzędowe")]
     public int WW;
     public int US;
     public int K;
@@ -30,7 +30,7 @@ public class GameData
     public int SW;
     public int Ogd;
 
-    [Header("Cechy drugorz�dowe")]
+    [Header("Cechy drugorzędowe")]
     public int A;
     public int S;
     public int Wt;
@@ -46,6 +46,7 @@ public class GameData
     [HideInInspector] public int Dodge; // poziom umiejętności uniku
     [HideInInspector] public int ChannelingMagic; // poziom umiejętności splatania magii
     public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
+    [HideInInspector] public bool QuickDraw; // informacja o tym, czy postac posiada zdolność szybkiego wyciągnięcia
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
     [HideInInspector] public bool isScary; // informacja o tym, że postać jest Straszna

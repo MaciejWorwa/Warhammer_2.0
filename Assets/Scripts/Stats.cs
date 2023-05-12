@@ -40,6 +40,7 @@ public class Stats : MonoBehaviour
     [HideInInspector] public int Dodge; // poziom umiejętności uniku
     [HideInInspector] public int ChannelingMagic; // poziom umiejętności splatania magii
     [HideInInspector] public bool instantReload; // informacja o tym, czy postać posiada zdolność blyskawicznego przeladowania
+    [HideInInspector] public bool QuickDraw; // informacja o tym, czy postac posiada zdolność szybkiego wyciągnięcia
     [HideInInspector] public bool canParry = true; // informacja o tym, czy postac może parować atak
     [HideInInspector] public bool canDodge; // informacja o tym, czy postac może unikać ataku
     [HideInInspector] public bool isScary; // informacja o tym, że postać jest Straszna

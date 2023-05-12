@@ -46,14 +46,14 @@ public class GridManager : MonoBehaviour
 
     public void ChangeGridSize()
     {
-        // Ustala szerokoœæ i wysokoœæ w zale¿noœci od wartoœci Sliderów
+        // Ustala szerokoÅ›Ä‡ i wysokoÅ›Ä‡ w zaleÅ¼noÅ›ci od wartoÅ›ci SliderÃ³w
         width = (int)sliderX.value; 
         height = (int)sliderY.value;
 
         szerokosc = width;
         wysokosc = height;
 
-        // Generuje now¹ siatkê ze zmienionymi wartoœciami
+        // Generuje nowÄ… siatkÄ™ ze zmienionymi wartoÅ›ciami
         GenerateGrid();
 
         // Usuwa przeszkody poza obszarem siatki
@@ -123,7 +123,7 @@ public class GridManager : MonoBehaviour
             GameObject.Find("AddTreeButton").GetComponent<Image>().color = newColor;
         }
 
-        // Zresetowanie funkji i przycisku usuwania przeszkód
+        // Zresetowanie funkji i przycisku usuwania przeszkÃ³d
         obstacleRemoving = false;
         GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color = new Color(1f, 0.398f, 0.392f, 1f);
     }
@@ -164,19 +164,19 @@ public class GridManager : MonoBehaviour
                 Instantiate(rockPrefab, position, Quaternion.identity).AddComponent<Obstacle>(); 
         }
         else
-            Debug.Log("W tym miejscu nie mo¿na postawiæ przeszkody.");
+            Debug.Log("W tym miejscu nie moÅ¼na postawiÄ‡ przeszkody.");
     }
 
     public void RemoveObstacle()
     {
-        // Usuwa klikniêt¹ przeszkodê
+        // Usuwa klikniÄ™tÄ… przeszkodÄ™
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         if (hit.collider != null && (hit.collider.CompareTag("Tree") || hit.collider.CompareTag("Rock")))
         {
             Destroy(hit.collider.gameObject);
         }
 
-        // Usuwa wszystkie przeszkody poza siatk¹ bitewn¹
+        // Usuwa wszystkie przeszkody poza siatkÄ… bitewnÄ…
         Obstacle[] obstacles = FindObjectsOfType<Obstacle>();
         for (int i = 0; i < obstacles.Length; i++)
         {
