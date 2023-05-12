@@ -35,7 +35,7 @@ public class RoundManager : MonoBehaviour
         else
         {
             roundNumberDisplay.text = "Runda: " + roundNumber;
-            nextRoundButtonText.text = "Next";
+            nextRoundButtonText.text = "+";
         }
     }
 

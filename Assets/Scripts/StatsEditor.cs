@@ -275,6 +275,9 @@ public class StatsEditor : MonoBehaviour
             GameObject.Find("melee_attack_button").GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
         }
 
+        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"{charStats.Name} zmienił/a broń", 3f);
+        Debug.Log($"{charStats.Name} zmienił/a broń");
+
         // Odświeżenie buttonów akcji
         GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, false);
         GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, true);

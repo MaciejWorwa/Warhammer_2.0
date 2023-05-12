@@ -86,7 +86,7 @@ public class Character : MonoBehaviour
  
         if (charStats.tempHealth < 0 && charStats.criticalCondition == false)
         {
-            characterManager.GetCriticalHit(this.gameObject.GetComponent<Stats>());
+            characterManager.GetCriticalHit(charStats);
         }
     }
 

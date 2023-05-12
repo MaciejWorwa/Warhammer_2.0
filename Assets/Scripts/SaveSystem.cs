@@ -11,6 +11,7 @@ public class SaveSystem : MonoBehaviour
 {
     [SerializeField] TMP_Dropdown savedFilesDropdown; // Dropdown z wszystkimi savami
     private static string dropdownText = "";
+    public static bool LoadOnlyCharacters;
 
     #region Save functions
     public void SaveAllCharactersStats()
@@ -110,8 +111,13 @@ public class SaveSystem : MonoBehaviour
 
 
     #region Load all characters stats
-    public void LoadAllCharactersStats()
+    public void LoadAllCharactersStats(bool loadOnlyCharacters)
     {
+        if (loadOnlyCharacters == true)
+            LoadOnlyCharacters = true;
+        else
+            LoadOnlyCharacters = false;
+
         if (savedFilesDropdown.GetComponent<TMP_Dropdown>().options.Count == 0)
             return;
 
@@ -176,14 +182,16 @@ public class SaveSystem : MonoBehaviour
 
         string[] tagsToSave = { "Tree", "Rock" };
 
+        if (!LoadOnlyCharacters)
+        {
+            // Usunięcie wszystkich obecnych przeszkód
+            GameObject[] rocks = GameObject.FindGameObjectsWithTag("Rock");
+            GameObject[] trees = GameObject.FindGameObjectsWithTag("Tree");
+            GameObject[] obstacles = rocks.Concat(trees).ToArray();
 
-        // Usunięcie wszystkich obecnych przeszkód
-        GameObject[] rocks = GameObject.FindGameObjectsWithTag("Rock");
-        GameObject[] trees = GameObject.FindGameObjectsWithTag("Tree");
-        GameObject[] obstacles = rocks.Concat(trees).ToArray();
-
-        foreach (GameObject obstacle in obstacles)
-            Destroy(obstacle);
+            foreach (GameObject obstacle in obstacles)
+                Destroy(obstacle);
+        }
 
         // Opóźniam wczytanie statystyk, bo program nie jest w stanie zrobić tego natychmiastowo. Cały kod, który tu był przeniosłem do metody LoadWithDelay
         Invoke("LoadWithDelay", 0.01f);   
@@ -193,6 +201,8 @@ public class SaveSystem : MonoBehaviour
     #region Load with delay
     void LoadWithDelay()
     {
+        Debug.Log("poczatek load and delay");
+
         GameData data = null;
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
@@ -262,23 +272,25 @@ public class SaveSystem : MonoBehaviour
             }
         }
 
-        RoundManager.roundNumber = data.NumberOfRounds;
-        GridManager.width = data.gridWidth;
-        GridManager.height = data.gridHeight;
-        GameObject.Find("Grid").GetComponent<GridManager>().GenerateGrid();
-
-        // Wczytanie przeszkód (skał i drzew)
-        if (data.obstaclePositions != null)
+        if (!LoadOnlyCharacters)
         {
-            // Tworzymy obiekty na podstawie wczytanych danych
-            for (int i = 0; i < data.obstaclePositions.Count; i++)
-            {
-                Vector3 position = new Vector3(data.obstaclePositions[i][0], data.obstaclePositions[i][1], data.obstaclePositions[i][2]);
+            RoundManager.roundNumber = data.NumberOfRounds;
+            GridManager.width = data.gridWidth;
+            GridManager.height = data.gridHeight;
+            GameObject.Find("Grid").GetComponent<GridManager>().GenerateGrid();
 
-                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(position, data.tags[i], true);
+            // Wczytanie przeszkód (skał i drzew)
+            if (data.obstaclePositions != null)
+            {
+                // Tworzymy obiekty na podstawie wczytanych danych
+                for (int i = 0; i < data.obstaclePositions.Count; i++)
+                {
+                    Vector3 position = new Vector3(data.obstaclePositions[i][0], data.obstaclePositions[i][1], data.obstaclePositions[i][2]);
+
+                    GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(position, data.tags[i], true);
+                }
             }
         }
-
 
         GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=green>Wczytano stan gry.</color>", 3f);
         Debug.Log($"<color=green>Wczytano stan gry.</color>");
