@@ -50,7 +50,7 @@ public class ExpManager : MonoBehaviour
 
         // Ustawia poziom postaci
         stats.Level = level;
-        Debug.Log($"Poziom postaci {stats.Name}: {level}");
+        //Debug.Log($"Poziom postaci {stats.Name}: {level}");
     }
 
 
@@ -98,13 +98,13 @@ public class ExpManager : MonoBehaviour
         if(((targetStats.Level - attackerStats.Level + 20) /2) > 0)
         {
             attackerStats.Exp += (targetStats.Level - attackerStats.Level + 20) /2;
-            messageManager.ShowMessage($"<color=#D82FDE>{attackerStats.Name} zdobył {(targetStats.Level - attackerStats.Level + 20) / 2} punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.</color>", 5f);
-            Debug.Log($"<color=#D82FDE>{attackerStats.Name} zdobył {(targetStats.Level - attackerStats.Level + 20) /2} punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.</color>");
+            //messageManager.ShowMessage($"<color=#D82FDE>{attackerStats.Name} zdobył {(targetStats.Level - attackerStats.Level + 20) / 2} punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.</color>", 5f);
+            //Debug.Log($"<color=#D82FDE>{attackerStats.Name} zdobył {(targetStats.Level - attackerStats.Level + 20) /2} punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.</color>");
         }
         else
         {
-            messageManager.ShowMessage($"{attackerStats.Name} zdobył 0 punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.", 5f);
-            Debug.Log($"{attackerStats.Name} zdobył 0 punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.");
+            //messageManager.ShowMessage($"{attackerStats.Name} zdobył 0 punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.", 5f);
+            //Debug.Log($"{attackerStats.Name} zdobył 0 punktów doświadczenia. Posiada łącznie {attackerStats.Exp}.");
         }
     }
 

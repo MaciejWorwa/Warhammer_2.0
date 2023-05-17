@@ -125,7 +125,7 @@ public class MovementManager : MonoBehaviour
             List<Vector3> path = FindPath(startCharPos, selectedTilePos, movementRange);
 
             // Sprawdza czy wybrane pole jest w zasiegu ruchu postaci. Warunek ten nie jest konieczny w przypadku automatycznej walki, dlatego dochodzi drugi warunek.
-            if (path.Count > 0 && path.Count <= movementRange|| GameManager.AutoMode && path.Count > 0)
+            if (path.Count > 0 && (path.Count <= movementRange|| GameManager.AutoMode))
             {
 
                 if(Run || Charge)

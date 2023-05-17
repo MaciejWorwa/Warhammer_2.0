@@ -12,6 +12,7 @@ TagManager:
   - MainCanvas
   - Tree
   - Rock
+  - Wall
   layers:
   - Default
   - TransparentFX

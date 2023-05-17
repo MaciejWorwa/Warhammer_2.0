@@ -22,15 +22,18 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private GameObject rockPrefab;
     [SerializeField] private GameObject treePrefab;
+    [SerializeField] private GameObject wallPrefab;
 
     public static bool treeAdding;
     public static bool rockAdding;
+    public static bool wallAdding;
     public static bool obstacleRemoving;
 
     void Start()
     {
         treeAdding = false;
         rockAdding = false;
+        wallAdding = false;
         obstacleRemoving = false;
 
         GenerateGrid();
@@ -111,16 +114,29 @@ public class GridManager : MonoBehaviour
         {
             treeAdding = true;
             rockAdding = false;
+            wallAdding = false;
             newColor.a = 1f;
             GameObject.Find("AddRockButton").GetComponent<Image>().color = newColor;
+            GameObject.Find("AddWallButton").GetComponent<Image>().color = newColor;
 
         }
         else if (button.name == "AddRockButton")
         {
             rockAdding = true;
             treeAdding = false;
+            wallAdding = false;
             newColor.a = 1f;
             GameObject.Find("AddTreeButton").GetComponent<Image>().color = newColor;
+            GameObject.Find("AddWallButton").GetComponent<Image>().color = newColor;
+        }
+        else if (button.name == "AddWallButton")
+        {
+            wallAdding = true;
+            rockAdding = false;
+            treeAdding = false;
+            newColor.a = 1f;
+            GameObject.Find("AddTreeButton").GetComponent<Image>().color = newColor;
+            GameObject.Find("AddRockButton").GetComponent<Image>().color = newColor;
         }
 
         // Zresetowanie funkji i przycisku usuwania przeszkód
@@ -139,29 +155,23 @@ public class GridManager : MonoBehaviour
         rockAdding = false;
         GameObject.Find("AddRockButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
         GameObject.Find("AddTreeButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
+        GameObject.Find("AddWallButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
     }
 
     public void AddObstacle(Vector3 position, string tag, bool loadGame)
     {
         position.z = 0;
 
-        if(loadGame)
+        Collider2D collider = Physics2D.OverlapCircle(position, 0.1f);
+
+        if (loadGame || collider != null && collider.gameObject.tag == "Tile")
         {
             if (tag == "Tree")
                 Instantiate(treePrefab, position, Quaternion.identity).AddComponent<Obstacle>();
             else if (tag == "Rock")
                 Instantiate(rockPrefab, position, Quaternion.identity).AddComponent<Obstacle>();
-
-            return;
-        }
-
-        Collider2D collider = Physics2D.OverlapCircle(position, 0.1f);
-        if (collider != null && collider.gameObject.tag == "Tile")
-        {
-            if (tag == "Tree")
-                Instantiate(treePrefab, position, Quaternion.identity).AddComponent<Obstacle>();
-            else if (tag == "Rock")
-                Instantiate(rockPrefab, position, Quaternion.identity).AddComponent<Obstacle>(); 
+            else if (tag == "Wall")
+                Instantiate(wallPrefab, position, Quaternion.identity).AddComponent<Obstacle>();
         }
         else
             Debug.Log("W tym miejscu nie można postawić przeszkody.");
@@ -171,7 +181,7 @@ public class GridManager : MonoBehaviour
     {
         // Usuwa klikniętą przeszkodę
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-        if (hit.collider != null && (hit.collider.CompareTag("Tree") || hit.collider.CompareTag("Rock")))
+        if (hit.collider != null && (hit.collider.CompareTag("Tree") || hit.collider.CompareTag("Rock") || hit.collider.CompareTag("Wall")))
         {
             Destroy(hit.collider.gameObject);
         }

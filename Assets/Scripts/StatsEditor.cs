@@ -234,7 +234,10 @@ public class StatsEditor : MonoBehaviour
         if (character.CompareTag("Player"))
                 character.GetComponent<Character>().rasa = (Character.Rasa)rasaDropdown.value;
         else if (character.CompareTag("Enemy"))
+        {
+            character.GetComponent<Stats>().isScary = false;
             character.GetComponent<Character>().rasa = (Character.Rasa)rasaDropdown.value + 4;
+        }
 
         character.GetComponent<Stats>().SetBaseStatsByRace(character.GetComponent<Character>().rasa);
 

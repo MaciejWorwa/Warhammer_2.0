@@ -58,10 +58,8 @@ public class RoundManager : MonoBehaviour
 
         Stats[] allObjectsWithStats = FindObjectsOfType<Stats>();
 
-        // Ilość Enemies z cechą Straszny
         bool scaryEnemyExist = false;
 
-        //przywracanie parowania i/lub uników każdej postaci wraz z nową rundą
         foreach (Stats obj in allObjectsWithStats)
         {
             characterManager.ResetParryAndDodge(obj.GetComponent<Stats>());
@@ -81,5 +79,7 @@ public class RoundManager : MonoBehaviour
     public void EndSelectedCharacterTurn()
     {
         Character.selectedCharacter.GetComponent<Stats>().actionsLeft = 0;
+        AttackManager.targetSelecting = false;
+        MagicManager.targetSelecting = false;
     }
 }

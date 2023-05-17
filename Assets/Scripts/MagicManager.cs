@@ -15,6 +15,8 @@ public class MagicManager : MonoBehaviour
     public static GameObject target;
 
     [SerializeField] private GameObject etherArmorButton;
+    // Lista wszystkich pol w zasiegu dzialania zaklecia
+    [HideInInspector] public List<GameObject> tilesInSpellRange = new List<GameObject>();
 
     void Start()
     {
@@ -155,6 +157,38 @@ public class MagicManager : MonoBehaviour
         GameObject character = Character.selectedCharacter;
         Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
 
+        List<Collider2D> allTargets = new List<Collider2D>();
+
+        if (charStats.AreaSize > 0)
+            allTargets = Physics2D.OverlapCircleAll(target.transform.position, charStats.AreaSize).ToList();
+        else
+            allTargets = Physics2D.OverlapCircleAll(target.transform.position, 0.1f).ToList();
+
+        // Usuwa wszystkie collidery, które nie moga być celami zaklęcia
+        for (int i = allTargets.Count - 1; i >= 0; i--)
+        {
+            if (!allTargets[i].gameObject.CompareTag(character.tag))
+            {
+                allTargets.RemoveAt(i);
+            }
+        }
+
+        if (allTargets.Count == 0)
+        {
+            messageManager.ShowMessage($"<color=red>W obszarze działania zaklęcia musi znaleźć się jakaś postać.</color>", 4f);
+            Debug.Log($"W obszarze działania zaklęcia musi znaleźć się jakaś postać.");
+            return;
+        }
+
+        double range = charStats.SpellRange;
+
+        if (range < Vector3.Distance(character.transform.position, target.transform.position))
+        {
+            messageManager.ShowMessage($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>", 3f);
+            Debug.Log($"Cel jest poza zasięgiem zaklęcia.");
+            return;
+        }
+
         if (charStats.CastDurationLeft == 1 && charStats.actionsLeft > 0 || charStats.CastDurationLeft > 1 && charStats.actionsLeft == 1)
         {
             characterManager.TakeAction(charStats);
@@ -188,21 +222,25 @@ public class MagicManager : MonoBehaviour
         if(powerLevel < charStats.PowerRequired)
         {
             messageManager.ShowMessage($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>", 6f);
-            Debug.Log($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>");
+            Debug.Log($"Nie udało się uzyskać wystarczającego poziomu mocy.");
             return;
         }
-        else
-            powerLevel = (Random.Range(1,11) + charStats.Mag);
-        
-        // Leczy punkty życia 
-        target.GetComponent<Stats>().tempHealth += powerLevel;
-        // Zapobiega wyleczeniu ponad maksymalne punkty życia
-        if (target.GetComponent<Stats>().tempHealth > target.GetComponent<Stats>().maxHealth)
-            target.GetComponent<Stats>().tempHealth = target.GetComponent<Stats>().maxHealth;
 
-        messageManager.ShowMessage($"<color=#00FF9A>{charStats.Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>", 6f);
-        Debug.Log($"<color=#00FF9A>{charStats.Name} wyleczył {powerLevel} punktów życia dla {target.GetComponent<Stats>().Name}</color>");
+        foreach (var tar in allTargets)
+        {
+            powerLevel = (Random.Range(1, 11) + charStats.Mag);
 
+            Stats targetStats = tar.gameObject.GetComponent<Stats>();
+
+            // Leczy punkty życia 
+            targetStats.tempHealth += powerLevel;
+            // Zapobiega wyleczeniu ponad maksymalne punkty życia
+            if (targetStats.tempHealth > targetStats.maxHealth)
+                targetStats.tempHealth = targetStats.maxHealth;
+
+            messageManager.ShowMessage($"<color=#00FF9A>{charStats.Name} wyleczył {powerLevel} punktów życia dla {targetStats.Name}</color>", 6f);
+            Debug.Log($"{charStats.Name} wyleczył {powerLevel} punktów życia dla {targetStats.Name}");
+        }
     }
     #endregion
 
@@ -211,7 +249,38 @@ public class MagicManager : MonoBehaviour
     {
         GameObject character = Character.selectedCharacter;
         Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
-        string targetName = target.GetComponent<Stats>().Name;
+
+        List<Collider2D> allTargets = new List<Collider2D>();
+
+        if (charStats.AreaSize > 0)
+            allTargets = Physics2D.OverlapCircleAll(target.transform.position, charStats.AreaSize).ToList();
+        else
+            allTargets = Physics2D.OverlapCircleAll(target.transform.position, 0.1f).ToList();
+
+        // Usuwa wszystkie collidery, które nie moga być celami zaklęcia
+        for(int i = allTargets.Count - 1; i >= 0; i--)
+        {
+            if (!allTargets[i].gameObject.CompareTag("Player") && !allTargets[i].gameObject.CompareTag("Enemy") || allTargets[i].gameObject == character)
+            {
+                allTargets.RemoveAt(i);
+            }
+        }
+
+        if (allTargets.Count == 0)
+        {
+            messageManager.ShowMessage($"<color=red>W obszarze działania zaklęcia musi znaleźć się jakaś postać.</color>", 4f);
+            Debug.Log($"W obszarze działania zaklęcia musi znaleźć się jakaś postać.");
+            return;
+        }
+
+        double range = charStats.SpellRange;
+
+        if (range < Vector3.Distance(character.transform.position, target.transform.position))
+        {
+            messageManager.ShowMessage($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>", 3f);
+            Debug.Log($"Cel jest poza zasięgiem zaklęcia.");
+            return;
+        }
 
         if (charStats.CastDurationLeft == 1 && charStats.actionsLeft > 0 || charStats.CastDurationLeft > 1 && charStats.actionsLeft == 1)
         {
@@ -238,15 +307,6 @@ public class MagicManager : MonoBehaviour
             return;
         }
 
-        double range = charStats.SpellRange;
-
-        if (range < Vector3.Distance(character.transform.position, target.transform.position))
-        {
-            messageManager.ShowMessage($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>", 3f);
-            Debug.Log($"<color=red>Cel jest poza zasięgiem zaklęcia.</color>");
-            return;
-        }
-
         // Zresetowanie czasu rzucania zaklęcia
         charStats.CastDurationLeft = charStats.CastDuration;
 
@@ -255,58 +315,33 @@ public class MagicManager : MonoBehaviour
         if (powerLevel < charStats.PowerRequired)
         {
             messageManager.ShowMessage($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>", 6f);
-            Debug.Log($"<color=red>Nie udało się uzyskać wystarczającego poziomu mocy.</color>");
+            Debug.Log($"Nie udało się uzyskać wystarczającego poziomu mocy.");
             return;
         }
 
         int rollResult = Random.Range(1, 11);
         int damage = charStats.Spell_S + rollResult;
-        double areaSize = charStats.AreaSize;
 
-        int armor = GameObject.Find("AttackManager").GetComponent<AttackManager>().CheckAttackLocalization(target.GetComponent<Stats>());
-
-        messageManager.ShowMessage($"<color=#00FF9A>{charStats.Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
-        Debug.Log($"{charStats.Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
-     
-
-        if (areaSize > 0)
+        bool showDamage = true;
+        foreach (var tar in allTargets)
         {
-            Collider2D[] allTargets = Physics2D.OverlapCircleAll(target.transform.position, (float)areaSize);
 
-            foreach (var tar in allTargets)
+            if (showDamage)
             {
-                if (tar.gameObject.CompareTag("Player") || tar.gameObject.CompareTag("Enemy"))
-                {
-                    Stats targetStats = tar.gameObject.GetComponent<Stats>();
-                    int damageReduction = targetStats.Wt + (charStats.IgnoreArmor ? 0 : armor);
-
-                    if (damage > damageReduction)
-                    {
-                        targetStats.tempHealth -= (damage - damageReduction);
-                        messageManager.ShowMessage($"{targetStats.Name} znegował {damageReduction} obrażeń.", 8f);
-                        Debug.Log($"{targetStats.Name} znegował {damageReduction} obrażeń.");
-                    }
-                    else
-                    {
-                        messageManager.ShowMessage($"Atak {charStats.Name} nie przebił się przez pancerz.", 6f);
-                        Debug.Log($"Atak {charStats.Name} nie przebił się przez pancerz.");
-                    }
-
-                    messageManager.ShowMessage($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}", 8f);
-                    Debug.Log($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}");
-                }
+                messageManager.ShowMessage($"<color=#00FF9A>{charStats.Name}</color> wyrzucił {rollResult} i zadał <color=#00FF9A>{damage} obrażeń.</color>", 8f);
+                Debug.Log($"{charStats.Name} wyrzucił {rollResult} i zadał {damage} obrażeń.");
             }
-        }
-        else
-        {
-            Stats targetStats = target.GetComponent<Stats>();
+            showDamage= false;
+              
+            Stats targetStats = tar.gameObject.GetComponent<Stats>();
+            int armor = GameObject.Find("AttackManager").GetComponent<AttackManager>().CheckAttackLocalization(targetStats);
             int damageReduction = targetStats.Wt + (charStats.IgnoreArmor ? 0 : armor);
 
             if (damage > damageReduction)
             {
                 targetStats.tempHealth -= (damage - damageReduction);
-                messageManager.ShowMessage($"{targetName} znegował {damageReduction} obrażeń.", 8f);
-                Debug.Log($"{targetName} znegował {damageReduction} obrażeń.");
+                messageManager.ShowMessage($"{targetStats.Name} znegował {damageReduction} obrażeń.", 8f);
+                Debug.Log($"{targetStats.Name} znegował {damageReduction} obrażeń.");
             }
             else
             {
@@ -314,8 +349,8 @@ public class MagicManager : MonoBehaviour
                 Debug.Log($"Atak {charStats.Name} nie przebił się przez pancerz.");
             }
 
-            messageManager.ShowMessage($"Punkty życia {targetName}: {targetStats.tempHealth}/{targetStats.maxHealth}", 8f);
-            Debug.Log($"Punkty życia {targetName}: {targetStats.tempHealth}/{targetStats.maxHealth}");
+            messageManager.ShowMessage($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}", 8f);
+            Debug.Log($"Punkty życia {targetStats.Name}: {targetStats.tempHealth}/{targetStats.maxHealth}");       
         }
     }
     #endregion
@@ -373,6 +408,48 @@ public class MagicManager : MonoBehaviour
 
         messageManager.ShowMessage($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>", 6f);
         Debug.Log($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>");
+    }
+    #endregion
+
+    #region Highlight tiles in spell range
+    // Zmienia kolor wszystkich pol w zasiegu dzialania zaklecia
+    public void HighlightTilesInSpellRange(GameObject tileUnderCursor)
+    {
+        ResetHighlightTilesInSpellRange();
+        tilesInSpellRange.Clear();
+
+        // Sprawdza zasieg ruchu postaci
+        int areaSize = Character.selectedCharacter.GetComponent<Stats>().AreaSize;
+
+        if (areaSize > 0)
+        {
+            Collider2D[] allTiles = Physics2D.OverlapCircleAll(tileUnderCursor.transform.position, areaSize);
+
+            foreach (var t in allTiles)
+            {
+                if (t != null && t.gameObject.tag == "Tile")
+                {
+                    tilesInSpellRange.Add(t.gameObject);
+                }
+            }
+        }
+
+        foreach (var tile in tilesInSpellRange)
+        {
+            // Zmienia kolor pola na highlightColor. Jesli pole juz jest podswietlone to przywraca domyslny kolor
+            if (tile.GetComponent<Tile>()._renderer.material.color != tile.GetComponent<Tile>().rangeColor)
+                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().rangeColor;
+        }
+    }
+
+    public void ResetHighlightTilesInSpellRange()
+    {
+        // Resetowanie koloru podświetlenia
+        foreach (var tile in tilesInSpellRange)
+        {
+            if (tile.GetComponent<Tile>()._renderer.material.color == tile.GetComponent<Tile>().rangeColor)
+                tile.GetComponent<Tile>()._renderer.material.color = tile.GetComponent<Tile>().normalColor;
+        }
     }
     #endregion
 }

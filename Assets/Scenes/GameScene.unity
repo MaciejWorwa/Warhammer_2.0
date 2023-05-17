@@ -2240,7 +2240,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -4.9999695}
+  m_AnchoredPosition: {x: 0, y: -5}
   m_SizeDelta: {x: -460, y: -330}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &91355051
@@ -6868,7 +6868,7 @@ MonoBehaviour:
       - m_Target: {fileID: 869205492}
         m_TargetAssemblyTypeName: AttackManager, Assembly-CSharp
         m_MethodName: SelectTarget
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -9373,14 +9373,14 @@ MonoBehaviour:
       - m_Target: {fileID: 869205492}
         m_TargetAssemblyTypeName: AttackManager, Assembly-CSharp
         m_MethodName: SelectTarget
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &376096193
 MonoBehaviour:
@@ -12747,7 +12747,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -4.9999695}
+  m_AnchoredPosition: {x: 0, y: -5}
   m_SizeDelta: {x: -440, y: -330}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &485027831
@@ -14252,7 +14252,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -4.9999695}
+  m_AnchoredPosition: {x: 0, y: -5}
   m_SizeDelta: {x: -460, y: -330}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &544770871
@@ -17859,14 +17859,14 @@ MonoBehaviour:
       - m_Target: {fileID: 869205492}
         m_TargetAssemblyTypeName: AttackManager, Assembly-CSharp
         m_MethodName: SelectTarget
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &673323836
 MonoBehaviour:
@@ -22483,6 +22483,42 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: DecreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 832171094}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: IncreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1294899341}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: IncreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 2077560913}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -34799,6 +34835,42 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: DecreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1294899341}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: IncreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 832171094}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: IncreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 2077560913}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1294899342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37981,6 +38053,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   etherArmorButton: {fileID: 500698467}
+  tilesInSpellRange: []
 --- !u!4 &1410638763
 Transform:
   m_ObjectHideFlags: 0
@@ -38399,6 +38472,7 @@ MonoBehaviour:
   sliderY: {fileID: 0}
   rockPrefab: {fileID: 2892476945766841829, guid: 3866322dff1665a44ad381b311574a61, type: 3}
   treePrefab: {fileID: 6364622524950083590, guid: 5b9e0c8be840cb049ba0264eee5b3144, type: 3}
+  wallPrefab: {fileID: 6364622524950083590, guid: 7cf5a56078f24f94680050a3a3bd3da6, type: 3}
 --- !u!4 &1438412471
 Transform:
   m_ObjectHideFlags: 0
@@ -39691,7 +39765,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -4.9999695}
+  m_AnchoredPosition: {x: 0, y: -5}
   m_SizeDelta: {x: -460, y: -330}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1479348099
@@ -53721,7 +53795,7 @@ MonoBehaviour:
       - m_Target: {fileID: 869205492}
         m_TargetAssemblyTypeName: AttackManager, Assembly-CSharp
         m_MethodName: SelectTarget
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -54061,7 +54135,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -4.9999695}
+  m_AnchoredPosition: {x: 0, y: -5}
   m_SizeDelta: {x: -460, y: -330}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2008764240
@@ -56154,6 +56228,42 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: DecreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 2077560913}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: IncreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 832171094}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1556588958}
+        m_TargetAssemblyTypeName: ButtonManager, Assembly-CSharp
+        m_MethodName: IncreaseButtonOpacity
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1294899341}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2077560914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56167,7 +56277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.39215684, g: 0.9061168, b: 1, a: 1}
+  m_Color: {r: 0.39215684, g: 0.9061168, b: 1, a: 0.47843137}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

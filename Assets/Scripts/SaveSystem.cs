@@ -109,7 +109,6 @@ public class SaveSystem : MonoBehaviour
     }
     #endregion
 
-
     #region Load all characters stats
     public void LoadAllCharactersStats(bool loadOnlyCharacters)
     {
@@ -180,17 +179,13 @@ public class SaveSystem : MonoBehaviour
         AttackManager.targetSelecting = false;
         MagicManager.targetSelecting = false;
 
-        string[] tagsToSave = { "Tree", "Rock" };
-
         if (!LoadOnlyCharacters)
         {
             // Usunięcie wszystkich obecnych przeszkód
-            GameObject[] rocks = GameObject.FindGameObjectsWithTag("Rock");
-            GameObject[] trees = GameObject.FindGameObjectsWithTag("Tree");
-            GameObject[] obstacles = rocks.Concat(trees).ToArray();
+            Obstacle[] obstacles = FindObjectsOfType<Obstacle>();
 
-            foreach (GameObject obstacle in obstacles)
-                Destroy(obstacle);
+            foreach (var obstacle in obstacles)
+                Destroy(obstacle.gameObject);
         }
 
         // Opóźniam wczytanie statystyk, bo program nie jest w stanie zrobić tego natychmiastowo. Cały kod, który tu był przeniosłem do metody LoadWithDelay

@@ -276,8 +276,7 @@ public class CharacterManager : MonoBehaviour
         GameObject[] allPlayers = GameObject.FindGameObjectsWithTag("Player");
 
         foreach (var player in allPlayers)
-        {
-             
+        {         
             if (!player.GetComponent<Stats>().isScared)
                 continue;
 

@@ -61,7 +61,7 @@ public class Stats : MonoBehaviour
     public int Weapon_S; // Siła broni
     public int DistanceWeapon_S; // Siła broni dystansowej
     public double AttackRange;
-    public double DistanceAttackRange = 15;
+    public double DistanceAttackRange = 12;
     public int reloadTime = 1;
     public int reloadLeft;
     public bool Ciezki;

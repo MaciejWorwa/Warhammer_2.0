@@ -41,6 +41,23 @@ public class ButtonManager : MonoBehaviour
         yield return new WaitForSeconds(time);
         selectedButton.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
     }
+
+    public void DecreaseButtonOpacity(Button button)
+    {
+        Color newColor = button.GetComponent<Image>().color;
+        newColor.a = 0.5f; // Ustawia nową wartość alpha
+
+        button.GetComponent<Image>().color = newColor; // Przypisuje zmieniony kolor z powrotem do komponentu Image
+    }
+
+    public void IncreaseButtonOpacity(Button button)
+    {
+        Color newColor = button.GetComponent<Image>().color;
+        newColor.a = 1f; // Ustawia nową wartość alpha
+
+        button.GetComponent<Image>().color = newColor; // Przypisuje zmieniony kolor z powrotem do komponentu Image
+    }
+
     #endregion
 
     #region Show or hide magic-related buttons function

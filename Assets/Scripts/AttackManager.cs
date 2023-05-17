@@ -38,14 +38,14 @@ public class AttackManager : MonoBehaviour
 
     #region Selecting target function
     // Wybor celu ataku
-    public void SelectTarget()
+    public void SelectTarget(bool spellTarget)
     {
         messageManager.ShowMessage("Wybierz cel, klikając na niego.", 3f);
         Debug.Log("Wybierz cel, klikając na niego.");
 
         targetSelecting = true;
         
-        if(GameObject.Find("SpellButtons/SpellButtonsCanvas") != null && GameObject.Find("SpellButtons/SpellButtonsCanvas").activeSelf)
+        if(spellTarget)
         {
             MagicManager.targetSelecting = true;
 
@@ -101,10 +101,10 @@ public class AttackManager : MonoBehaviour
         do
         {
             //uwzględnienie bonusu do WW zwiazanego z szarżą
-            if (MovementManager.Charge)          
-                chargeBonus = 10;                
-            else 
-                chargeBonus = 0;            
+            if (MovementManager.Charge)
+                chargeBonus = 10;
+            else
+                chargeBonus = 0;
 
             // Ustala bonus do trafienia (za szarżę i przycelowanie)
             attackBonus = attackerStats.aimingBonus + chargeBonus;
@@ -120,8 +120,8 @@ public class AttackManager : MonoBehaviour
             if (MovementManager.Charge)
                 attackDistance = 1.5f;
 
-            // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego
-            if (attackDistance <= attackerStats.AttackRange)
+            // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego (uwzględnia też długi zasięg w przypadku broni dystansowej)
+            if (attackDistance <= attackerStats.AttackRange || attackDistance <= attackerStats.AttackRange * 2 && attackerStats.AttackRange > 1.5f)
             {
                 int wynik = UnityEngine.Random.Range(1, 101);
                 bool hit = false;
@@ -139,21 +139,28 @@ public class AttackManager : MonoBehaviour
 
                         foreach(var raycastHit in raycastHits)
                         {
-                            if (raycastHit.collider != null && raycastHit.collider.CompareTag("Tree"))
+                            if (raycastHit.collider != null && (raycastHit.collider.CompareTag("Tree") || raycastHit.collider.CompareTag("Wall")))
                             {
                                 messageManager.ShowMessage($"<color=red>Na linii strzału znajduje się przeszkoda.</color>", 3f);
                                 Debug.Log("Na linii strzału znajduje się przeszkoda.");
                                 return;
                             }
+                            if (raycastHit.collider != null && raycastHit.collider.CompareTag("Rock") && Vector3.Distance(raycastHit.collider.gameObject.transform.position, target.transform.position) <= 1.5f)
+                            {
+                                Debug.Log("schowal sie za skala");
+                                defensiveBonus += 20;
+                            }
                         }
 
+                        // Sprawdza, czy strzał jest wykonywany na długi zasięg broni i jeśli tak to dodaje modyfikator -20
+                        attackBonus -= attackDistance > attackerStats.AttackRange ? 20 : 0;
 
                         hit = wynik <= attackerStats.US + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
-                        if (attackBonus > 0 || defensiveBonus > 0)
+                        if (attackBonus != 0 || defensiveBonus != 0)
                         {
-                            messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
-                            Debug.Log($"{attackerStats.Name} Rzut na US: {wynik}  Premia: {attackBonus - defensiveBonus}");
+                            messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik} Modyfikator: {attackBonus - defensiveBonus}", 6f);
+                            Debug.Log($"{attackerStats.Name} Rzut na US: {wynik} Modyfikator: {attackBonus - defensiveBonus}");
                         }
                         else
                         {
@@ -184,8 +191,8 @@ public class AttackManager : MonoBehaviour
 
                     if (attackBonus > 0 || defensiveBonus > 0)
                     {
-                        messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}", 6f);
-                        Debug.Log($"{attackerStats.Name} Rzut na WW: {wynik}  Premia: {attackBonus - defensiveBonus}");
+                        messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na WW: {wynik} Modyfikator: {attackBonus - defensiveBonus}", 6f);
+                        Debug.Log($"{attackerStats.Name} Rzut na WW: {wynik} Modyfikator: {attackBonus - defensiveBonus}");
                     }
                     else
                     {

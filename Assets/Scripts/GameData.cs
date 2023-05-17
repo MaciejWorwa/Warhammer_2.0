@@ -109,7 +109,7 @@ public class GameData
         gridHeight = GridManager.height;
 
        // INFORMACJE O PRZESZKODACH
-       string[] tagsToSave = {"Tree", "Rock"};
+       string[] tagsToSave = {"Tree", "Rock", "Wall"};
 
         // Pobieramy wszystkie obiekty o wybranych tagach
         List<GameObject> objectsToSave = new List<GameObject>();

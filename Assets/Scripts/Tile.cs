@@ -46,6 +46,10 @@ public class Tile : MonoBehaviour
             else
                 _renderer.material.color = rangeHighlightColor;
         }
+        if (MagicManager.targetSelecting && Character.selectedCharacter.GetComponent<Stats>().AreaSize > 0)
+        {
+            GameObject.Find("MagicManager").GetComponent<MagicManager>().HighlightTilesInSpellRange(this.gameObject);
+        }
     }
 
     void OnMouseExit()
@@ -70,6 +74,10 @@ public class Tile : MonoBehaviour
             {
                 GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Rock", false);
             }
+            else if (GridManager.wallAdding)
+            {
+                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Wall", false);
+            }
             return;
         }
 
@@ -78,6 +86,23 @@ public class Tile : MonoBehaviour
             GameObject.Find("CharacterManager").GetComponent<CharacterManager>().CreateNewCharacter(CharacterManager.characterTag, "", new Vector2 (this.transform.position.x, this.transform.position.y));
             CharacterManager.characterAdding = false;
             return;
+        }
+
+        if (MagicManager.targetSelecting == true && !GameManager.PanelIsOpen)
+        {
+            if (Character.selectedCharacter.GetComponent<Stats>().OffensiveSpell)
+                GameObject.Find("MagicManager").GetComponent<MagicManager>().GetMagicDamage(this.gameObject);
+            else
+                GameObject.Find("MagicManager").GetComponent<MagicManager>().HealingSpell(this.gameObject);
+
+            GameObject.Find("MagicManager").GetComponent<MagicManager>().ResetHighlightTilesInSpellRange();
+
+            // Resetuje tryb wyboru celu ataku
+            AttackManager.targetSelecting = false;
+            MagicManager.targetSelecting = false;
+
+            Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
+            Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
         }
 
         MovementManager movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
