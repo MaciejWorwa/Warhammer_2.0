@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     public static bool ManualMode;
     public static bool AutoMode;
 
-    public static float MusicVolume = 1;
+    public static float MusicVolume = 0.5f;
 
     void Start()
     {
@@ -114,6 +114,15 @@ public class GameManager : MonoBehaviour
         {
             ShowOrHideMainMenuPanel();
         }
+
+        //PRZEŁĄCZENIE MIEDZY TRYBEM PEŁNOEKRANOWYM A OKIENKOWYM
+        // Sprawdź, czy klawisz Ctrl jest wciśnięty
+        bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        // Sprawdź, czy klawisz Enter jest wciśnięty
+        bool enterPressed = Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter);
+        // Sprawdź, czy oba klawisze są wciśnięte jednocześnie
+        if (ctrlPressed && enterPressed)
+            Screen.fullScreen = !Screen.fullScreen ? true : false;
     }
 
     public void ShowOrHideMainMenuPanel()

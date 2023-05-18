@@ -10,6 +10,7 @@ public class MovementManager : MonoBehaviour
     public static bool canMove; // okresla czy postac moze wykonac ruch
     public static bool Charge; // szarza
     public static bool Run; //bieg
+    public static bool isMoving; // okresla, ze postac jest trakcie animacji ruchu
 
     // Lista wszystkich pol w zasiegu ruchu postaci
     [HideInInspector] public List<GameObject> tilesInMovementRange = new List<GameObject>();
@@ -22,6 +23,7 @@ public class MovementManager : MonoBehaviour
     void Start()
     {
         canMove = false;
+        isMoving = false;
         grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
@@ -128,7 +130,7 @@ public class MovementManager : MonoBehaviour
             if (path.Count > 0 && (path.Count <= movementRange|| GameManager.AutoMode))
             {
 
-                if(Run || Charge)
+                if (Run || Charge)
                 {
                     if(character.GetComponent<Stats>().actionsLeft == 2)
                         characterManager.TakeDoubleAction(character.GetComponent<Stats>());
@@ -148,26 +150,67 @@ public class MovementManager : MonoBehaviour
                     return;
                 }
 
+                // Odznacza postać na czas wykonywanania ruchu
+                if(!Charge)
+                {
+                    character.GetComponent<Character>().SelectOrDeselectCharacter(character);
+                    GameObject.Find("ActionsButtons").transform.Find("Canvas").gameObject.SetActive(false);
+                }
+
+                // Oznacza wybrane pole jako zajęte (gdyz troche potrwa, zanim postać tam dojdzie i gdyby nie zaznaczyć, to można na nie ruszyć inna postacią)
+                selectedTile.GetComponent<Tile>().isOccupied = true;
+
                 // Sprawdza, czy ruch spowoduje atak okazyjny
                 CheckForOpportunityAttack(character, selectedTilePos);
 
+                StartCoroutine(MoveCharacterWithDelay());
+
                 // Wykonuje pojedynczy ruch tyle razy ile wynosi zasieg ruchu postaci
-                for (int i = 0; i < movementRange; i++)
+                IEnumerator MoveCharacterWithDelay()
                 {
+                    for (int i = 0; i < movementRange; i++)
+                    {
+                        if (character.transform.position == selectedTilePos)
+                            break;
+
+                        Vector3 nextPos = path[i];
+                        nextPos.z = 0f;
+
+                        float elapsedTime = 0f;
+                        float duration = 0.2f; // Czas trwania interpolacji
+
+                        // W AUTOMODE MUSZE TO NA RAZIE WYŁĄCZYĆ, BO PRZECIWNICY SĄ ZABIJANI I USUWANI W TRAKCIE ANIMACJI I PRZEZ TO WYWALA NULL REFERENCE
+                        if (GameManager.AutoMode)
+                            duration = 0f;
+
+                        while (elapsedTime < duration)
+                        {
+                            isMoving = true;                        
+                            
+                            character.transform.position = Vector3.Lerp(character.transform.position, nextPos, elapsedTime / duration);
+                            elapsedTime += Time.deltaTime;
+                            yield return null; // Poczekaj na odświeżenie klatki animacji
+                        }
+
+                        character.transform.position = nextPos;
+                    }
 
                     if (character.transform.position == selectedTilePos)
-                        break;
+                    {
+                        // Ponownie zaznacza postać                           
+                        character.GetComponent<Character>().SelectOrDeselectCharacter(character);
 
-                    // Aktualizuje pozycję postaci po każdym ruchu
-                    // tempCharPos = character.transform.position;
-                    Vector3 nextPos = path[i];
-                    nextPos.z = 0f;
-                    character.transform.position = nextPos;
+                        if(Charge)
+                            character.GetComponent<Character>().SelectOrDeselectCharacter(character);                          
+
+                        isMoving = false;
+                    }
                 }
-
             }
             else
             {
+                GameObject.Find("ActionsButtons").transform.Find("Canvas").gameObject.SetActive(true);
+
                 messageManager.ShowMessage("<color=red>Wybrane pole jest poza zasięgiem ruchu postaci.</color>", 4f);
                 Debug.Log("Wybrane pole jest poza zasięgiem ruchu postaci.");
             }
@@ -175,11 +218,6 @@ public class MovementManager : MonoBehaviour
             // Zresetowanie koloru podswietlonych pol w zasiegu ruchu
             grid.ResetTileColors();
 
-            // Przywraca widocznosc przyciskow akcji postaci po wykonaniu ruchu i ewentualnie resetuje bieg oraz szarze
-            if (!GameManager.AutoMode)
-            {
-                GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(character, true);
-            }
             canMove = false;
             ResetChargeAndRun();
         }
@@ -262,8 +300,11 @@ public class MovementManager : MonoBehaviour
                 {
                     bool isTile = false;
 
-                    if (collider.gameObject.CompareTag("Tile"))
+                    if (collider.gameObject.CompareTag("Tile") && !collider.gameObject.GetComponent<Tile>().isOccupied)
+                    {
                         isTile = true;
+                    }
+
 
                     if (isTile)
                     {

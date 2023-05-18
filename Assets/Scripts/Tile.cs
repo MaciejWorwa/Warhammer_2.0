@@ -30,9 +30,12 @@ public class Tile : MonoBehaviour
 
     void Update()
     {
-        // Sprawdza czy na polu stoi jakas postac
-        Collider2D collider = Physics2D.OverlapCircle(transform.position, 0.1f, layer);
-        isOccupied = (collider != null) ? true : false;
+        if(!MovementManager.isMoving)
+        {
+            // Sprawdza czy na polu stoi jakas postac
+            Collider2D collider = Physics2D.OverlapCircle(transform.position, 0.1f, layer);
+            isOccupied = (collider != null) ? true : false;
+        }
     }
 
     void OnMouseEnter()
@@ -61,11 +64,14 @@ public class Tile : MonoBehaviour
             _renderer.material.color = rangeColor;
     }
 
-    void OnMouseDown()
+    void OnMouseUp()
     {
         // Jeżeli jesteśmy w kreatorze pola bitwy to funkcja OnMouseDown jest nieaktywna
         if (SceneManager.GetActiveScene().buildIndex == 0)
         {
+            if (GameManager.PanelIsOpen)
+                return;
+
             if (GridManager.treeAdding)
             {
                 GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Tree", false);
@@ -111,7 +117,11 @@ public class Tile : MonoBehaviour
         GameObject character = Character.selectedCharacter;
 
         // wywoluje akcje ruchu wewnatrz klasy MovementManager
-        if(character != null && !GameManager.PanelIsOpen && MovementManager.canMove)
+        if(character != null && !GameManager.PanelIsOpen && MovementManager.canMove && !isOccupied)
             movementManager.MoveSelectedCharacter(this.gameObject, character);    
+        else if (isOccupied)
+        {
+            Debug.Log("Wybrane pole jest zajęte.");
+        }
     }
 }

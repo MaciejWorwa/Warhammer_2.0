@@ -2,14 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class GridManager : MonoBehaviour
 {
     public static int width = 17;
     public static int height = 8;
-
-    public int szerokosc;
-    public int wysokosc;
 
     [SerializeField] private Tile tilePrefab;
 
@@ -19,6 +17,8 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private Slider sliderX;
     [SerializeField] private Slider sliderY;
+    [SerializeField] private TMP_Text widthDisplay;
+    [SerializeField] private TMP_Text heightDisplay;
 
     [SerializeField] private GameObject rockPrefab;
     [SerializeField] private GameObject treePrefab;
@@ -31,10 +31,21 @@ public class GridManager : MonoBehaviour
 
     void Start()
     {
-        treeAdding = false;
+        treeAdding = true;
         rockAdding = false;
         wallAdding = false;
         obstacleRemoving = false;
+
+        if (widthDisplay != null && heightDisplay != null)
+        {
+            widthDisplay.text = width.ToString();
+            heightDisplay.text = height.ToString();
+
+            int szerokosc = width;
+            int wysokosc = height;
+            sliderX.value = szerokosc;
+            sliderY.value = wysokosc;
+        }
 
         GenerateGrid();
     }
@@ -53,8 +64,8 @@ public class GridManager : MonoBehaviour
         width = (int)sliderX.value; 
         height = (int)sliderY.value;
 
-        szerokosc = width;
-        wysokosc = height;
+        widthDisplay.text = width.ToString();
+        heightDisplay.text = height.ToString();
 
         // Generuje nową siatkę ze zmienionymi wartościami
         GenerateGrid();
@@ -104,39 +115,25 @@ public class GridManager : MonoBehaviour
 
 
     #region Adding and removing obstacles
-    public void AddingObstacle(GameObject button)
+    public void AddingObstacle(TMP_Dropdown dropdown)
     {
-        Color newColor = button.GetComponent<Image>().color;
-        newColor.a = 0.5f;
-        button.GetComponent<Image>().color = newColor;
-
-        if (button.name == "AddTreeButton")
+        if (dropdown.value == 0) // drzewo
         {
             treeAdding = true;
             rockAdding = false;
             wallAdding = false;
-            newColor.a = 1f;
-            GameObject.Find("AddRockButton").GetComponent<Image>().color = newColor;
-            GameObject.Find("AddWallButton").GetComponent<Image>().color = newColor;
-
         }
-        else if (button.name == "AddRockButton")
+        else if (dropdown.value == 1) // skała
         {
             rockAdding = true;
             treeAdding = false;
             wallAdding = false;
-            newColor.a = 1f;
-            GameObject.Find("AddTreeButton").GetComponent<Image>().color = newColor;
-            GameObject.Find("AddWallButton").GetComponent<Image>().color = newColor;
         }
-        else if (button.name == "AddWallButton")
+        else if (dropdown.value == 2) // ściana
         {
             wallAdding = true;
             rockAdding = false;
             treeAdding = false;
-            newColor.a = 1f;
-            GameObject.Find("AddTreeButton").GetComponent<Image>().color = newColor;
-            GameObject.Find("AddRockButton").GetComponent<Image>().color = newColor;
         }
 
         // Zresetowanie funkji i przycisku usuwania przeszkód
@@ -144,18 +141,27 @@ public class GridManager : MonoBehaviour
         GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color = new Color(1f, 0.398f, 0.392f, 1f);
     }
 
-    public void RemovingObstacle()
+    public void RemovingObstacle(TMP_Dropdown dropdown)
     {
-        obstacleRemoving = true;
         Color removeColor = GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color;
+
+        if (obstacleRemoving)
+        {
+            removeColor.a = 1f;
+            GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color = removeColor;
+            obstacleRemoving = false;
+            AddingObstacle(dropdown);
+            return;
+        }
+
+        obstacleRemoving = true;
+
         removeColor.a = 0.5f;
         GameObject.Find("RemoveObstacleButton").GetComponent<Image>().color = removeColor;
 
         treeAdding = false;
         rockAdding = false;
-        GameObject.Find("AddRockButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
-        GameObject.Find("AddTreeButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
-        GameObject.Find("AddWallButton").GetComponent<Image>().color = new Color(0.392f, 0.906f, 1f, 1f);
+        wallAdding = false;
     }
 
     public void AddObstacle(Vector3 position, string tag, bool loadGame)

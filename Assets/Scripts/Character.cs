@@ -74,7 +74,7 @@ public class Character : MonoBehaviour
 
         initiativeDisplay.transform.position = new Vector3(this.gameObject.transform.position.x + 0.5f, this.gameObject.transform.position.y + 0.5f, this.gameObject.transform.position.z);
 
-        nameDisplay.transform.position = new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y - 0.6f, this.gameObject.transform.position.z);
+        nameDisplay.transform.position = new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y - 0.5f, this.gameObject.transform.position.z);
     }
 
     void Update()
@@ -101,6 +101,9 @@ public class Character : MonoBehaviour
     #region Select or deselect character method
     public void OnMouseDown()
     {
+        if (MovementManager.isMoving)
+            return;
+
         if (this.gameObject.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode && trSelect == null)
         {
             messageManager.ShowMessage($"<color=red>Wybrana postać nie może wykonać więcej akcji w tej rundzie.</color>", 4f);
@@ -121,7 +124,7 @@ public class Character : MonoBehaviour
         {
             if (trSelect == thisCharacter.transform) // klikniecie na postac, ktora juz jest wybrana
             {
-                thisCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+                thisCharacter.transform.localScale = new Vector3(0.85f, 0.85f, 1f);
                 trSelect = null;
                 MovementManager.canMove = false;
                 // Resetuje tryb wyboru celu ataku, gdyby był aktywny
@@ -141,7 +144,7 @@ public class Character : MonoBehaviour
             else // klikniecie na postac, gdy zadna postac nie jest wybrana
             {
                 trSelect = thisCharacter.transform;
-                thisCharacter.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+                thisCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
 
                 selectedCharacter = thisCharacter;
 
@@ -192,7 +195,8 @@ public class Character : MonoBehaviour
                 Debug.Log("Nie możesz atakować swoich sojuszników.");
 
                 // Przywraca widocznosc przyciskow akcji
-                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                //buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+
                 // Ukrywa przyciski zaklęć, jeśli są aktywne
                 buttonManager.HideSpellButtons();
 
@@ -216,12 +220,13 @@ public class Character : MonoBehaviour
 
 
             // Przywraca widocznosc przyciskow akcji atakujacej postaci
-            buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+            //buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+
             // Ukrywa przyciski zaklęć, jeśli są aktywne
             buttonManager.HideSpellButtons();
 
             // Resetuje szarze jesli jest aktywna
-            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
+            //GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
 
             // Resetuje tryb wyboru celu ataku
             AttackManager.targetSelecting = false;
@@ -236,7 +241,7 @@ public class Character : MonoBehaviour
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // PRAWY PRZYCISK MYSZY == Zaatakuj klikniętą postać
-        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen && trSelect != null) // wciśnięcie prawego przycisku myszy
+        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen && trSelect != null && !MovementManager.isMoving) // wciśnięcie prawego przycisku myszy
         {
             // Sprawdza, czy atakujacym nie jest sojusznik
             if (selectedCharacter.tag == this.gameObject.tag)
@@ -268,7 +273,7 @@ public class Character : MonoBehaviour
 
         }
         // ŚRODKOWY PRZYCISK MYSZY == Wybierz klikniętą postać, nie musisz odznaczać obecnie wybranej
-        else if (Input.GetMouseButtonDown(2) && !GameManager.PanelIsOpen) // wcisniecie srodkowego przycisku myszy
+        else if (Input.GetMouseButtonDown(2) && !GameManager.PanelIsOpen && !MovementManager.isMoving) // wcisniecie srodkowego przycisku myszy
         {
             if (this.gameObject.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode)
             {
@@ -281,7 +286,7 @@ public class Character : MonoBehaviour
             // Zresetowanie zmiany koloru i wielkosci poprzednio wybranej posataci
             if (selectedCharacter != null)
             {
-                selectedCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+                selectedCharacter.transform.localScale = new Vector3(0.85f, 0.85f, 1f);
                 
                 buttonManager.ShowOrHideActionsButtons(selectedCharacter, false);
 
@@ -292,7 +297,7 @@ public class Character : MonoBehaviour
             }
 
             trSelect = transform;
-            transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+            transform.localScale = new Vector3(1f, 1f, 1f);
 
             selectedCharacter = this.gameObject;
 

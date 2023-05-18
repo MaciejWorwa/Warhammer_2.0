@@ -121,13 +121,13 @@ public class AttackManager : MonoBehaviour
                 attackDistance = 1.5f;
 
             // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego (uwzględnia też długi zasięg w przypadku broni dystansowej)
-            if (attackDistance <= attackerStats.AttackRange || attackDistance <= attackerStats.AttackRange * 2 && attackerStats.AttackRange > 1.5f)
+            if (attackDistance <= attackerStats.AttackRange || attackDistance <= attackerStats.AttackRange * 2 && attackerStats.AttackRange > 1.5f || MovementManager.Charge)
             {
                 int wynik = UnityEngine.Random.Range(1, 101);
                 bool hit = false;
 
                 // sprawdza czy atak jest atakiem dystansowym
-                if (attackDistance > 1.5f)
+                if (attackDistance > 1.5f && !MovementManager.Charge)
                 {
                     attackerStats.distanceFight = true;
 
@@ -183,7 +183,7 @@ public class AttackManager : MonoBehaviour
                     }
                 }
                 // sprawdza czy atak jest atakiem w zwarciu
-                if (attackDistance <= 1.5f)
+                if (attackDistance <= 1.5f || MovementManager.Charge)
                 {
                     attackerStats.distanceFight = false;
 
@@ -202,7 +202,7 @@ public class AttackManager : MonoBehaviour
                 }
 
                 //wywołanie funkcji parowania lub uniku jeśli postać jeszcze może to robić w tej rundzie
-                if (hit && attackDistance <= 1.5f)
+                if (hit && (attackDistance <= 1.5f || MovementManager.Charge))
                 {
                     //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
                     if (targetStats.WW + targetStats.parryBonus > (targetStats.Zr + (targetStats.Dodge * 10) - 10))
@@ -706,30 +706,48 @@ public class AttackManager : MonoBehaviour
 
         if (path.Count >= 3 && path.Count <= attackerStats.Sz * 2) // Jesli jest w zasiegu szarzy
         {
+            // Odznacza postać na czas wykonywanania szarży
+            attacker.transform.localScale = new Vector3(0.85f, 0.85f, 1f);
+            GameObject.Find("ActionsButtons").transform.Find("Canvas").gameObject.SetActive(false);
+            if (attacker.CompareTag("Player"))
+                attacker.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+            else if (attacker.CompareTag("Enemy"))
+                attacker.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+
+
             //Wykonanie szarzy
             if (adjacentTilesArray != null)
             {
                 attackerStats.tempSz = attackerStats.Sz * 2;
 
                 MovementManager.canMove = true;
+
+                MovementManager.Charge = true;
                 movementManager.MoveSelectedCharacter(adjacentTilesArray[0], attacker);
                 Physics2D.SyncTransforms(); // Synchronizuje collidery (inaczej Collider2D nie wykrywa zmian pozycji postaci)
 
 
-                MovementManager.Charge = true;
-                Attack(attacker, target); // Wykonywany jest jeden atak z bonusem +10, bo to szarza
+                // Wywołanie funkcji z wyczekaniem na koniec animacji ruchu postaci
+                StartCoroutine(DelayedAttack(attacker, target, path.Count * 0.2f));
+
+                IEnumerator DelayedAttack(GameObject attacker, GameObject target, float delay)
+                {
+                    yield return new WaitForSeconds(delay);
+                    MovementManager.Charge = true;
+                    Attack(attacker, target);
+                }
 
                 // Zresetowanie szarzy
-                attackerStats.tempSz = attackerStats.Sz;
-                movementManager.SetCharge();
-                MovementManager.canMove = false;
+                movementManager.ResetChargeAndRun();
             }
         }
         else if (path.Count < 3) // Jesli jest zbyt blisko na szarze
         {
+            GameObject.Find("ActionsButtons").transform.Find("Canvas").gameObject.SetActive(true);
+            movementManager.ResetChargeAndRun();
+
             messageManager.ShowMessage($"<color=red>Zbyt mała odległość na wykonanie szarży.</color>", 3f);
             Debug.Log("Zbyt mała odległość na wykonanie szarży");
-            movementManager.SetCharge();
         }
     }
     #endregion

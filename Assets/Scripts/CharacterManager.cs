@@ -67,7 +67,7 @@ public class CharacterManager : MonoBehaviour
                 attributesLoaded = true;
             }
 
-            if(Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode)
+            if(Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode && !MovementManager.isMoving)
             {
                 Stats[] allStatsArray = FindObjectsOfType<Stats>();
                 Array.Sort(allStatsArray, (x, y) => y.Initiative.CompareTo(x.Initiative));
@@ -114,6 +114,9 @@ public class CharacterManager : MonoBehaviour
         {
             button.GetComponent<Image>().color = new Color(235f / 255f, 207f / 255f, 0, 0.5f);
             randomPositionMode = true;
+            GameObject.Find("CreatePlayerButton").GetComponent<Image>().color = new Color(1 / 2.55f, 1f, 1 / 2.55f, 1f);
+            GameObject.Find("CreateEnemyButton").GetComponent<Image>().color = new Color(1f, 1 / 2.55f, 1 / 2.55f, 1f);
+            characterAdding = false;
         }
     }
     public void SelectFieldForNewCharacter(string tag)
@@ -129,9 +132,15 @@ public class CharacterManager : MonoBehaviour
 
         // Zmniejszenie przezroczystosci przycisku tworzenia postaci
         if (tag == "Player")
+        {
             GameObject.Find("CreatePlayerButton").GetComponent<Image>().color = new Color(1 / 2.55f, 1f, 1 / 2.55f, 0.5f);
+            GameObject.Find("CreateEnemyButton").GetComponent<Image>().color = new Color(1f, 1 / 2.55f, 1 / 2.55f, 1f);
+        }
         else if (tag == "Enemy")
+        {
             GameObject.Find("CreateEnemyButton").GetComponent<Image>().color = new Color(1f, 1 / 2.55f, 1 / 2.55f, 0.5f);
+            GameObject.Find("CreatePlayerButton").GetComponent<Image>().color = new Color(1 / 2.55f, 1f, 1 / 2.55f, 1f);
+        }
 
         Debug.Log("Wybierz pole na którym chcesz postawić postać.");
     }
@@ -252,14 +261,14 @@ public class CharacterManager : MonoBehaviour
         // Odznaczenie aktualnie zaznaczonej postaci
         foreach (var stats in allObjectsWithStats)
         {
-            if (stats.gameObject.transform.localScale.x != 1f && Character.selectedCharacter != null)
+            if (stats.gameObject.transform.localScale.x != 0.85f && Character.selectedCharacter != null)
             {
                 Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(stats.gameObject);
             }
         }
 
         // Zaznaczenie postaci z najwyższą inicjatywą
-        if (allObjectsWithStats.Length > 0 && allObjectsWithStats[0].gameObject.transform.localScale.x == 1f)
+        if (allObjectsWithStats.Length > 0 && allObjectsWithStats[0].gameObject.transform.localScale.x == 0.85f)
         {
             Character.selectedCharacter = allObjectsWithStats[0].gameObject;
             Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
@@ -337,7 +346,7 @@ public class CharacterManager : MonoBehaviour
             return;
 
         charStats.actionsLeft--;
-        Debug.Log($"{charStats.gameObject.name} wykonał akcję pojedynczą. Pozostała {charStats.actionsLeft} akcja w tej rundzie.");
+        Debug.Log($"{charStats.gameObject.name} wykonał akcję pojedynczą. Dostępne akcje w tej rundzie: {charStats.actionsLeft}");
     }
 
     public void TakeDoubleAction(Stats charStats) // wykonanie akcji podwójnej
@@ -346,7 +355,7 @@ public class CharacterManager : MonoBehaviour
             return;
 
         charStats.actionsLeft = 0;
-        Debug.Log($"{charStats.gameObject.name} wykonał akcję podwójną. Pozostało {charStats.actionsLeft} akcji w tej rundzie.");
+        Debug.Log($"{charStats.gameObject.name} wykonał akcję podwójną. Dostępne akcje w tej rundzie: {charStats.actionsLeft}");
     }
     #endregion
 }

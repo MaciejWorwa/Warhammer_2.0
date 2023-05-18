@@ -18,8 +18,8 @@ public class SaveSystem : MonoBehaviour
     {
         if(GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text.Length < 1)
         {
-            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Zapis nieudany. Nie podano nazwy pliku.</color>", 4f);
-            Debug.Log($"<color=red>Zapis nieudany. Nie podano nazwy pliku.</color>");
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Zapis nieudany. Niepoprawna nazwa pliku.</color>", 4f);
+            Debug.Log($"<color=red>Zapis nieudany. Niepoprawna nazwa pliku.</color>");
             return;
         }
 
