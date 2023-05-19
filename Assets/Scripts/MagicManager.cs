@@ -356,9 +356,35 @@ public class MagicManager : MonoBehaviour
     #endregion
 
     #region Ether Armor spell mechanics
-    public void EtherArmorSpell()
+    public void EtherArmorSpell(GameObject character = null)
     {
-        Stats charStats = Character.selectedCharacter.GetComponent<Stats>();
+        if (!character.CompareTag("Player") && !character.CompareTag("Enemy") && Character.selectedCharacter != null)
+            character = Character.selectedCharacter;
+
+        Stats charStats = character.GetComponent<Stats>();
+
+        if (charStats.etherArmorActive == true)
+        {
+            charStats.etherArmorActive = false;
+            etherArmorButton.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+            charStats.SpellDuration = 0;
+
+            charStats.PZ_head = 0;
+            charStats.PZ_arms = 0;
+            charStats.PZ_torso = 0;
+            charStats.PZ_legs = 0;
+
+            messageManager.ShowMessage($"<color=red>Pancerz Eteru postaci {charStats.Name} dezaktywowany.</color>", 3f);
+            Debug.Log($"<color=red>Pancerz Eteru postaci {charStats.Name} dezaktywowany.</color>");
+            return;
+        }
+
+        if (charStats.PZ_head > 0 || charStats.PZ_arms > 0 || charStats.PZ_torso > 0 || charStats.PZ_legs > 0)
+        {
+            messageManager.ShowMessage($"<color=red>Nie możesz rzucać Pancerzu Eteru jeśli nosisz zbroję.</color>", 3f);
+            Debug.Log($"<color=red>Nie możesz rzucać Pancerzu Eteru jeśli nosisz zbroję.</color>");
+            return;
+        }
 
         if (charStats.actionsLeft > 0)
             characterManager.TakeAction(charStats);
@@ -366,27 +392,6 @@ public class MagicManager : MonoBehaviour
         {
             messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
             Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
-            return;
-        }
-
-        if (charStats.etherArmorActive == true)
-        {
-            charStats.etherArmorActive = false;
-            etherArmorButton.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
-
-            charStats.PZ_head = 0;
-            charStats.PZ_arms = 0;
-            charStats.PZ_torso = 0;
-            charStats.PZ_legs = 0;
-
-            messageManager.ShowMessage($"<color=red>Pancerz Eteru dezaktywowany.</color>", 3f);
-            Debug.Log($"<color=red>Pancerz Eteru dezaktywowany.</color>");
-            return;
-        }
-        if (charStats.PZ_head > 0 || charStats.PZ_arms > 0 || charStats.PZ_torso > 0 || charStats.PZ_legs > 0)
-        {
-            messageManager.ShowMessage($"<color=red>Nie możesz rzucać Pancerzu Eteru jeśli nosisz zbroję.</color>", 3f);
-            Debug.Log($"<color=red>Nie możesz rzucać Pancerzu Eteru jeśli nosisz zbroję.</color>");
             return;
         }
 
@@ -400,14 +405,15 @@ public class MagicManager : MonoBehaviour
 
         charStats.etherArmorActive = true;
         etherArmorButton.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+        charStats.SpellDuration = 6;
 
         charStats.PZ_head = charStats.Mag;
         charStats.PZ_arms = charStats.Mag;
         charStats.PZ_torso = charStats.Mag;
         charStats.PZ_legs = charStats.Mag;
 
-        messageManager.ShowMessage($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>", 6f);
-        Debug.Log($"<color=#00FF9A>Pancerz Eteru aktywowany.</color>");
+        messageManager.ShowMessage($"<color=#00FF9A>Pancerz Eteru postaci {charStats.Name} aktywowany.</color>", 6f);
+        Debug.Log($"<color=#00FF9A>Pancerz Eteru postaci {charStats.Name} aktywowany.</color>");
     }
     #endregion
 

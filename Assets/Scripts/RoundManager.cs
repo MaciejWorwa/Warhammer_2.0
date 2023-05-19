@@ -42,17 +42,21 @@ public class RoundManager : MonoBehaviour
     public void NextRound()
     {
         if (GameManager.AutoMode)
-        {
             autoCombat.AutomaticActions();
-
+      
+        Stats[] characters = FindObjectsOfType<Stats>();
+        foreach (var character in characters)
+        {
             // Ponowne usunięcie postaci, które są w stanie krytycznym, dlatego że wewnątrz AutoCombatu z jakiegoś powodu nie zawsze to działa dobrze
-            Stats[] characters = FindObjectsOfType<Stats>();
-            foreach (var character in characters)
-            {
-                if (character.GetComponent<Stats>().tempHealth < 0)
-                    Destroy(character.gameObject);
-            }
-        }
+            if (character.tempHealth < 0 && GameManager.AutoMode)
+                Destroy(character.gameObject);
+
+            // Zresetowanie pancerzu eteru po odpowiednim czasie
+            if (character.SpellDuration > 0)
+                character.SpellDuration--;
+            if (character.SpellDuration == 0 && character.etherArmorActive)
+                GameObject.Find("MagicManager").GetComponent<MagicManager>().EtherArmorSpell(character.gameObject);
+        } 
 
         roundNumber++;
 

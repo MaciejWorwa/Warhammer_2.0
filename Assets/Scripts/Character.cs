@@ -101,7 +101,7 @@ public class Character : MonoBehaviour
     #region Select or deselect character method
     public void OnMouseDown()
     {
-        if (MovementManager.isMoving)
+        if (MovementManager.isMoving || GameManager.PanelIsOpen)
             return;
 
         if (this.gameObject.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode && trSelect == null)
@@ -120,7 +120,7 @@ public class Character : MonoBehaviour
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // Umozliwia zaznaczenie/odznaczenie postaci, tylko gdy inne postacie nie sa wybrane i panel edycji statystyk jest zamkniety
-        if (!GameManager.PanelIsOpen && !AttackManager.targetSelecting && (trSelect == null || trSelect == transform))
+        if (!AttackManager.targetSelecting && (trSelect == null || trSelect == transform))
         {
             if (trSelect == thisCharacter.transform) // klikniecie na postac, ktora juz jest wybrana
             {
@@ -167,7 +167,7 @@ public class Character : MonoBehaviour
         }
 
         // Jezeli jest aktywny tryb wybierania celu ataku, przekazuje informacje o kliknietej postaci i wywoluje funkcje Attack traktujac wybraną postać jako atakujacego, a klikniętą jako atakowanego.
-        if (AttackManager.targetSelecting == true && !GameManager.PanelIsOpen)
+        if (AttackManager.targetSelecting == true)
         {
             // Jezeli jest rzucane zaklęcie i nie jest to zaklęcie ofensywne to wywoływana jest funkcja zaklęcia leczącego
             if (MagicManager.targetSelecting == true && selectedCharacter.GetComponent<Stats>().OffensiveSpell == false)
@@ -194,8 +194,11 @@ public class Character : MonoBehaviour
                 messageManager.ShowMessage($"<color=red>Nie możesz atakować swoich sojuszników.</color>", 3f);
                 Debug.Log("Nie możesz atakować swoich sojuszników.");
 
-                // Przywraca widocznosc przyciskow akcji
-                //buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                if(!MovementManager.Charge)
+                {
+                    // Przywraca widocznosc przyciskow akcji
+                    buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                }
 
                 // Ukrywa przyciski zaklęć, jeśli są aktywne
                 buttonManager.HideSpellButtons();
@@ -212,21 +215,18 @@ public class Character : MonoBehaviour
             }
 
             if (!MovementManager.Charge && MagicManager.targetSelecting != true)
+            {
                 attackManager.Attack(selectedCharacter, thisCharacter);
+                // Przywraca widocznosc przyciskow akcji
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+            }
             else if (MovementManager.Charge)
                 attackManager.ChargeAttack(selectedCharacter, thisCharacter);
             else if (MagicManager.targetSelecting == true)
                 GameObject.Find("MagicManager").GetComponent<MagicManager>().GetMagicDamage(thisCharacter);
 
-
-            // Przywraca widocznosc przyciskow akcji atakujacej postaci
-            //buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
-
             // Ukrywa przyciski zaklęć, jeśli są aktywne
             buttonManager.HideSpellButtons();
-
-            // Resetuje szarze jesli jest aktywna
-            //GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
 
             // Resetuje tryb wyboru celu ataku
             AttackManager.targetSelecting = false;
@@ -241,7 +241,7 @@ public class Character : MonoBehaviour
         GridManager grid = GameObject.Find("Grid").GetComponent<GridManager>();
 
         // PRAWY PRZYCISK MYSZY == Zaatakuj klikniętą postać
-        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen && trSelect != null && !MovementManager.isMoving) // wciśnięcie prawego przycisku myszy
+        if (Input.GetMouseButtonDown(1) && !GameManager.PanelIsOpen && trSelect != null && !MovementManager.isMoving && MagicManager.targetSelecting != true) // wciśnięcie prawego przycisku myszy
         {
             // Sprawdza, czy atakujacym nie jest sojusznik
             if (selectedCharacter.tag == this.gameObject.tag)
@@ -249,8 +249,11 @@ public class Character : MonoBehaviour
                 messageManager.ShowMessage($"<color=red>Nie możesz atakować swoich sojuszników.</color>", 3f);
                 Debug.Log("Nie możesz atakować swoich sojuszników.");
 
-                // Przywraca widocznosc przyciskow akcji
-                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                if (!MovementManager.Charge)
+                {
+                    // Przywraca widocznosc przyciskow akcji
+                    buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+                }
                 // Resetuje szarze jesli jest aktywna
                 if (MovementManager.Charge)
                     GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
@@ -258,19 +261,13 @@ public class Character : MonoBehaviour
             }
 
             if (!MovementManager.Charge)
+            {
                 attackManager.Attack(selectedCharacter, this.gameObject);
+                // Przywraca widocznosc przyciskow akcji
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
+            }
             else
                 attackManager.ChargeAttack(selectedCharacter, this.gameObject);
-
-            // Ukrywa przyciski zaklęć, jeśli są aktywne
-            buttonManager.HideSpellButtons();
-
-            // Przywraca widocznosc przyciskow akcji atakujacej postaci
-            buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
-
-            // Resetuje szarze jesli jest aktywna
-            GameObject.Find("MovementManager").GetComponent<MovementManager>().ResetChargeAndRun();
-
         }
         // ŚRODKOWY PRZYCISK MYSZY == Wybierz klikniętą postać, nie musisz odznaczać obecnie wybranej
         else if (Input.GetMouseButtonDown(2) && !GameManager.PanelIsOpen && !MovementManager.isMoving) // wcisniecie srodkowego przycisku myszy

@@ -196,8 +196,6 @@ public class SaveSystem : MonoBehaviour
     #region Load with delay
     void LoadWithDelay()
     {
-        Debug.Log("poczatek load and delay");
-
         GameData data = null;
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
@@ -254,7 +252,15 @@ public class SaveSystem : MonoBehaviour
                     }
                 }
 
+                // Wczytanie pozycji
                 character.transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
+
+                // Zresetowanie zaznaczenia, gdyby z jakiegoś powodu postać była zaznaczona
+                character.transform.localScale = new Vector3(0.85f, 0.85f, 1f);
+                if (character.CompareTag("Player"))
+                    character.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+                else if (character.CompareTag("Enemy"))
+                    character.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
             }
             else
             {

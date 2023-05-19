@@ -22,6 +22,8 @@ public class AttackManager : MonoBehaviour
     private MessageManager messageManager;
     private MovementManager movementManager;
 
+    [SerializeField] private Animator attackAnimator;
+
     void Start()
     {
         aimButtons = GameObject.FindGameObjectsWithTag("AimButton");
@@ -123,6 +125,53 @@ public class AttackManager : MonoBehaviour
             // sprawdza, czy dystans miedzy walczacymi jest mniejszy lub rowny zasiegowi broni atakujacego (uwzględnia też długi zasięg w przypadku broni dystansowej)
             if (attackDistance <= attackerStats.AttackRange || attackDistance <= attackerStats.AttackRange * 2 && attackerStats.AttackRange > 1.5f || MovementManager.Charge)
             {
+                if (attackDistance > 1.5f && !MovementManager.Charge && attackerStats.reloadLeft == 0)
+                {
+                    // Sprawdza, czy na linii strzału znajduje się przeszkoda
+                    RaycastHit2D[] raycastHits = Physics2D.RaycastAll(attacker.transform.position, target.transform.position - attacker.transform.position, attackDistance);
+
+                    foreach (var raycastHit in raycastHits)
+                    {
+                        if (raycastHit.collider != null && (raycastHit.collider.CompareTag("Tree") || raycastHit.collider.CompareTag("Wall")))
+                        {
+                            messageManager.ShowMessage($"<color=red>Na linii strzału znajduje się przeszkoda.</color>", 3f);
+                            Debug.Log("Na linii strzału znajduje się przeszkoda.");
+                            return;
+                        }
+                        if (raycastHit.collider != null && raycastHit.collider.CompareTag("Rock") && Vector3.Distance(raycastHit.collider.gameObject.transform.position, target.transform.position) <= 1.5f)
+                        {
+                            defensiveBonus += 20;
+                        }
+                    }
+                }
+
+                // WYKONANIE AKCJI               
+                bool canTakeAction = attackerStats.A == 1 && attackerStats.actionsLeft > 0 && attackerStats.attacksLeft > 0 || attackerStats.A > 1 && attackerStats.actionsLeft == 1;
+                bool canTakeDoubleAction = attackerStats.attacksLeft >= 1 && attackerStats.actionsLeft == 2 || attackerStats.actionsLeft == -1;
+
+                if (!MovementManager.Charge && attackDistance <= 1.5f || attackDistance > 1.5f)
+                {
+                    if (canTakeAction)
+                    {
+                        attackerStats.attacksLeft--;
+                        characterManager.TakeAction(attackerStats);
+                    }
+                    else if (canTakeDoubleAction)
+                    {
+                        attackerStats.actionsLeft = -1;
+
+                        attackerStats.attacksLeft--;
+                        if (attackerStats.attacksLeft == 0)
+                            characterManager.TakeDoubleAction(attackerStats);
+                    }
+                    else if (GameManager.StandardMode)
+                    {
+                        messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
+                        Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
+                        return;
+                    }
+                }
+
                 int wynik = UnityEngine.Random.Range(1, 101);
                 bool hit = false;
 
@@ -133,25 +182,7 @@ public class AttackManager : MonoBehaviour
 
                     // sprawdza czy bron jest naladowana
                     if (attackerStats.reloadLeft == 0)
-                    {
-                        // Sprawdza, czy na linii strzału znajduje się przeszkoda
-                        RaycastHit2D[] raycastHits = Physics2D.RaycastAll(attacker.transform.position, target.transform.position - attacker.transform.position, attackDistance);
-
-                        foreach(var raycastHit in raycastHits)
-                        {
-                            if (raycastHit.collider != null && (raycastHit.collider.CompareTag("Tree") || raycastHit.collider.CompareTag("Wall")))
-                            {
-                                messageManager.ShowMessage($"<color=red>Na linii strzału znajduje się przeszkoda.</color>", 3f);
-                                Debug.Log("Na linii strzału znajduje się przeszkoda.");
-                                return;
-                            }
-                            if (raycastHit.collider != null && raycastHit.collider.CompareTag("Rock") && Vector3.Distance(raycastHit.collider.gameObject.transform.position, target.transform.position) <= 1.5f)
-                            {
-                                Debug.Log("schowal sie za skala");
-                                defensiveBonus += 20;
-                            }
-                        }
-
+                    {                   
                         // Sprawdza, czy strzał jest wykonywany na długi zasięg broni i jeśli tak to dodaje modyfikator -20
                         attackBonus -= attackDistance > attackerStats.AttackRange ? 20 : 0;
 
@@ -234,11 +265,11 @@ public class AttackManager : MonoBehaviour
                     int rollResult;
 
                     // mechanika broni przebijajacej zbroje
-                    if (attackerStats.PrzebijajacyZbroje && armor >= 1)
+                    if ((attackDistance <= 1.5f && attackerStats.PrzebijajacyZbroje || attackDistance > 1.5f && attackerStats.PrzebijajacyZbrojeDystansowa) && armor >= 1)
                         armor--;
 
                     // mechanika bronii druzgoczacej
-                    if (attackerStats.Druzgoczacy)
+                    if (attackDistance <= 1.5f && attackerStats.Druzgoczacy || attackDistance > 1.5f && attackerStats.DruzgoczacyDystansowa)
                     {
                         int roll1 = UnityEngine.Random.Range(1, 11);
                         int roll2 = UnityEngine.Random.Range(1, 11);
@@ -250,7 +281,7 @@ public class AttackManager : MonoBehaviour
                         rollResult = UnityEngine.Random.Range(1, 11);
 
                     // mechanika broni ciezkiej. Czyli po pierszym CELNYM ataku bron traci ceche druzgoczacy. Wg podrecznika traci sie to po pierwszej rundzie, ale wole tak :)
-                    if (attackerStats.Ciezki)
+                    if (attackDistance <= 1.5f && attackerStats.Ciezki)
                         attackerStats.Druzgoczacy = false;
 
                     // mechanika furii ulryka
@@ -337,34 +368,9 @@ public class AttackManager : MonoBehaviour
                 }
                 targetDefended = false; // przestawienie boola na false, żeby przy kolejnym ataku znowu musiał się bronić, a nie był obroniony na starcie
 
-
-
-                // WYKONANIE AKCJI               
-                bool canTakeAction = attackerStats.A == 1 && attackerStats.actionsLeft > 0 && attackerStats.attacksLeft > 0 || attackerStats.A > 1 && attackerStats.actionsLeft == 1;
-                bool canTakeDoubleAction = attackerStats.attacksLeft >= 1 && attackerStats.actionsLeft == 2 || attackerStats.actionsLeft == -1;
-
-                if (!MovementManager.Charge && attackDistance <= 1.5f || attackDistance > 1.5f)
-                {
-                    if (canTakeAction)
-                    {
-                        attackerStats.attacksLeft--;
-                        characterManager.TakeAction(attackerStats);
-                    }
-                    else if (canTakeDoubleAction)
-                    {
-                        attackerStats.actionsLeft = -1;
-
-                        attackerStats.attacksLeft--;
-                        if (attackerStats.attacksLeft == 0)
-                            characterManager.TakeDoubleAction(attackerStats);
-                    }
-                    else if (GameManager.StandardMode)
-                    {
-                        messageManager.ShowMessage($"<color=red>Postać nie może wykonać tylu akcji w tej rundzie.</color>", 3f);
-                        Debug.Log($"Postać nie może wykonać tylu akcji w tej rundzie.");
-                        return;
-                    }
-                }
+                // Włączenie animacji ataku
+                if (!GameManager.AutoMode)
+                    GameObject.Find("AnimationManager").GetComponent<AnimationManager>().AttackAnimation(target.transform.position);        
             }
             else
             {

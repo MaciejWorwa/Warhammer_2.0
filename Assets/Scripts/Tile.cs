@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class Tile : MonoBehaviour
 {
@@ -71,6 +72,10 @@ public class Tile : MonoBehaviour
         {
             if (GameManager.PanelIsOpen)
                 return;
+
+            // Zapobiega przypadkowemu postawieniu przeszkody podczas wybierania opcji dropdownu
+            if (GameObject.Find("ObstaclesDropdown").GetComponent<TMP_Dropdown>().IsExpanded)
+                return;      
 
             if (GridManager.treeAdding)
             {

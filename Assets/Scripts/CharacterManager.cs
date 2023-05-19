@@ -94,6 +94,10 @@ public class CharacterManager : MonoBehaviour
                 Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
                 Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(nextCharacter);
 
+                // Zresetowanie pozycji obronnej, jeśli jest aktywna
+                if (Character.selectedCharacter.GetComponent<Stats>().defensiveBonus > 0)
+                    GameObject.Find("AttackManager").GetComponent<AttackManager>().DefensivePosition(GameObject.Find("DefensivePositionButton"));
+
                 // Aktualizacja wyświetlanych statystyk
                 Character.selectedCharacter = nextCharacter;
                 GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();
@@ -121,6 +125,9 @@ public class CharacterManager : MonoBehaviour
     }
     public void SelectFieldForNewCharacter(string tag)
     {
+        if (MovementManager.isMoving)
+            return;
+
         characterAdding = true;
         characterTag = tag;
 
@@ -272,6 +279,10 @@ public class CharacterManager : MonoBehaviour
         {
             Character.selectedCharacter = allObjectsWithStats[0].gameObject;
             Character.selectedCharacter.GetComponent<Character>().SelectOrDeselectCharacter(Character.selectedCharacter);
+
+            // Zresetowanie pozycji obronnej, jeśli jest aktywna
+            if (Character.selectedCharacter.GetComponent<Stats>().defensiveBonus > 0)
+                GameObject.Find("AttackManager").GetComponent<AttackManager>().DefensivePosition(GameObject.Find("DefensivePositionButton"));
         }
 
         // Aktualizacja wyświetlanych statystyk

@@ -72,9 +72,11 @@ public class GameData
     public int reloadLeft;
     public bool Ciezki;
     public bool Druzgoczacy;
+    public bool DruzgoczacyDystansowa;
     public bool Parujacy;
     public bool Powolny;
     public bool PrzebijajacyZbroje;
+    public bool PrzebijajacyZbrojeDystansowa;
     public bool Szybki;
 
     [Header("Punkty zbroi")]
@@ -90,6 +92,7 @@ public class GameData
     public int AreaSize;
     public int CastDuration;
     public int CastDurationLeft;
+    public int SpellDuration; // czas trwania zaklęcia, obecnie uzywany tylko do pancerzu eteru
     public bool OffensiveSpell;
     public bool IgnoreArmor;
     [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru

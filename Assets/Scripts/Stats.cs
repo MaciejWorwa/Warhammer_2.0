@@ -66,9 +66,11 @@ public class Stats : MonoBehaviour
     public int reloadLeft;
     public bool Ciezki;
     public bool Druzgoczacy;
+    public bool DruzgoczacyDystansowa;
     public bool Parujacy;
     public bool Powolny;
     public bool PrzebijajacyZbroje;
+    public bool PrzebijajacyZbrojeDystansowa;
     public bool Szybki;
 
     [Header("Punkty zbroi")]
@@ -84,6 +86,7 @@ public class Stats : MonoBehaviour
     public int AreaSize; // wielkość obszaru objętego działaniem zaklęcia
     public int CastDuration = 1; // czas rzucania zaklęcia
     public int CastDurationLeft;
+    public int SpellDuration; // czas trwania zaklęcia, obecnie uzywany tylko do pancerzu eteru
     [HideInInspector] public bool OffensiveSpell; // określa, czy zaklęcie jest ofensywne (może byc rzucane tylko na przeciwników)
     public bool IgnoreArmor; // Określa, czy zaklęcie ofensywne ignoruje pancerz
     [HideInInspector] public bool etherArmorActive = false; // Określa, czy postać ma aktywny pancerz eteru

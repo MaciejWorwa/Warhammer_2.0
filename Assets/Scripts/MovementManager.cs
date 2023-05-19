@@ -15,6 +15,9 @@ public class MovementManager : MonoBehaviour
     // Lista wszystkich pol w zasiegu ruchu postaci
     [HideInInspector] public List<GameObject> tilesInMovementRange = new List<GameObject>();
 
+    // Lista wszystkich pol na ścieżce ruchu postaci
+    [HideInInspector] public List<GameObject> tilesOnPath = new List<GameObject>();
+
     private GridManager grid;
 
     private CharacterManager characterManager;

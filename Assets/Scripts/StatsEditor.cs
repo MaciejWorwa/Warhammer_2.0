@@ -14,6 +14,9 @@ public class StatsEditor : MonoBehaviour
 
     [SerializeField] TMP_Dropdown rasaDropdown; // Dropdown z wyborem rasy
 
+    [SerializeField] GameObject distanceWeaponStatsPanel;
+    [SerializeField] GameObject meleeWeaponStatsPanel;
+
     #region Panels visibility functions
     public void PanelVisibility(GameObject panel)
     {
@@ -286,6 +289,25 @@ public class StatsEditor : MonoBehaviour
         GameObject.Find("ButtonManager").GetComponent<ButtonManager>().ShowOrHideActionsButtons(Character.selectedCharacter, true);
 
         LoadAttributes();
+        if(distanceWeaponStatsPanel.activeSelf || meleeWeaponStatsPanel.activeSelf)
+            DisplayEquippedWeaponStats();
     }
+    #endregion
+
+    #region Display equipped weapon stats
+    public void DisplayEquippedWeaponStats()
+    {
+        if(Character.selectedCharacter.GetComponent<Stats>().distanceFight)
+        {
+            distanceWeaponStatsPanel.SetActive(true);
+            meleeWeaponStatsPanel.SetActive(false);
+        }
+        else
+        {
+            meleeWeaponStatsPanel.SetActive(true);
+            distanceWeaponStatsPanel.SetActive(false);
+        }
+    }
+
     #endregion
 }
