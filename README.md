@@ -13,7 +13,9 @@ Execute the `Warhammer_2ed.exe` executable file and enjoy!
 # Environment 
 
 The game was developed in Unity Engine. List of supported OS:
-- [x] Windows 10
+- [x] Windows
+- [x] Mac
+- [x] Linux
 
 # Language Pack
 
@@ -31,7 +33,7 @@ At the moment only Polish language is supported.
     - [x] Automatic 
     - [x] Manual 
     - [x] Default
-- [ ] Map Creator
+- [x] Map Creator
 
 # Tutorial
 
