@@ -238,7 +238,7 @@ public class AttackManager : MonoBehaviour
                     //sprawdza, czy atakowana postac ma wieksza szanse na unik, czy na parowanie i na tej podstawie ustala kolejnosc tych akcji
                     if (targetStats.WW + targetStats.parryBonus > (targetStats.Zr + (targetStats.Dodge * 10) - 10))
                     {
-                        if (targetStats.canParry)
+                        if (targetStats.canParry && !targetStats.distanceFight)
                             ParryAttack(attackerStats, targetStats);
                         else if (targetStats.canDodge)
                             DodgeAttack(targetStats);
@@ -247,7 +247,7 @@ public class AttackManager : MonoBehaviour
                     {
                         if (targetStats.canDodge)
                             DodgeAttack(targetStats);
-                        else if (targetStats.canParry)
+                        else if (targetStats.canParry && !targetStats.distanceFight)
                             ParryAttack(attackerStats, targetStats);
                     }
                 }

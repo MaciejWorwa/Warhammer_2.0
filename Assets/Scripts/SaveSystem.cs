@@ -12,16 +12,23 @@ public class SaveSystem : MonoBehaviour
     [SerializeField] TMP_Dropdown savedFilesDropdown; // Dropdown z wszystkimi savami
     private static string dropdownText = "";
     public static bool LoadOnlyCharacters;
+    [SerializeField] private GameObject undoButton;
 
     #region Save functions
     public void SaveAllCharactersStats()
     {
-        if(GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text.Length < 1)
+        if(!CharacterManager.Autosave)
         {
-            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Zapis nieudany. Niepoprawna nazwa pliku.</color>", 4f);
-            Debug.Log($"<color=red>Zapis nieudany. Niepoprawna nazwa pliku.</color>");
-            return;
+            if (GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text.Length < 1 || GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text == "autosave")
+            {
+                GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=red>Zapis nieudany. Niepoprawna nazwa pliku.</color>", 4f);
+                Debug.Log($"<color=red>Zapis nieudany. Niepoprawna nazwa pliku.</color>");
+                return;
+            }
         }
+        // Jeżeli był już wczesniej robiony autozapis to aktywuje przycisk umożliwiający cofnięcie akcji
+        if (Directory.Exists(Path.Combine(Application.persistentDataPath, "autosave")))
+            undoButton.SetActive(true);
 
         List<Stats> allStats = new List<Stats>();
 
@@ -59,8 +66,14 @@ public class SaveSystem : MonoBehaviour
             charNames.Add(character.gameObject.name);
         }
 
+        string savesFolderName;
+
         // Stworzenie folderu dla zapisów
-        string savesFolderName = GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text;
+        if (!CharacterManager.Autosave)
+            savesFolderName = GameObject.Find("NameOfSaveInput").GetComponent<TMP_InputField>().text;
+        else
+            savesFolderName = "autosave";
+
         Directory.CreateDirectory(Application.persistentDataPath + "/" + savesFolderName);
 
         // Pobranie listy zapisanych plików
@@ -102,7 +115,8 @@ public class SaveSystem : MonoBehaviour
         // Wykonuje pętle dla wszystkich folderów wewnątrz głównego folderu z save'ami
         foreach (string saveFolder in Directory.GetDirectories(Application.persistentDataPath))
         {
-            options.Add(Path.GetFileName(saveFolder));
+            if (saveFolder != (Application.persistentDataPath + "\\" + "autosave"))
+                options.Add(Path.GetFileName(saveFolder));
         }
 
         savedFilesDropdown.AddOptions(options);
@@ -117,8 +131,11 @@ public class SaveSystem : MonoBehaviour
         else
             LoadOnlyCharacters = false;
 
-        if (savedFilesDropdown.GetComponent<TMP_Dropdown>().options.Count == 0)
+        if (savedFilesDropdown.GetComponent<TMP_Dropdown>().options.Count == 0 && !CharacterManager.Autosave)
             return;
+
+        // Wyłącza możliwość cofnięcia akcji
+        undoButton.SetActive(false);
 
         // Odznaczenie postaci, jeżeli podczas kliknięcia "Load" była zaznaczona, aby przyciski akcji nie zostawały widocznie w złym miejscu
         if (Character.trSelect != null)
@@ -149,7 +166,10 @@ public class SaveSystem : MonoBehaviour
             charNames.Add(character.gameObject.name);
         }
 
-        dropdownText = savedFilesDropdown.GetComponent<TMP_Dropdown>().options[savedFilesDropdown.value].text;
+        if (!CharacterManager.Autosave)
+            dropdownText = savedFilesDropdown.GetComponent<TMP_Dropdown>().options[savedFilesDropdown.value].text;
+        else
+            dropdownText = "autosave";
 
         // Pobranie listy zapisanych plików
         string[] files = Directory.GetFiles(Application.persistentDataPath + "/" + dropdownText, "*.fun");

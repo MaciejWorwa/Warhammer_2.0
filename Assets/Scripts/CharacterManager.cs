@@ -31,6 +31,9 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private GameObject statsDisplayPanel;
 
     private bool attributesLoaded;
+    public static bool Autosave;
+
+    //private Stats charStatsForAutosave; // Odniesienie do postaci, która wykorzystuje PS do cofnięcia akcji
 
     void Start()
     {
@@ -149,6 +152,7 @@ public class CharacterManager : MonoBehaviour
             GameObject.Find("CreatePlayerButton").GetComponent<Image>().color = new Color(1 / 2.55f, 1f, 1 / 2.55f, 1f);
         }
 
+        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage("Wybierz pole na którym chcesz postawić postać.", 3f);
         Debug.Log("Wybierz pole na którym chcesz postawić postać.");
     }
 
@@ -353,6 +357,11 @@ public class CharacterManager : MonoBehaviour
 
     public void TakeAction(Stats charStats) // wykonanie akcji
     {
+        Autosave = true;
+        //charStatsForAutosave = charStats;
+        GameObject.Find("SaveSystem").GetComponent<SaveSystem>().SaveAllCharactersStats();
+        Autosave = false;
+
         if (!GameManager.StandardMode)
             return;
 
@@ -362,11 +371,23 @@ public class CharacterManager : MonoBehaviour
 
     public void TakeDoubleAction(Stats charStats) // wykonanie akcji podwójnej
     {
+        Autosave = true;
+        //charStatsForAutosave = charStats;
+        GameObject.Find("SaveSystem").GetComponent<SaveSystem>().SaveAllCharactersStats();
+        Autosave = false;
+
         if (!GameManager.StandardMode)
             return;
 
         charStats.actionsLeft = 0;
         Debug.Log($"{charStats.gameObject.name} wykonał akcję podwójną. Dostępne akcje w tej rundzie: {charStats.actionsLeft}");
+    }
+
+    public void UndoAction()
+    {
+        Autosave = true;
+        GameObject.Find("SaveSystem").GetComponent<SaveSystem>().LoadAllCharactersStats(true);
+        Autosave = false;
     }
     #endregion
 }

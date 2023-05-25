@@ -34,6 +34,7 @@ public class Stats : MonoBehaviour
     public int maxHealth;
     public int tempHealth;
     public int PP;
+    public int PS;
 
     [Header("Inicjatywa, zdolności, umiejętności, inne")]
     public int Initiative; // inicjatywa

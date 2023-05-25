@@ -7,13 +7,13 @@ public class AverageLevelCounter : MonoBehaviour
     // JEST TO KLASA TYMCZASOWA. ULATWIA LICZENIE POZIOMOW I W PRZYSZLOSCI CHCIALBYM TUTAJ ROBIC TESTY TEGO ILE EXPA POWINNO SIE PRZYZNAWAC ZA KONKRETNYCH PRZECIWNIKOW.
 
     // Update is called once per frame
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.A))
-        {
-            CountAverageLevelOfCharacters();
-        }
-    }
+    //void Update()
+    //{
+    //    if(Input.GetKeyDown(KeyCode.A))
+    //    {
+    //        CountAverageLevelOfCharacters();
+    //    }
+    //}
 
     void CountAverageLevelOfCharacters()
     {

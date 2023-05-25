@@ -200,6 +200,9 @@ public class MovementManager : MonoBehaviour
 
                     if (character.transform.position == selectedTilePos)
                     {
+                        ResetChargeAndRun();
+                        canMove = false;
+
                         // Ponownie zaznacza postać                           
                         character.GetComponent<Character>().SelectOrDeselectCharacter(character);
 

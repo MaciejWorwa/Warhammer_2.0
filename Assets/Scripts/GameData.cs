@@ -40,6 +40,7 @@ public class GameData
     public int maxHealth;
     public int tempHealth;
     public int PP;
+    public int PS;
 
     [Header("Inicjatywa, parowanie, uniki")]
     public int Initiative; // inicjatywa
