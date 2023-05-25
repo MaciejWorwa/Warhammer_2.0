@@ -8,7 +8,7 @@ At the moment, the game can only be downloaded from GitHub:
 
     git clone git@github.com:MaciejWorwa/Warhammer_2.0.git
 
-Execute the `WarhammerSimulator.exe` executable file and enjoy!
+Execute the `Warhammer_2ed.exe` executable file and enjoy!
 
 # Environment 
 
