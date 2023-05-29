@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MainMenuScene.unity
+    guid: 517b814b8143d4243abbdb0ad2203867
+  - enabled: 1
     path: Assets/Scenes/BattefieldEditor.unity
     guid: 0d98d983c2d60af42811fa2641a237b4
   - enabled: 1

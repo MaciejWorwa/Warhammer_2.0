@@ -55,6 +55,8 @@ public class CharacterManager : MonoBehaviour
             statsDisplayPanel.SetActive(false);
             attributesLoaded = false;
 
+            //Debug.Log("trSelect to null");
+
         }
         else if (Character.selectedCharacter != null)
         {
@@ -70,7 +72,11 @@ public class CharacterManager : MonoBehaviour
                 attributesLoaded = true;
             }
 
-            if(Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode && !MovementManager.isMoving)
+            //Debug.Log("Character.selectedCharacter.name " + Character.selectedCharacter.name);
+            //Debug.Log("Character.selectedCharacter.GetComponent<Stats>().actionsLeft " + Character.selectedCharacter.GetComponent<Stats>().actionsLeft);
+            //Debug.Log("MovementManager.isMoving " + MovementManager.isMoving);
+
+            if (Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode && !MovementManager.isMoving)
             {
                 Stats[] allStatsArray = FindObjectsOfType<Stats>();
                 Array.Sort(allStatsArray, (x, y) => y.Initiative.CompareTo(x.Initiative));

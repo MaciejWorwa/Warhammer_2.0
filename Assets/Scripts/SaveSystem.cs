@@ -51,8 +51,11 @@ public class SaveSystem : MonoBehaviour
 
         SaveCharacterStats(allStats.ToArray());
 
-        GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=green>Zapisano stan gry.</color>", 3f);
-        Debug.Log($"<color=green>Zapisano stan gry.</color>");
+        if(!CharacterManager.Autosave)
+        {
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage($"<color=green>Zapisano stan gry.</color>", 3f);
+            Debug.Log($"<color=green>Zapisano stan gry.</color>");
+        }
     }
 
     public static void SaveCharacterStats(Stats[] characters)
@@ -84,10 +87,7 @@ public class SaveSystem : MonoBehaviour
         {
             string fileName = Path.GetFileNameWithoutExtension(file);
             if (!charNames.Contains(fileName))
-            {
-                Debug.Log("usuwam " + fileName);
                 File.Delete(file);
-            }
         }
 
         // Zapis wszystkich postaci w 'characters'
@@ -166,10 +166,15 @@ public class SaveSystem : MonoBehaviour
             charNames.Add(character.gameObject.name);
         }
 
-        if (!CharacterManager.Autosave)
+
+        if(ScenesManager.saveFileName.Length > 1) // Wczytanie gry z poziomu menu startowego
+            dropdownText = ScenesManager.saveFileName;
+        else if (!CharacterManager.Autosave) // Standardowe wczytanie gry
             dropdownText = savedFilesDropdown.GetComponent<TMP_Dropdown>().options[savedFilesDropdown.value].text;
-        else
+        else // Cofnięcie akcji
             dropdownText = "autosave";
+
+        ScenesManager.saveFileName = "";
 
         // Pobranie listy zapisanych plików
         string[] files = Directory.GetFiles(Application.persistentDataPath + "/" + dropdownText, "*.fun");

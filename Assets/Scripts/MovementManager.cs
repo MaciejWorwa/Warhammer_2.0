@@ -154,7 +154,7 @@ public class MovementManager : MonoBehaviour
                 }
 
                 // Odznacza postać na czas wykonywanania ruchu
-                if(!Charge)
+                if (!Charge)
                 {
                     character.GetComponent<Character>().SelectOrDeselectCharacter(character);
                     GameObject.Find("ActionsButtons").transform.Find("Canvas").gameObject.SetActive(false);
@@ -202,14 +202,11 @@ public class MovementManager : MonoBehaviour
                     {
                         ResetChargeAndRun();
                         canMove = false;
+                        isMoving = false;
 
                         // Ponownie zaznacza postać                           
                         character.GetComponent<Character>().SelectOrDeselectCharacter(character);
-
-                        if(Charge)
-                            character.GetComponent<Character>().SelectOrDeselectCharacter(character);                          
-
-                        isMoving = false;
+                        Character.trSelect = character.transform;
                     }
                 }
             }

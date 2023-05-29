@@ -194,11 +194,8 @@ public class Character : MonoBehaviour
                 messageManager.ShowMessage($"<color=red>Nie możesz atakować swoich sojuszników.</color>", 3f);
                 Debug.Log("Nie możesz atakować swoich sojuszników.");
 
-                if(!MovementManager.Charge)
-                {
-                    // Przywraca widocznosc przyciskow akcji
-                    buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
-                }
+                // Przywraca widocznosc przyciskow akcji
+                buttonManager.ShowOrHideActionsButtons(selectedCharacter, true);
 
                 // Ukrywa przyciski zaklęć, jeśli są aktywne
                 buttonManager.HideSpellButtons();

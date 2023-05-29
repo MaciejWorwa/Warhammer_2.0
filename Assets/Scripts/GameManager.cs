@@ -10,24 +10,45 @@ public class GameManager : MonoBehaviour
     StatsEditor statsEditor;
     MessageManager messageManager;
 
-    public static bool PanelIsOpen = false;
+    public static bool PanelIsOpen;
     public static bool StandardMode;
     public static bool ManualMode;
     public static bool AutoMode;
 
+    [SerializeField] private Slider slider;
     public static float MusicVolume = 0.5f;
 
     void Start()
     {
         Camera.main.GetComponent<AudioSource>().volume = MusicVolume;
-        StandardMode = true;
-        ManualMode = false;
-        AutoMode = false;
 
-        if (SceneManager.GetActiveScene().buildIndex == 0)
-            GameObject.Find("SliderVolume").GetComponent<Slider>().value = MusicVolume;
+        PanelIsOpen = false;
 
-        if(SceneManager.GetActiveScene().buildIndex == 1)
+        // Wyszarza przycisk z aktualnie aktywnym trybem gry
+        // Jeżeli w menu startowym nie został ustawiony tryb, to ustawiany jest tryb domyślny
+        if (StandardMode != true && ManualMode != true && AutoMode != true && SceneManager.GetActiveScene().buildIndex == 2)
+        {
+            StandardMode = true;
+            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().DecreaseButtonOpacity(GameObject.Find("Canvas/OptionsPanel/StandardModeButton").GetComponent<Button>());
+            GameObject.Find("Canvas/OptionsPanel").SetActive(false);
+        }
+        else if (ManualMode == true && SceneManager.GetActiveScene().buildIndex == 2)
+        {
+            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().DecreaseButtonOpacity(GameObject.Find("Canvas/OptionsPanel/ManualModeButton").GetComponent<Button>());
+            GameObject.Find("Canvas/OptionsPanel").SetActive(false);
+        }
+        else if (AutoMode == true && SceneManager.GetActiveScene().buildIndex == 2)
+        {
+            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().DecreaseButtonOpacity(GameObject.Find("Canvas/OptionsPanel/AutoModeButton").GetComponent<Button>());
+            GameObject.Find("Canvas/OptionsPanel").SetActive(false);
+        }
+        else if(StandardMode == true)
+            GameObject.Find("Canvas/OptionsPanel").SetActive(false);
+
+        if (SceneManager.GetActiveScene().buildIndex == 1 || SceneManager.GetActiveScene().buildIndex == 0)
+            SetSliderValue(slider);
+
+        if (SceneManager.GetActiveScene().buildIndex == 2)
         {
             statsEditor = GameObject.Find("StatsEditor").GetComponent<StatsEditor>();
             // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
@@ -42,7 +63,8 @@ public class GameManager : MonoBehaviour
         ManualMode = false;
         AutoMode = false;
 
-        messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb standardowy.</color>", 3f);
+        if(SceneManager.GetActiveScene().buildIndex == 2)
+            messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb standardowy.</color>", 3f);           
         Debug.Log($"Został włączony tryb standardowy.");
     }
 
@@ -53,7 +75,8 @@ public class GameManager : MonoBehaviour
         StandardMode = false;
         AutoMode = false;
 
-        messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb manualny.</color>", 3f);
+        if (SceneManager.GetActiveScene().buildIndex == 2)
+            messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb manualny.</color>", 3f);
         Debug.Log($"Został włączony tryb manualny.");
     }
 
@@ -64,7 +87,8 @@ public class GameManager : MonoBehaviour
         StandardMode = false;
         ManualMode = false;
 
-        messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb automatyczny.</color>", 3f);
+        if (SceneManager.GetActiveScene().buildIndex == 2)
+            messageManager.ShowMessage($"<color=#00FF9A>Został włączony tryb automatyczny.</color>", 3f);
         Debug.Log($"Został włączony tryb automatyczny.");
     }
     #endregion
@@ -85,7 +109,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown("escape") && SceneManager.GetActiveScene().buildIndex == 1)
+        if (Input.GetKeyDown("escape") && (SceneManager.GetActiveScene().buildIndex == 0 || SceneManager.GetActiveScene().buildIndex == 2))
         {
             GameObject[] panels = GameObject.FindGameObjectsWithTag("Panel");
 
@@ -101,16 +125,19 @@ public class GameManager : MonoBehaviour
                     ShowOrHideMainMenuPanel();
                 }
 
-                if (panel.transform.IsChildOf(GameObject.Find("SetStatsCanvas").transform) && panel.name != "RollPanel" && panel.name != "StatsPanel")
+                if(SceneManager.GetActiveScene().buildIndex != 0)
                 {
-                    statsEditor.ShowGeneralPanel();
+                    if (panel.transform.IsChildOf(GameObject.Find("SetStatsCanvas").transform) && panel.name != "RollPanel" && panel.name != "StatsPanel")
+                    {
+                        statsEditor.ShowGeneralPanel();
+                    }
                 }
             }
 
-            if (panels.Length == 0)
+            if (panels.Length == 0 && SceneManager.GetActiveScene().buildIndex != 0)
                 ShowOrHideMainMenuPanel();
         }
-        else if (Input.GetKeyDown("escape") && SceneManager.GetActiveScene().buildIndex == 0)
+        else if (Input.GetKeyDown("escape") && SceneManager.GetActiveScene().buildIndex == 1)
         {
             ShowOrHideMainMenuPanel();
         }
