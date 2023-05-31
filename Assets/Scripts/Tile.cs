@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
@@ -14,7 +12,7 @@ public class Tile : MonoBehaviour
     public bool isOccupied;
     private LayerMask layer;
 
-    //public static bool canMove = true; // okresla czy postac moze wykonac ruch
+    public static bool isMouseDragging; // Określa, czy lewy przycisk myszy jest przytrzymany. Wtedy można stawiać przeszkody bez konieczności klikania za każdym razem
 
     public void Init(bool isOffset)
     {
@@ -37,6 +35,11 @@ public class Tile : MonoBehaviour
             Collider2D collider = Physics2D.OverlapCircle(transform.position, 0.1f, layer);
             isOccupied = (collider != null) ? true : false;
         }
+
+        if (Input.GetMouseButtonDown(0)) // Sprawdza, czy lewy przycisk myszy został puszczony
+            isMouseDragging = true;
+        else if (Input.GetMouseButtonUp(0))
+            isMouseDragging = false;
     }
 
     void OnMouseEnter()
@@ -67,7 +70,7 @@ public class Tile : MonoBehaviour
 
     void OnMouseUp()
     {
-        // Jeżeli jesteśmy w kreatorze pola bitwy to funkcja OnMouseDown jest nieaktywna
+        // Jeżeli jesteśmy w kreatorze pola bitwy to funkcja OnMouseUp jest nieaktywna
         if (SceneManager.GetActiveScene().buildIndex == 1)
         {
             if (GameManager.PanelIsOpen)
@@ -77,18 +80,6 @@ public class Tile : MonoBehaviour
             if (GameObject.Find("ObstaclesDropdown").GetComponent<TMP_Dropdown>().IsExpanded)
                 return;      
 
-            if (GridManager.treeAdding)
-            {
-                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Tree", false);
-            }
-            else if (GridManager.rockAdding)
-            {
-                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Rock", false);
-            }
-            else if (GridManager.wallAdding)
-            {
-                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(this.transform.position, "Wall", false);
-            }
             return;
         }
 
@@ -127,6 +118,33 @@ public class Tile : MonoBehaviour
         else if (isOccupied)
         {
             Debug.Log("Wybrane pole jest zajęte.");
+        }
+    }
+
+    void OnMouseOver()
+    {
+        // Jeżeli nie jesteśmy w kreatorze pola bitwy to funkcja stawiania przeszkód jest wyłączona
+        if (SceneManager.GetActiveScene().buildIndex != 1 || GameManager.PanelIsOpen || GameObject.Find("ObstaclesDropdown").GetComponent<TMP_Dropdown>().IsExpanded)
+            return;
+
+        Vector3 mousePosition = new Vector3(Mathf.Round(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), Mathf.Round(Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Mathf.Round(Camera.main.ScreenToWorldPoint(Input.mousePosition).z));
+
+        Collider2D collider = Physics2D.OverlapCircle(mousePosition, 0.1f);
+
+        if (collider != null && collider.gameObject.tag == "Tile" && isMouseDragging)
+        {
+            if (GridManager.treeAdding)
+            {
+                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(mousePosition, "Tree", false);
+            }
+            else if (GridManager.rockAdding)
+            {
+                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(mousePosition, "Rock", false);
+            }
+            else if (GridManager.wallAdding)
+            {
+                GameObject.Find("Grid").GetComponent<GridManager>().AddObstacle(mousePosition, "Wall", false);
+            }
         }
     }
 }

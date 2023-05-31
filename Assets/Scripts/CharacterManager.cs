@@ -11,7 +11,6 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private GameObject playerObject;
     [SerializeField] private GameObject enemyObject;
     GameObject newCharacter;
-    private Vector2 position;
 
     public static bool characterAdding; // bool aktywny podczas wybierania pola na którym chcemy stworzyć postać
     public static bool randomPositionMode; // bool określający, czy postać ma się tworzyć w losowej pozycji
@@ -20,8 +19,6 @@ public class CharacterManager : MonoBehaviour
 
     public static int playersAmount; // liczba wszystkich bohaterow graczy
     public static int enemiesAmount; // liczba wszystkich wrogów graczy
-
-    private GridManager gridManager;
 
     [Header("Przyciski dotyczące zaznaczonej postaci")]
     [SerializeField] private GameObject setStatsButton;
@@ -32,8 +29,6 @@ public class CharacterManager : MonoBehaviour
 
     private bool attributesLoaded;
     public static bool Autosave;
-
-    //private Stats charStatsForAutosave; // Odniesienie do postaci, która wykorzystuje PS do cofnięcia akcji
 
     void Start()
     {
@@ -54,9 +49,6 @@ public class CharacterManager : MonoBehaviour
             endTurnButton.SetActive(false);
             statsDisplayPanel.SetActive(false);
             attributesLoaded = false;
-
-            //Debug.Log("trSelect to null");
-
         }
         else if (Character.selectedCharacter != null)
         {
@@ -71,10 +63,6 @@ public class CharacterManager : MonoBehaviour
                 GameObject.Find("StatsEditor").GetComponent<StatsEditor>().LoadAttributes();               
                 attributesLoaded = true;
             }
-
-            //Debug.Log("Character.selectedCharacter.name " + Character.selectedCharacter.name);
-            //Debug.Log("Character.selectedCharacter.GetComponent<Stats>().actionsLeft " + Character.selectedCharacter.GetComponent<Stats>().actionsLeft);
-            //Debug.Log("MovementManager.isMoving " + MovementManager.isMoving);
 
             if (Character.selectedCharacter.GetComponent<Stats>().actionsLeft == 0 && GameManager.StandardMode && !MovementManager.isMoving)
             {
@@ -120,16 +108,22 @@ public class CharacterManager : MonoBehaviour
     {
         if(randomPositionMode)
         {
-            button.GetComponent<Image>().color = new Color(235f / 255f, 207f / 255f, 0, 1f);
+            button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
             randomPositionMode = false;
+
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage("Losowa pozycja postaci wyłączona.", 3f);
+            Debug.Log("Losowa pozycja postaci wyłączona.");
         }
         else
         {
-            button.GetComponent<Image>().color = new Color(235f / 255f, 207f / 255f, 0, 0.5f);
+            button.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
             randomPositionMode = true;
             GameObject.Find("CreatePlayerButton").GetComponent<Image>().color = new Color(1 / 2.55f, 1f, 1 / 2.55f, 1f);
             GameObject.Find("CreateEnemyButton").GetComponent<Image>().color = new Color(1f, 1 / 2.55f, 1 / 2.55f, 1f);
             characterAdding = false;
+
+            GameObject.Find("MessageManager").GetComponent<MessageManager>().ShowMessage("Losowa pozycja postaci włączona.", 3f);
+            Debug.Log("Losowa pozycja postaci włączona.");
         }
     }
     public void SelectFieldForNewCharacter(string tag)
@@ -354,7 +348,7 @@ public class CharacterManager : MonoBehaviour
     }
     #endregion
 
-    #region Zarzadzanie akcjami postaci
+    #region Character actions managing
     public void ResetActionsNumber(Stats charStats)
     {
         charStats.actionsLeft = 2;
@@ -364,7 +358,6 @@ public class CharacterManager : MonoBehaviour
     public void TakeAction(Stats charStats) // wykonanie akcji
     {
         Autosave = true;
-        //charStatsForAutosave = charStats;
         GameObject.Find("SaveSystem").GetComponent<SaveSystem>().SaveAllCharactersStats();
         Autosave = false;
 
@@ -377,8 +370,7 @@ public class CharacterManager : MonoBehaviour
 
     public void TakeDoubleAction(Stats charStats) // wykonanie akcji podwójnej
     {
-        Autosave = true;
-        //charStatsForAutosave = charStats;
+        Autosave = true;      
         GameObject.Find("SaveSystem").GetComponent<SaveSystem>().SaveAllCharactersStats();
         Autosave = false;
 

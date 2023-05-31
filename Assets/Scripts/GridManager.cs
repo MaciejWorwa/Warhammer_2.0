@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,8 +11,6 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Tile tilePrefab;
 
     private Dictionary<Vector3, Tile> tiles;
-
-    private List<GameObject> tilesInRange;
 
     [SerializeField] private Slider sliderX;
     [SerializeField] private Slider sliderY;
@@ -29,6 +26,8 @@ public class GridManager : MonoBehaviour
     public static bool wallAdding;
     public static bool obstacleRemoving;
 
+    private bool changeGridSizeAllowed = false;
+
     void Start()
     {
         treeAdding = true;
@@ -41,10 +40,9 @@ public class GridManager : MonoBehaviour
             widthDisplay.text = width.ToString();
             heightDisplay.text = height.ToString();
 
-            int szerokosc = width;
-            int wysokosc = height;
-            sliderX.value = szerokosc;
-            sliderY.value = wysokosc;
+            sliderX.value = width;
+            changeGridSizeAllowed = true;
+            sliderY.value = height;
         }
 
         GenerateGrid();
@@ -60,6 +58,11 @@ public class GridManager : MonoBehaviour
 
     public void ChangeGridSize()
     {
+        if (!changeGridSizeAllowed)
+            return;
+
+        Tile.isMouseDragging = false;
+        
         // Ustala szerokość i wysokość w zależności od wartości Sliderów
         width = (int)sliderX.value; 
         height = (int)sliderY.value;
@@ -166,7 +169,7 @@ public class GridManager : MonoBehaviour
 
     public void AddObstacle(Vector3 position, string tag, bool loadGame)
     {
-        position.z = 0;
+        position.z = 1;
 
         Collider2D collider = Physics2D.OverlapCircle(position, 0.1f);
 
@@ -185,8 +188,9 @@ public class GridManager : MonoBehaviour
 
     public void RemoveObstacle()
     {
-        // Usuwa klikniętą przeszkodę
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+        // Usuwa klikniętą przeszkodę
         if (hit.collider != null && (hit.collider.CompareTag("Tree") || hit.collider.CompareTag("Rock") || hit.collider.CompareTag("Wall")))
         {
             Destroy(hit.collider.gameObject);

@@ -16,8 +16,6 @@ public class AttackManager : MonoBehaviour
     private int chargeBonus; //premia za szarżę
     private int defensiveBonus; // minus do atakow przeciwko postaci z pozycja obronna
 
-    private GameObject[] aimButtons; // przyciski celowania zarowno bohatera gracza jak i wroga
-
     private CharacterManager characterManager;
     private MessageManager messageManager;
     private MovementManager movementManager;
@@ -26,8 +24,6 @@ public class AttackManager : MonoBehaviour
 
     void Start()
     {
-        aimButtons = GameObject.FindGameObjectsWithTag("AimButton");
-
         // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
         messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
 
@@ -149,7 +145,7 @@ public class AttackManager : MonoBehaviour
                 bool canTakeAction = attackerStats.A == 1 && attackerStats.actionsLeft > 0 && attackerStats.attacksLeft > 0 || attackerStats.A > 1 && attackerStats.actionsLeft == 1;
                 bool canTakeDoubleAction = attackerStats.attacksLeft >= 1 && attackerStats.actionsLeft == 2 || attackerStats.actionsLeft == -1;
 
-                if (!MovementManager.Charge && attackDistance <= 1.5f || attackDistance > 1.5f)
+                if (!MovementManager.Charge && attackDistance <= 1.5f || attackDistance > 1.5f && attackerStats.reloadLeft == 0)
                 {
                     if (canTakeAction)
                     {
@@ -171,6 +167,13 @@ public class AttackManager : MonoBehaviour
                         return;
                     }
                 }
+                else if (!MovementManager.Charge && attackDistance > 1.5f && attackerStats.reloadLeft != 0)
+                {
+                    messageManager.ShowMessage($"<color=red>Broń wymaga naładowania</color>", 2f);
+                    Debug.Log($"Broń wymaga naładowania");
+                    return;
+                }
+
 
                 int wynik = UnityEngine.Random.Range(1, 101);
                 bool hit = false;
@@ -179,39 +182,29 @@ public class AttackManager : MonoBehaviour
                 if (attackDistance > 1.5f && !MovementManager.Charge)
                 {
                     attackerStats.distanceFight = true;
+                
+                    // Sprawdza, czy strzał jest wykonywany na długi zasięg broni i jeśli tak to dodaje modyfikator -20
+                    attackBonus -= attackDistance > attackerStats.AttackRange ? 20 : 0;
 
-                    // sprawdza czy bron jest naladowana
-                    if (attackerStats.reloadLeft == 0)
-                    {                   
-                        // Sprawdza, czy strzał jest wykonywany na długi zasięg broni i jeśli tak to dodaje modyfikator -20
-                        attackBonus -= attackDistance > attackerStats.AttackRange ? 20 : 0;
+                    hit = wynik <= attackerStats.US + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
 
-                        hit = wynik <= attackerStats.US + attackBonus - defensiveBonus; // zwraca do 'hit' wartosc 'true' jesli to co jest po '=' jest prawda. Jest to skrocona forma 'if/else'
-
-                        if (attackBonus != 0 || defensiveBonus != 0)
-                        {
-                            messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik} Modyfikator: {attackBonus - defensiveBonus}", 6f);
-                            Debug.Log($"{attackerStats.Name} Rzut na US: {wynik} Modyfikator: {attackBonus - defensiveBonus}");
-                        }
-                        else
-                        {
-                            messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik}", 6f);
-                            Debug.Log($"{attackerStats.Name} Rzut na US: {wynik}");
-                        }
-
-                        // resetuje naladowanie broni po wykonaniu strzalu
-                        attackerStats.reloadLeft = attackerStats.reloadTime;
-
-                        // uwzglednia zdolnosc blyskawicznego przeladowania
-                        if (attackerStats.instantReload == true)
-                            attackerStats.reloadLeft--;
+                    if (attackBonus != 0 || defensiveBonus != 0)
+                    {
+                        messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik} Modyfikator: {attackBonus - defensiveBonus}", 6f);
+                        Debug.Log($"{attackerStats.Name} Rzut na US: {wynik} Modyfikator: {attackBonus - defensiveBonus}");
                     }
                     else
                     {
-                        messageManager.ShowMessage($"<color=red>Broń wymaga naładowania</color>", 2f);
-                        Debug.Log($"Broń wymaga naładowania");
-                        break;
+                        messageManager.ShowMessage($"<color=#00FF9A>{attackerStats.Name}</color> Rzut na US: {wynik}", 6f);
+                        Debug.Log($"{attackerStats.Name} Rzut na US: {wynik}");
                     }
+
+                    // resetuje naladowanie broni po wykonaniu strzalu
+                    attackerStats.reloadLeft = attackerStats.reloadTime;
+
+                    // uwzglednia zdolnosc blyskawicznego przeladowania
+                    if (attackerStats.instantReload == true)
+                        attackerStats.reloadLeft--;              
                 }
                 // sprawdza czy atak jest atakiem w zwarciu
                 if (attackDistance <= 1.5f || MovementManager.Charge)

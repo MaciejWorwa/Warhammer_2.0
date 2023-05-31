@@ -116,24 +116,24 @@ public class MagicManager : MonoBehaviour
                 int rollResult = Random.Range(1, 101);
                 messageManager.ShowMessage($"Wartość {value} występuje {count} razy.", 6f);
                 Debug.Log($"Wartość {value} występuje {count} razy.");
-                messageManager.ShowMessage($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestację: {rollResult}", 6f);
-                Debug.Log($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestację: {rollResult}");
+                messageManager.ShowMessage($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu: {rollResult}", 6f);
+                Debug.Log($"<color=red>POMNIEJSZA MANIFESTACJA CHAOSU!</color> Wynik rzutu: {rollResult}");
             }
             else if (count == 3)
             {
                 int rollResult = Random.Range(1, 101);
                 messageManager.ShowMessage($"Wartość {value} występuje {count} razy.", 6f);
                 Debug.Log($"Wartość {value} występuje {count} razy.");
-                messageManager.ShowMessage($"<color=red>POWAŻNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestację: {rollResult}", 6f);
-                Debug.Log($"<color=red>POWAŻNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestację: {rollResult}");
+                messageManager.ShowMessage($"<color=red>POWAŻNA MANIFESTACJA CHAOSU!</color> Wynik rzutu: {rollResult}", 6f);
+                Debug.Log($"<color=red>POWAŻNA MANIFESTACJA CHAOSU!</color> Wynik rzutu: {rollResult}");
             }
             else if (count > 3)
             {
                 int rollResult = Random.Range(1, 101);
                 messageManager.ShowMessage($"Wartość {value} występuje {count} razy.", 6f);
                 Debug.Log($"Wartość {value} występuje {count} razy.");
-                messageManager.ShowMessage($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestację: {rollResult}", 6f);
-                Debug.Log($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu na manifestację: {rollResult}");
+                messageManager.ShowMessage($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu: {rollResult}", 6f);
+                Debug.Log($"<color=red>KATASTROFALNA MANIFESTACJA CHAOSU!</color> Wynik rzutu: {rollResult}");
             }
         }
 

@@ -13,14 +13,9 @@ public class AutoCombat : MonoBehaviour
 
     public MovementManager movementManager;
 
-    private MessageManager messageManager;
-
     void Start()
     {
         movementManager = movementManager.gameObject.GetComponent<MovementManager>();
-
-        // Odniesienie do Menadzera Wiadomosci wyswietlanych na ekranie gry
-        messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
     }
 
     // Wykonuje automatyczne akcje za kazda postac

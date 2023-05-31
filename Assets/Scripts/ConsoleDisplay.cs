@@ -8,7 +8,6 @@ namespace DebugStuff
         //#if !UNITY_EDITOR
         static string myLog = "";
         private string output;
-        private string stack;
 
         bool doShow;
 
@@ -32,7 +31,6 @@ namespace DebugStuff
         public void Log(string logString, string stackTrace, LogType type)
         {
             output = logString;
-            stack = stackTrace;
             myLog = output + "\n" + myLog;
             if (myLog.Length > 5000)
             {

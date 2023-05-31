@@ -42,8 +42,11 @@ public class GameManager : MonoBehaviour
             GameObject.Find("ButtonManager").GetComponent<ButtonManager>().DecreaseButtonOpacity(GameObject.Find("Canvas/OptionsPanel/AutoModeButton").GetComponent<Button>());
             GameObject.Find("Canvas/OptionsPanel").SetActive(false);
         }
-        else if(StandardMode == true)
+        else if(StandardMode == true && SceneManager.GetActiveScene().buildIndex == 2)
+        {
+            GameObject.Find("ButtonManager").GetComponent<ButtonManager>().DecreaseButtonOpacity(GameObject.Find("Canvas/OptionsPanel/StandardModeButton").GetComponent<Button>());
             GameObject.Find("Canvas/OptionsPanel").SetActive(false);
+        }
 
         if (SceneManager.GetActiveScene().buildIndex == 1 || SceneManager.GetActiveScene().buildIndex == 0)
             SetSliderValue(slider);
