@@ -28,7 +28,7 @@ public class MessageManager : MonoBehaviour
 
         // Ustala pozycje nowo powstalej wiadomosci i przypisuje ja do glownego Canvasa oraz ustawia go jako dziecko z indexem 0, żeby był wartwą na samym dole
         message.gameObject.transform.SetParent(GameObject.FindGameObjectWithTag("MainCanvas").transform.transform);
-        message.gameObject.transform.SetSiblingIndex(0);
+        message.gameObject.transform.SetSiblingIndex(1);
 
         message.text = messageText;
 

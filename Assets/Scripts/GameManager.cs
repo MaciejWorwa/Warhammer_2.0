@@ -18,6 +18,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Slider slider;
     public static float MusicVolume = 0.5f;
 
+    void Awake()
+    {
+        if(SceneManager.GetActiveScene().buildIndex == 0)
+            Screen.fullScreen = true;
+    }
+
     void Start()
     {
         Camera.main.GetComponent<AudioSource>().volume = MusicVolume;

@@ -138,8 +138,8 @@ Library: lib_burst_generated
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Burst.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.2D.Animation.Runtime.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.TextMeshPro.dll
---root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Timeline.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Assembly-CSharp.dll
+--root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Timeline.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Services.Core.Environments.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Services.Core.Internal.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Services.Core.Analytics.dll
@@ -301,8 +301,8 @@ Library: lib_burst_generated
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Burst.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.2D.Animation.Runtime.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.TextMeshPro.dll
---root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Timeline.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Assembly-CSharp.dll
+--root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Timeline.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Services.Core.Environments.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Services.Core.Internal.dll
 --root-assembly=C:\Users\macie\Documents\GitHub\Warhammer_2.0\Temp\StagingArea\Data\Managed\Unity.Services.Core.Analytics.dll
