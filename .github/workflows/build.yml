@@ -1,9 +1,12 @@
 name: Build
 
 on:
+#   push:
+#     tags:
+#       - '*'
+  pull_request:
   push:
-    tags:
-      - '*'
+  
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
